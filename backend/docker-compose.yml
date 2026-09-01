@@ -1,0 +1,23 @@
+services:
+  my_postgres:
+    image: postgres:15
+    container_name: my_postgres
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: "3821"
+      POSTGRES_DB: els_db
+      TZ: Asia/Ho_Chi_Minh
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  my_redis:
+    image: redis:alpine
+    container_name: my_redis
+    restart: always
+    ports:
+      - "6379:6379"
+    environment:
+      TZ: Asia/Ho_Chi_Minh

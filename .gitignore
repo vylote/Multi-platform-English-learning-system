@@ -1,0 +1,53 @@
+# ==========================================
+# 1. BIẾN MÔI TRƯỜNG & BẢO MẬT (TUYỆT ĐỐI KHÔNG PUSH)
+# ==========================================
+.env
+.env.local
+.env.*.local
+*.env
+
+# ==========================================
+# 2. NODE.JS & NPM (Backend & Frontend Web)
+# ==========================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json.backup
+
+# Thư mục build của Frontend React
+frontend-web/build/
+frontend-web/dist/
+
+# ==========================================
+# 3. ANDROID NATIVE & GRADLE (Mobile App)
+# ==========================================
+mobile-android/.gradle/
+mobile-android/build/
+mobile-android/*/build/
+mobile-android/local.properties
+mobile-android/.cxx/
+mobile-android/*.apk
+mobile-android/*.aab
+mobile-android/*.keystore
+mobile-android/*.jks
+
+# ==========================================
+# 4. HỆ THỐNG & IDE (VS Code, Android Studio)
+# ==========================================
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.DS_Store
+Thumbs.db
+
+# ==========================================
+# 5. DOCKER DATA & LOGS
+# ==========================================
+pgdata/
+pgdata_new/
+*.log
