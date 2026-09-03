@@ -1,5 +1,3 @@
-const { formatVNDateTime } = require("../utils/date.util");
-
 class User {
   constructor({ id, username, email, password_hash, role, created_at }) {
     this.id = id;
@@ -17,7 +15,7 @@ class User {
       username: this.username,
       email: this.email,
       role: this.role,
-      created_at: formatVNDateTime(this.created_at),
+      created_at: this.created_at,
     };
   }
 }

@@ -7,7 +7,7 @@
 *.env
 
 # ==========================================
-# 2. NODE.JS & NPM (Backend & Frontend Web)
+# 2. NODE.JS & NPM (Backend Express + Frontend Web)
 # ==========================================
 node_modules/
 npm-debug.log*
@@ -15,25 +15,99 @@ yarn-debug.log*
 yarn-error.log*
 package-lock.json.backup
 
-# Thư mục build của Frontend React
+# ------------------------------------------
+# Backend (Node.js + Express.js)
+# ------------------------------------------
+backend/dist/
+backend/build/
+backend/logs/
+backend/**/*.log
+backend/**/*.pid
+backend/coverage/
+backend/.nyc_output/
+
+# Upload/tạm thời do server sinh ra (nếu có)
+backend/uploads/
+backend/tmp/
+
+# ------------------------------------------
+# Frontend (React + Vite + TailwindCSS)
+# ------------------------------------------
 frontend-web/build/
 frontend-web/dist/
+frontend-web/dist-ssr/
+frontend-web/.vite/
+frontend-web/*.tsbuildinfo
+frontend-web/.eslintcache
+frontend-web/coverage/
 
 # ==========================================
-# 3. ANDROID NATIVE & GRADLE (Mobile App)
+# 3. ANDROID NATIVE & GRADLE (Kotlin DSL / Java - Mobile App)
 # ==========================================
+
+# ------------------------------------------
+# Gradle & Build
+# ------------------------------------------
 mobile-android/.gradle/
+mobile-android/**/build/
 mobile-android/build/
-mobile-android/*/build/
+mobile-android/buildSrc/build/
+
+# Local SDK / environment configuration
 mobile-android/local.properties
+
+# Kotlin compiler cache
+mobile-android/.kotlin/
+
+# Native / CMake build
 mobile-android/.cxx/
-mobile-android/*.apk
-mobile-android/*.aab
-mobile-android/*.keystore
-mobile-android/*.jks
+mobile-android/.externalNativeBuild/
+
+# Android Studio captures & profiling
+mobile-android/captures/
+mobile-android/**/*.hprof
+
+# ------------------------------------------
+# Build Output Artifacts
+# ------------------------------------------
+mobile-android/**/*.apk
+mobile-android/**/*.aab
+mobile-android/**/*.ap_
+mobile-android/**/*.dex
+mobile-android/**/output-metadata.json
+
+# ------------------------------------------
+# Signing & Sensitive Config - NEVER COMMIT
+# ------------------------------------------
+mobile-android/**/*.keystore
+mobile-android/**/*.jks
+mobile-android/**/*.p12
+mobile-android/**/*.pem
+mobile-android/**/key.properties
+mobile-android/**/keystore.properties
+
+# Firebase / Google services
+mobile-android/**/google-services.json
+
+# Crashlytics / Fabric
+mobile-android/**/fabric.properties
+mobile-android/**/crashlytics.properties
+mobile-android/**/crashlytics-build.properties
+
+# ------------------------------------------
+# IntelliJ module files
+# ------------------------------------------
+mobile-android/**/*.iml
+
+# ------------------------------------------
+# Lint / Test Reports
+# ------------------------------------------
+mobile-android/**/lint/
+mobile-android/**/reports/
+mobile-android/**/test-results/
 
 # ==========================================
-# 4. HỆ THỐNG & IDE (VS Code, Android Studio)
+# 4. HỆ THỐNG & IDE (VS Code, Android Studio, IntelliJ)
 # ==========================================
 .idea/
 .vscode/

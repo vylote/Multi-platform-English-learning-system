@@ -1,0 +1,8 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Đổi parent thành .NoActionBar -->
+    <style name="Theme.Mobileandroid" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- Các màu sắc giữ nguyên -->
+        <item name="colorPrimary">@color/purple_500</item>
+        ...
+    </style>
+</resources>
