@@ -10,7 +10,7 @@ import api from "../api/api";
 export default function RegisterPage() {
   const navigate = useNavigate();
 
-  const [step, setStep] = useState(1); // 1: chọn tuổi | 2: điền hồ sơ
+  const [step, setStep] = useState(1);
   const [age, setAge] = useState("");
   const [form, setForm] = useState({ username: "", email: "", password: "" });
   const [errorMsg, setErrorMsg] = useState("");
@@ -30,8 +30,6 @@ export default function RegisterPage() {
     setErrorMsg("");
     setSubmitting(true);
     try {
-      // Lưu ý: schema hiện tại chưa có cột lưu "tuổi" -> age chỉ dùng ở FE,
-      // chưa gửi lên BE. Nếu cần lưu, phải bổ sung cột vào bảng users trước.
       await api.post("/auth/register", { username, email, password });
       toast.success("Tạo tài khoản thành công! Vui lòng đăng nhập.");
       navigate("/login");
@@ -44,11 +42,12 @@ export default function RegisterPage() {
     }
   };
 
-  // ===================== BƯỚC 1: CHỌN TUỔI =====================
   if (step === 1) {
     return (
       <AuthLayout onClose={() => navigate("/")}>
-        <h1 className="text-xl font-bold mb-4">Bạn bao nhiêu tuổi?</h1>
+        <h1 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">
+          Bạn bao nhiêu tuổi?
+        </h1>
 
         <input
           type="number"
@@ -57,12 +56,12 @@ export default function RegisterPage() {
           onChange={(e) => setAge(e.target.value)}
           min={1}
           max={119}
-          className="w-full px-3 py-2.5 border border-gray-200 rounded-md mb-2.5 outline-none focus:border-[#58cc02] focus:ring-2 focus:ring-[#58cc02]/20 transition-shadow"
+          className="w-full px-3 py-2.5 border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-300 rounded-md mb-2.5 outline-none focus:border-[#58cc02] dark:focus:border-[#58cc02] focus:ring-2 focus:ring-[#58cc02]/20 transition-shadow"
         />
-        <p className="text-xs text-gray-500 leading-relaxed">
+        <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
           Hãy cho chúng tôi biết tuổi của bạn để có trải nghiệm học tập phù hợp
           nhất. Vui lòng truy cập trang{" "}
-          <a href="/privacy" className="text-[#0073e6] hover:underline">
+          <a href="/privacy" className="text-[#0073e6] dark:text-[#4da3ff] hover:underline">
             Chính sách quyền riêng tư
           </a>{" "}
           để biết thêm chi tiết.
@@ -72,7 +71,7 @@ export default function RegisterPage() {
           type="button"
           disabled={!isAgeValid}
           onClick={() => setStep(2)}
-          className="w-full py-2.5 mt-3 rounded-md text-white font-bold text-base bg-[#58cc02] hover:bg-[#4cb001] disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+          className="w-full py-2.5 mt-3 rounded-md text-white font-bold text-base bg-[#58cc02] hover:bg-[#4cb001] disabled:bg-gray-300 dark:disabled:bg-gray-600 disabled:cursor-not-allowed transition-colors"
         >
           Tiếp theo
         </button>
@@ -83,10 +82,11 @@ export default function RegisterPage() {
     );
   }
 
-  // ===================== BƯỚC 2: ĐIỀN HỒ SƠ =====================
   return (
     <AuthLayout onBack={() => setStep(1)}>
-      <h1 className="text-2xl font-bold text-center mb-4">Tạo hồ sơ</h1>
+      <h1 className="text-2xl font-bold text-center mb-4 text-gray-900 dark:text-white">
+        Tạo hồ sơ
+      </h1>
 
       <form onSubmit={handleSubmit} noValidate>
         <input
@@ -96,7 +96,7 @@ export default function RegisterPage() {
           value={form.username}
           onChange={handleChange}
           required
-          className="w-full px-3 py-2.5 border border-gray-200 rounded-md mb-2.5 outline-none focus:border-[#58cc02] focus:ring-2 focus:ring-[#58cc02]/20 transition-shadow"
+          className="w-full px-3 py-2.5 border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-300 rounded-md mb-2.5 outline-none focus:border-[#58cc02] dark:focus:border-[#58cc02] focus:ring-2 focus:ring-[#58cc02]/20 transition-shadow"
         />
         <input
           type="email"
@@ -105,7 +105,7 @@ export default function RegisterPage() {
           value={form.email}
           onChange={handleChange}
           required
-          className="w-full px-3 py-2.5 border border-gray-200 rounded-md mb-2.5 outline-none focus:border-[#58cc02] focus:ring-2 focus:ring-[#58cc02]/20 transition-shadow"
+          className="w-full px-3 py-2.5 border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-300 rounded-md mb-2.5 outline-none focus:border-[#58cc02] dark:focus:border-[#58cc02] focus:ring-2 focus:ring-[#58cc02]/20 transition-shadow"
         />
         <input
           type="password"
@@ -115,7 +115,7 @@ export default function RegisterPage() {
           onChange={handleChange}
           required
           minLength={6}
-          className="w-full px-3 py-2.5 border border-gray-200 rounded-md mb-2.5 outline-none focus:border-[#58cc02] focus:ring-2 focus:ring-[#58cc02]/20 transition-shadow"
+          className="w-full px-3 py-2.5 border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-300 rounded-md mb-2.5 outline-none focus:border-[#58cc02] dark:focus:border-[#58cc02] focus:ring-2 focus:ring-[#58cc02]/20 transition-shadow"
         />
 
         {errorMsg && (
@@ -125,7 +125,7 @@ export default function RegisterPage() {
         <button
           type="submit"
           disabled={submitting || !form.username || !form.email || !form.password}
-          className="w-full py-2.5 mt-2 rounded-md text-white font-bold text-base bg-[#58cc02] hover:bg-[#4cb001] disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+          className="w-full py-2.5 mt-2 rounded-md text-white font-bold text-base bg-[#58cc02] hover:bg-[#4cb001] disabled:bg-gray-300 dark:disabled:bg-gray-600 disabled:cursor-not-allowed transition-colors"
         >
           {submitting ? "Đang tạo tài khoản..." : "Tạo tài khoản"}
         </button>

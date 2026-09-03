@@ -2,16 +2,15 @@ export default function SocialButtons() {
   return (
     <>
       <div className="flex items-center my-4">
-        <div className="flex-1 border-b border-gray-200" />
-        <span className="px-3 text-sm text-gray-400">hoặc</span>
-        <div className="flex-1 border-b border-gray-200" />
+        <div className="flex-1 border-b border-gray-200 dark:border-gray-600" />
+        <span className="px-3 text-sm text-gray-400 dark:text-gray-500">hoặc</span>
+        <div className="flex-1 border-b border-gray-200 dark:border-gray-600" />
       </div>
 
       <button
         type="button"
-        className="w-full flex items-center justify-center gap-2 border border-gray-200 rounded-md py-2.5 mt-2 font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+        className="w-full flex items-center justify-center gap-2 border border-gray-200 dark:border-gray-600 rounded-md py-2.5 mt-2 font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
       >
-        {/* Logo Google (SVG inline, tránh phụ thuộc ảnh ngoài) */}
         <svg className="w-5 h-5" viewBox="0 0 48 48">
           <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.9 32.6 29.4 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l5.7-5.7C34.7 6.1 29.6 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.7-.4-3.5z"/>
           <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 16 19 13 24 13c3.1 0 5.8 1.1 8 3l5.7-5.7C34.7 6.1 29.6 4 24 4c-7.5 0-14 4.2-17.7 10.7z"/>
@@ -23,7 +22,7 @@ export default function SocialButtons() {
 
       <button
         type="button"
-        className="w-full flex items-center justify-center gap-2 border border-gray-200 rounded-md py-2.5 mt-2 font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+        className="w-full flex items-center justify-center gap-2 border border-gray-200 dark:border-gray-600 rounded-md py-2.5 mt-2 font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
       >
         <svg className="w-5 h-5" viewBox="0 0 24 24" fill="#1877F2">
           <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
