@@ -1,13 +1,17 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const ms = require("ms");
 const userRepository = require("../repositories/user.repository");
+const roleRepository = require("../repositories/role.repository");
+const redisClient = require("../config/redis");
 const { ErrorCode } = require("../common/error-code");
 const AppException = require("../exceptions/app.exception");
 
+const DEFAULT_ROLE_CODE = "STUDENT";
+const SESSION_KEY_PREFIX = "session:"; // session:{userId} -> access token hiện hành
+
 class AuthService {
-  // Xử lý nghiệp vụ Đăng ký tài khoản
   async registerUser({ username, email, password }) {
-    // 1. Kiểm tra tồn tại username
     const existingUser = await userRepository.findByUsername(username);
     if (existingUser) {
       throw new AppException(
@@ -16,7 +20,6 @@ class AuthService {
       );
     }
 
-    // 2. Kiểm tra tồn tại email
     const existingEmail = await userRepository.findByEmail(email);
     if (existingEmail) {
       throw new AppException(
@@ -25,24 +28,28 @@ class AuthService {
       );
     }
 
-    // 3. Tiến hành mã hóa mật khẩu bảo mật
+    const studentRole = await roleRepository.findByCode(DEFAULT_ROLE_CODE);
+    if (!studentRole) {
+      throw new AppException(
+        ErrorCode.SYSTEM_ERROR,
+        "Vai trò STUDENT chưa được khởi tạo trong hệ thống. Vui lòng seed bảng roles trước.",
+      );
+    }
+
     const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(password, salt);
 
-    // 4. Lưu thực thể thông qua Repository
     const newUser = await userRepository.create({
       username,
       email,
       password_hash: passwordHash,
-      role: "STUDENT",
+      role_id: studentRole.id,
     });
 
     return newUser.toJSON();
   }
 
-  // Xử lý nghiệp vụ Đăng nhập và tạo JWT Token
   async loginUser({ username, password }) {
-    // 1. Tìm thông tin người dùng
     const user = await userRepository.findByUsername(username);
     if (!user) {
       throw new AppException(
@@ -51,7 +58,6 @@ class AuthService {
       );
     }
 
-    // 2. Kiểm tra tính hợp lệ của mật khẩu
     const isMatch = await bcrypt.compare(password, user.password_hash);
     if (!isMatch) {
       throw new AppException(
@@ -60,27 +66,40 @@ class AuthService {
       );
     }
 
-    // 3. Khởi tạo Payload và ký số Token JWT
     const payload = {
       id: user.id,
       username: user.username,
       role: user.role,
     };
 
-    const token = jwt.sign(payload, process.env.JWT_SECRET, {
-      expiresIn: process.env.JWT_EXPIRES_IN || "7d",
+    const expiresIn = process.env.JWT_ACCESS_EXPIRES_IN;
+    const expirySeconds = Math.floor(ms(expiresIn) / 1000);
+
+    const accessToken = jwt.sign(payload, process.env.JWT_SECRET, {
+      expiresIn,
+    });
+
+    // Lưu session vào Redis với TTL trùng thời hạn JWT
+    // -> cho phép server chủ động thu hồi (logout) mà không cần chờ JWT tự hết hạn
+    await redisClient.set(`${SESSION_KEY_PREFIX}${user.id}`, accessToken, {
+      EX: expirySeconds,
     });
 
     return {
-      token
+      user: user.toJSON(),
+      accessToken,
+      expirySeconds,
     };
   }
 
-  // Lấy thông tin người dùng hiện tại
+  async logoutUser(userId) {
+    await redisClient.del(`${SESSION_KEY_PREFIX}${userId}`);
+  }
+
   async getUserProfile(userId) {
     const user = await userRepository.findById(userId);
     if (!user) {
-        throw new AppException(
+      throw new AppException(
         ErrorCode.RESOURCE_NOT_FOUND,
         "Không tìm thấy hồ sơ người dùng.",
       );
