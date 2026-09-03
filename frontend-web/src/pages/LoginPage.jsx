@@ -28,7 +28,6 @@ export default function LoginPage() {
     setErrorMsg("");
     setSubmitting(true);
     try {
-      // BE set Access Token vào httpOnly cookie, response chỉ trả về thông tin user
       const res = await api.post("/auth/login", form);
       dispatch(loginSuccess({ user: res.data.result.user }));
       toast.success("Đăng nhập thành công!");
@@ -44,7 +43,9 @@ export default function LoginPage() {
 
   return (
     <AuthLayout onClose={() => navigate("/")}>
-      <h1 className="text-2xl font-bold text-center mb-4">Đăng nhập</h1>
+      <h1 className="text-2xl font-bold text-center mb-4 text-gray-900 dark:text-white">
+        Đăng nhập
+      </h1>
 
       <form onSubmit={handleSubmit} noValidate>
         <input
@@ -54,7 +55,7 @@ export default function LoginPage() {
           value={form.username}
           onChange={handleChange}
           required
-          className="w-full px-3 py-2.5 border border-gray-200 rounded-md mb-2.5 outline-none focus:border-[#58cc02] focus:ring-2 focus:ring-[#58cc02]/20 transition-shadow"
+          className="w-full px-3 py-2.5 border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-300 rounded-md mb-2.5 outline-none focus:border-[#58cc02] dark:focus:border-[#58cc02] focus:ring-2 focus:ring-[#58cc02]/20 transition-shadow"
         />
         <input
           type="password"
@@ -63,7 +64,7 @@ export default function LoginPage() {
           value={form.password}
           onChange={handleChange}
           required
-          className="w-full px-3 py-2.5 border border-gray-200 rounded-md mb-2.5 outline-none focus:border-[#58cc02] focus:ring-2 focus:ring-[#58cc02]/20 transition-shadow"
+          className="w-full px-3 py-2.5 border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-300 rounded-md mb-2.5 outline-none focus:border-[#58cc02] dark:focus:border-[#58cc02] focus:ring-2 focus:ring-[#58cc02]/20 transition-shadow"
         />
 
         {errorMsg && (
@@ -71,7 +72,7 @@ export default function LoginPage() {
         )}
 
         <div className="text-right text-xs -mt-1 mb-1">
-          <a href="/forgot-password" className="text-[#0073e6] hover:underline">
+          <a href="/forgot-password" className="text-[#0073e6] dark:text-[#4da3ff] hover:underline">
             Quên mật khẩu?
           </a>
         </div>
@@ -79,7 +80,7 @@ export default function LoginPage() {
         <button
           type="submit"
           disabled={submitting || !form.username || !form.password}
-          className="w-full py-2.5 mt-2 rounded-md text-white font-bold text-base bg-[#58cc02] hover:bg-[#4cb001] disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+          className="w-full py-2.5 mt-2 rounded-md text-white font-bold text-base bg-[#58cc02] hover:bg-[#4cb001] disabled:bg-gray-300 dark:disabled:bg-gray-600 disabled:cursor-not-allowed transition-colors"
         >
           {submitting ? "Đang đăng nhập..." : "Đăng nhập"}
         </button>
@@ -88,7 +89,7 @@ export default function LoginPage() {
         <PolicyFooter mode="login" />
       </form>
 
-      <p className="text-center text-sm text-gray-600 mt-4">
+      <p className="text-center text-sm text-gray-600 dark:text-gray-400 mt-4">
         Chưa có tài khoản?{" "}
         <a href="/register" className="text-[#58cc02] font-bold hover:underline">
           Đăng ký
