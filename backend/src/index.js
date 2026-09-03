@@ -4,6 +4,7 @@ const cookieParser = require('cookie-parser');
 require('dotenv').config();
 
 const authRoutes = require('./routes/auth.routes');
+const roleRoutes = require('./routes/role.routes');
 const { noResourceFoundHandler, globalExceptionHandler } = require('./middlewares/error.middleware');
 
 const app = express();
@@ -26,6 +27,7 @@ app.get('/health', (req, res) => {
 
 // Nạp Router phân hệ Authentication
 app.use('/api/v1/auth', authRoutes);
+app.use("/api/v1/roles", roleRoutes);
 
 app.use(noResourceFoundHandler);
 app.use(globalExceptionHandler);

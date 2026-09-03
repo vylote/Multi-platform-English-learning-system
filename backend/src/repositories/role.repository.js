@@ -1,4 +1,5 @@
 const db = require('../config/db');
+const Role = require('../models/role.model');
 
 class RoleRepository {
   // Tìm role theo code (VD: 'STUDENT', 'ADMIN')
@@ -27,6 +28,12 @@ class RoleRepository {
     `;
     const result = await db.query(query, [roleCode]);
     return result.rows.map((row) => row.code);
+  }
+
+  async findAll() {
+    const query = `SELECT id, code, name FROM roles ORDER BY id`;
+    const result = await db.query(query);
+    return result.rows.map((row) => new Role(row));
   }
 }
 
