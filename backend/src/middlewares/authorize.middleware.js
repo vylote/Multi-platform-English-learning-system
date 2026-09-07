@@ -2,17 +2,6 @@ const AppException = require("../exceptions/app.exception");
 const { ErrorCode } = require("../common/error-code");
 const permissionService = require("../services/permission.service");
 
-/**
- * Middleware factory kiểm tra quyền hạn (permission) của role đang đăng nhập.
- * Tương đương @PreAuthorize("hasAuthority('PERMISSION_CODE')") bên Spring Security.
- *
- * BẮT BUỘC dùng SAU verifyToken (cần req.user.role đã được set sẵn từ JWT payload).
- * Không cần query lại user theo id -> chỉ cần role, vì permission gắn với ROLE chứ
- * không gắn với từng user, nên cache theo role là đủ và hiệu quả hơn cache theo userId.
- *
- * Cách dùng:
- *   router.post('/exams', verifyToken, authorize('MANAGE_EXAMS'), examController.create);
- */
 const authorize = (permissionCode) => {
   return async (req, res, next) => {
     try {

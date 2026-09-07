@@ -50,13 +50,13 @@ CREATE TABLE IF NOT EXISTS users (
 -- =======================================================
 CREATE TABLE IF NOT EXISTS words (
     id SERIAL PRIMARY KEY,
-    word VARCHAR(100) NOT NULL,
-    pronunciation VARCHAR(100),
-    part_of_speech VARCHAR(30),
-    definition TEXT NOT NULL,
-    example_sentence TEXT
+    word VARCHAR(150) NOT NULL,
+    pronunciation VARCHAR(150),
+    part_of_speech VARCHAR(100),
+    meaning_vi TEXT NOT NULL
 );
-CREATE INDEX IF NOT EXISTS idx_words_word ON words(word);
+-- Tạo index unique chống trùng lặp từ vựng khi import
+CREATE UNIQUE INDEX IF NOT EXISTS word_lower_unique_idx ON words (LOWER(word));
 
 -- =======================================================
 -- 6. BẢNG IDIOMS: Thành ngữ tiếng Anh (Đọc tĩnh - Cached Redis)
