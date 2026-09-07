@@ -1,0 +1,555 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F1F5F9"
+    tools:context=".ui.auth.LearnActivity">
+
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/scrollContent"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:fillViewport="true"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/bottomNav">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="32dp">
+
+            <!-- ===== Header ===== -->
+            <TextView
+                android:id="@+id/tvTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Học tập"
+                android:textColor="#0F172A"
+                android:textSize="20sp"
+                android:fontFamily="sans-serif-medium"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                android:layout_marginTop="24dp"
+                android:layout_marginStart="24dp"/>
+
+            <!-- ===== Thanh tìm kiếm ===== -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cardSearch"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                app:cardCornerRadius="14dp"
+                app:cardElevation="0dp"
+                app:cardBackgroundColor="#FFFFFF"
+                app:layout_constraintTop_toBottomOf="@id/tvTitle"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginTop="16dp"
+                android:layout_marginStart="24dp"
+                android:layout_marginEnd="24dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingStart="14dp"
+                    android:paddingEnd="14dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="🔍"
+                        android:textSize="15sp"/>
+
+                    <EditText
+                        android:id="@+id/etSearch"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:background="@null"
+                        android:hint="Tìm bài học, chủ đề..."
+                        android:textColorHint="#94A3B8"
+                        android:textColor="#0F172A"
+                        android:textSize="14sp"
+                        android:singleLine="true"
+                        android:imeOptions="actionSearch"
+                        android:inputType="text"
+                        android:layout_marginStart="10dp"/>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- ===== Bộ lọc danh mục ===== -->
+            <HorizontalScrollView
+                android:id="@+id/scrollFilters"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:scrollbars="none"
+                app:layout_constraintTop_toBottomOf="@id/cardSearch"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginTop="16dp">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:paddingStart="24dp"
+                    android:paddingEnd="24dp">
+
+                    <TextView
+                        android:id="@+id/chipAll"
+                        android:layout_width="wrap_content"
+                        android:layout_height="36dp"
+                        android:text="Tất cả"
+                        android:textColor="#FFFFFF"
+                        android:textSize="13sp"
+                        android:fontFamily="sans-serif-medium"
+                        android:gravity="center"
+                        android:background="@drawable/bg_chip_selected"
+                        android:paddingStart="18dp"
+                        android:paddingEnd="18dp"/>
+
+                    <TextView
+                        android:id="@+id/chipVocab"
+                        android:layout_width="wrap_content"
+                        android:layout_height="36dp"
+                        android:text="Từ vựng"
+                        android:textColor="#4F46E5"
+                        android:textSize="13sp"
+                        android:gravity="center"
+                        android:background="@drawable/bg_chip_unselected"
+                        android:paddingStart="18dp"
+                        android:paddingEnd="18dp"
+                        android:layout_marginStart="10dp"/>
+
+                    <TextView
+                        android:id="@+id/chipGrammar"
+                        android:layout_width="wrap_content"
+                        android:layout_height="36dp"
+                        android:text="Ngữ pháp"
+                        android:textColor="#4F46E5"
+                        android:textSize="13sp"
+                        android:gravity="center"
+                        android:background="@drawable/bg_chip_unselected"
+                        android:paddingStart="18dp"
+                        android:paddingEnd="18dp"
+                        android:layout_marginStart="10dp"/>
+
+                    <TextView
+                        android:id="@+id/chipQuiz"
+                        android:layout_width="wrap_content"
+                        android:layout_height="36dp"
+                        android:text="Kiểm tra"
+                        android:textColor="#4F46E5"
+                        android:textSize="13sp"
+                        android:gravity="center"
+                        android:background="@drawable/bg_chip_unselected"
+                        android:paddingStart="18dp"
+                        android:paddingEnd="18dp"
+                        android:layout_marginStart="10dp"/>
+
+                </LinearLayout>
+            </HorizontalScrollView>
+
+            <!-- ===== Section: Đang học ===== -->
+            <TextView
+                android:id="@+id/tvSectionContinue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Tiếp tục học"
+                android:textColor="#0F172A"
+                android:textSize="15sp"
+                android:fontFamily="sans-serif-medium"
+                app:layout_constraintTop_toBottomOf="@id/scrollFilters"
+                app:layout_constraintStart_toStartOf="parent"
+                android:layout_marginTop="24dp"
+                android:layout_marginStart="24dp"/>
+
+            <!-- ===== Card bài học đang dở ===== -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cardContinue"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="18dp"
+                app:cardElevation="5dp"
+                app:cardBackgroundColor="#4F46E5"
+                app:layout_constraintTop_toBottomOf="@id/tvSectionContinue"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginTop="10dp"
+                android:layout_marginStart="24dp"
+                android:layout_marginEnd="24dp">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="18dp">
+
+                    <TextView
+                        android:id="@+id/tvContinueLabel"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="Bài 12: Thì hiện tại hoàn thành"
+                        android:textColor="#FFFFFF"
+                        android:textSize="15sp"
+                        android:fontFamily="sans-serif-medium"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"/>
+
+                    <TextView
+                        android:id="@+id/tvContinueSub"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="Ngữ pháp · Còn 6 câu"
+                        android:textColor="#E0E7FF"
+                        android:textSize="12sp"
+                        app:layout_constraintTop_toBottomOf="@id/tvContinueLabel"
+                        app:layout_constraintStart_toStartOf="parent"
+                        android:layout_marginTop="4dp"/>
+
+                    <ProgressBar
+                        android:id="@+id/progressContinue"
+                        style="?android:attr/progressBarStyleHorizontal"
+                        android:layout_width="0dp"
+                        android:layout_height="6dp"
+                        android:max="100"
+                        android:progress="60"
+                        android:progressTint="#52F800"
+                        android:progressBackgroundTint="#6366F1"
+                        app:layout_constraintTop_toBottomOf="@id/tvContinueSub"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toStartOf="@id/btnContinue"
+                        android:layout_marginTop="12dp"
+                        android:layout_marginEnd="12dp"/>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnContinue"
+                        android:layout_width="wrap_content"
+                        android:layout_height="34dp"
+                        android:text="Học tiếp"
+                        android:textSize="12sp"
+                        android:textAllCaps="false"
+                        android:textColor="#4F46E5"
+                        android:insetTop="0dp"
+                        android:insetBottom="0dp"
+                        app:backgroundTint="#FFFFFF"
+                        app:cornerRadius="17dp"
+                        app:elevation="0dp"
+                        app:layout_constraintTop_toTopOf="@id/progressContinue"
+                        app:layout_constraintBottom_toBottomOf="@id/progressContinue"
+                        app:layout_constraintEnd_toEndOf="parent"/>
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- ===== Section: Danh sách bài học ===== -->
+            <TextView
+                android:id="@+id/tvSectionLessons"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Tất cả bài học"
+                android:textColor="#0F172A"
+                android:textSize="15sp"
+                android:fontFamily="sans-serif-medium"
+                app:layout_constraintTop_toBottomOf="@id/cardContinue"
+                app:layout_constraintStart_toStartOf="parent"
+                android:layout_marginTop="24dp"
+                android:layout_marginStart="24dp"/>
+
+            <!-- ===== Item bài học 1 - Từ vựng ===== -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cardLesson1"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="3dp"
+                app:cardBackgroundColor="#FFFFFF"
+                app:layout_constraintTop_toBottomOf="@id/tvSectionLessons"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginTop="10dp"
+                android:layout_marginStart="24dp"
+                android:layout_marginEnd="24dp">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="14dp">
+
+                    <androidx.cardview.widget.CardView
+                        android:id="@+id/iconLesson1"
+                        android:layout_width="44dp"
+                        android:layout_height="44dp"
+                        app:cardCornerRadius="14dp"
+                        app:cardElevation="0dp"
+                        app:cardBackgroundColor="#DCFCE7"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintStart_toStartOf="parent">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:text="📖"
+                            android:textSize="18sp"
+                            android:gravity="center"/>
+                    </androidx.cardview.widget.CardView>
+
+                    <TextView
+                        android:id="@+id/tvLesson1Title"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="Từ vựng chủ đề Du lịch"
+                        android:textColor="#0F172A"
+                        android:textSize="14sp"
+                        android:fontFamily="sans-serif-medium"
+                        app:layout_constraintTop_toTopOf="@id/iconLesson1"
+                        app:layout_constraintStart_toEndOf="@id/iconLesson1"
+                        app:layout_constraintEnd_toStartOf="@id/tvLesson1Arrow"
+                        android:layout_marginStart="12dp"/>
+
+                    <TextView
+                        android:id="@+id/tvLesson1Sub"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="20 từ · Đã học 14/20"
+                        android:textColor="#64748B"
+                        android:textSize="12sp"
+                        app:layout_constraintTop_toBottomOf="@id/tvLesson1Title"
+                        app:layout_constraintStart_toStartOf="@id/tvLesson1Title"
+                        app:layout_constraintEnd_toStartOf="@id/tvLesson1Arrow"
+                        android:layout_marginTop="2dp"/>
+
+                    <ProgressBar
+                        android:id="@+id/progressLesson1"
+                        style="?android:attr/progressBarStyleHorizontal"
+                        android:layout_width="0dp"
+                        android:layout_height="5dp"
+                        android:max="100"
+                        android:progress="70"
+                        android:progressTint="#4F46E5"
+                        android:progressBackgroundTint="#E2E8F0"
+                        app:layout_constraintTop_toBottomOf="@id/tvLesson1Sub"
+                        app:layout_constraintStart_toStartOf="@id/tvLesson1Title"
+                        app:layout_constraintEnd_toStartOf="@id/tvLesson1Arrow"
+                        android:layout_marginTop="8dp"/>
+
+                    <TextView
+                        android:id="@+id/tvLesson1Arrow"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="›"
+                        android:textColor="#94A3B8"
+                        android:textSize="18sp"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"/>
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- ===== Item bài học 2 - Ngữ pháp ===== -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cardLesson2"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="3dp"
+                app:cardBackgroundColor="#FFFFFF"
+                app:layout_constraintTop_toBottomOf="@id/cardLesson1"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginTop="10dp"
+                android:layout_marginStart="24dp"
+                android:layout_marginEnd="24dp">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="14dp">
+
+                    <androidx.cardview.widget.CardView
+                        android:id="@+id/iconLesson2"
+                        android:layout_width="44dp"
+                        android:layout_height="44dp"
+                        app:cardCornerRadius="14dp"
+                        app:cardElevation="0dp"
+                        app:cardBackgroundColor="#E0E7FF"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintStart_toStartOf="parent">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:text="✏️"
+                            android:textSize="18sp"
+                            android:gravity="center"/>
+                    </androidx.cardview.widget.CardView>
+
+                    <TextView
+                        android:id="@+id/tvLesson2Title"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="Ngữ pháp: Câu điều kiện"
+                        android:textColor="#0F172A"
+                        android:textSize="14sp"
+                        android:fontFamily="sans-serif-medium"
+                        app:layout_constraintTop_toTopOf="@id/iconLesson2"
+                        app:layout_constraintStart_toEndOf="@id/iconLesson2"
+                        app:layout_constraintEnd_toStartOf="@id/tvLesson2Arrow"
+                        android:layout_marginStart="12dp"/>
+
+                    <TextView
+                        android:id="@+id/tvLesson2Sub"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="12 bài tập · Đã học 5/12"
+                        android:textColor="#64748B"
+                        android:textSize="12sp"
+                        app:layout_constraintTop_toBottomOf="@id/tvLesson2Title"
+                        app:layout_constraintStart_toStartOf="@id/tvLesson2Title"
+                        app:layout_constraintEnd_toStartOf="@id/tvLesson2Arrow"
+                        android:layout_marginTop="2dp"/>
+
+                    <ProgressBar
+                        android:id="@+id/progressLesson2"
+                        style="?android:attr/progressBarStyleHorizontal"
+                        android:layout_width="0dp"
+                        android:layout_height="5dp"
+                        android:max="100"
+                        android:progress="42"
+                        android:progressTint="#4F46E5"
+                        android:progressBackgroundTint="#E2E8F0"
+                        app:layout_constraintTop_toBottomOf="@id/tvLesson2Sub"
+                        app:layout_constraintStart_toStartOf="@id/tvLesson2Title"
+                        app:layout_constraintEnd_toStartOf="@id/tvLesson2Arrow"
+                        android:layout_marginTop="8dp"/>
+
+                    <TextView
+                        android:id="@+id/tvLesson2Arrow"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="›"
+                        android:textColor="#94A3B8"
+                        android:textSize="18sp"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"/>
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- ===== Item bài học 3 - Kiểm tra ===== -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cardLesson3"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="3dp"
+                app:cardBackgroundColor="#FFFFFF"
+                app:layout_constraintTop_toBottomOf="@id/cardLesson2"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginTop="10dp"
+                android:layout_marginStart="24dp"
+                android:layout_marginEnd="24dp">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="14dp">
+
+                    <androidx.cardview.widget.CardView
+                        android:id="@+id/iconLesson3"
+                        android:layout_width="44dp"
+                        android:layout_height="44dp"
+                        app:cardCornerRadius="14dp"
+                        app:cardElevation="0dp"
+                        app:cardBackgroundColor="#FCE7F3"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintStart_toStartOf="parent">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:text="🎯"
+                            android:textSize="18sp"
+                            android:gravity="center"/>
+                    </androidx.cardview.widget.CardView>
+
+                    <TextView
+                        android:id="@+id/tvLesson3Title"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="Kiểm tra giữa khóa"
+                        android:textColor="#0F172A"
+                        android:textSize="14sp"
+                        android:fontFamily="sans-serif-medium"
+                        app:layout_constraintTop_toTopOf="@id/iconLesson3"
+                        app:layout_constraintStart_toEndOf="@id/iconLesson3"
+                        app:layout_constraintEnd_toStartOf="@id/tvLesson3Arrow"
+                        android:layout_marginStart="12dp"/>
+
+                    <TextView
+                        android:id="@+id/tvLesson3Sub"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="30 câu hỏi · Chưa làm"
+                        android:textColor="#64748B"
+                        android:textSize="12sp"
+                        app:layout_constraintTop_toBottomOf="@id/tvLesson3Title"
+                        app:layout_constraintStart_toStartOf="@id/tvLesson3Title"
+                        app:layout_constraintEnd_toStartOf="@id/tvLesson3Arrow"
+                        android:layout_marginTop="2dp"/>
+
+                    <ProgressBar
+                        android:id="@+id/progressLesson3"
+                        style="?android:attr/progressBarStyleHorizontal"
+                        android:layout_width="0dp"
+                        android:layout_height="5dp"
+                        android:max="100"
+                        android:progress="0"
+                        android:progressTint="#4F46E5"
+                        android:progressBackgroundTint="#E2E8F0"
+                        app:layout_constraintTop_toBottomOf="@id/tvLesson3Sub"
+                        app:layout_constraintStart_toStartOf="@id/tvLesson3Title"
+                        app:layout_constraintEnd_toStartOf="@id/tvLesson3Arrow"
+                        android:layout_marginTop="8dp"/>
+
+                    <TextView
+                        android:id="@+id/tvLesson3Arrow"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="›"
+                        android:textColor="#94A3B8"
+                        android:textSize="18sp"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"/>
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </androidx.cardview.widget.CardView>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.core.widget.NestedScrollView>
+
+    <!-- ===== Bottom Navigation ===== -->
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottomNav"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="#FFFFFF"
+        app:itemIconTint="#4F46E5"
+        app:itemTextColor="#4F46E5"
+        app:menu="@menu/menu_bottom_nav"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:elevation="8dp"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

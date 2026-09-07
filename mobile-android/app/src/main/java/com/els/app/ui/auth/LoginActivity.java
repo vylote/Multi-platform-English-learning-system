@@ -28,6 +28,9 @@ import retrofit2.Response;
 
 public class LoginActivity extends AppCompatActivity {
 
+    private static final String TEST_USERNAME = "test";
+    private static final String TEST_PASSWORD = "test";
+
     private TextInputEditText edtUsername;
     private TextInputEditText edtPassword;
     private View progressOverlay; // ProgressBar/overlay trong layout, thay cho ProgressDialog
@@ -58,6 +61,13 @@ public class LoginActivity extends AppCompatActivity {
 
         if (username.isEmpty() || password.isEmpty()) {
             Toast.makeText(this, "Vui lòng nhập đầy đủ tài khoản và mật khẩu", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Tài khoản test: bỏ qua gọi API, vào thẳng Home để tiện test UI
+        if (TEST_USERNAME.equals(username) && TEST_PASSWORD.equals(password)) {
+            Toast.makeText(this, "Đăng nhập tài khoản test thành công!", Toast.LENGTH_SHORT).show();
+            navigateToHome();
             return;
         }
 
@@ -99,11 +109,21 @@ public class LoginActivity extends AppCompatActivity {
             try {
                 UserEntity user = UserMapper.toEntity(dto, database.roleDao());
                 database.userDao().insertUser(user);
-                runOnUiThread(() -> Toast.makeText(this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show());
+                runOnUiThread(() -> {
+                    Toast.makeText(this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
+                    navigateToHome();
+                });
             } catch (Exception e) {
                 runOnUiThread(() -> Toast.makeText(this, "Lỗi lưu dữ liệu local: " + e.getMessage(), Toast.LENGTH_LONG).show());
             }
         }).start();
+    }
+
+    private void navigateToHome() {
+        Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
     }
 
     private void showLoading(boolean show) {

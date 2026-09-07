@@ -43,6 +43,7 @@ android {
 }
 
 dependencies {
+    implementation(libs.activity.ktx)
     // ------------------------------------------
     // 1. Thư viện cơ bản & Material Design UI
     // ------------------------------------------
