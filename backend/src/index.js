@@ -5,10 +5,13 @@ require('dotenv').config();
 
 const authRoutes = require('./routes/auth.routes');
 const roleRoutes = require('./routes/role.routes');
+const dictionaryRoutes = require('./routes/dictionary.routes')
+const flashcardRoutes = require('./routes/flashcard.routes')
+
 const { noResourceFoundHandler, globalExceptionHandler } = require('./middlewares/error.middleware');
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT;
 
 // QUAN TRỌNG: withCredentials ở FE chỉ hoạt động nếu:
 // 1. origin là domain CỤ THỂ (không được dùng '*')
@@ -20,14 +23,15 @@ app.use(cors({
 app.use(express.json());
 app.use(cookieParser()); // Bắt buộc để đọc req.cookies (access_token) trong auth.middleware.js
 
-// Tuyến đường kiểm tra sức khỏe hệ thống
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'OK', message: 'Backend Server is running' });
 });
 
-// Nạp Router phân hệ Authentication
+
 app.use('/api/v1/auth', authRoutes);
 app.use("/api/v1/roles", roleRoutes);
+app.use('/api/v1/words', dictionaryRoutes);    
+app.use('/api/v1/flashcards', flashcardRoutes); 
 
 app.use(noResourceFoundHandler);
 app.use(globalExceptionHandler);

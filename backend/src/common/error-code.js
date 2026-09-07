@@ -88,11 +88,6 @@ const ErrorCode = Object.freeze({
     message: "Không tìm thấy người dùng.",
     statusCode: 404,
   },
-  UNAUTHORIZED: {
-    code: "1026",
-    message: "Bạn không có quyền truy cập tài nguyên này.",
-    statusCode: 403,
-  },
 });
 
 module.exports = { ErrorCode, HttpStatus };
