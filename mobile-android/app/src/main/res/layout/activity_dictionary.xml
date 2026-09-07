@@ -1,0 +1,357 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F1F5F9"
+    tools:context=".ui.auth.DictionaryActivity">
+
+    <!-- ===== Header ===== -->
+    <ImageButton
+        android:id="@+id/btnBack"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:background="@android:color/transparent"
+        android:src="@android:drawable/ic_menu_close_clear_cancel"
+        app:tint="#0F172A"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginTop="20dp"
+        android:layout_marginStart="16dp"/>
+
+    <TextView
+        android:id="@+id/tvTitle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Tra cứu từ điển"
+        android:textColor="#0F172A"
+        android:textSize="18sp"
+        android:fontFamily="sans-serif-medium"
+        app:layout_constraintTop_toTopOf="@id/btnBack"
+        app:layout_constraintBottom_toBottomOf="@id/btnBack"
+        app:layout_constraintStart_toEndOf="@id/btnBack"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginStart="8dp"/>
+
+    <!-- ===== Ô tìm kiếm ===== -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/tilSearch"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="Nhập từ cần tra..."
+        app:startIconDrawable="@android:drawable/ic_menu_search"
+        app:startIconTint="#94A3B8"
+        app:boxCornerRadiusTopStart="14dp"
+        app:boxCornerRadiusTopEnd="14dp"
+        app:boxCornerRadiusBottomStart="14dp"
+        app:boxCornerRadiusBottomEnd="14dp"
+        app:boxStrokeColor="#4F46E5"
+        app:boxBackgroundColor="#FFFFFF"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        app:layout_constraintTop_toBottomOf="@id/btnBack"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="12dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginEnd="24dp">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/edtSearch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="text"
+            android:imeOptions="actionSearch"
+            android:maxLines="1"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- ===== Vùng nội dung cuộn ===== -->
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/scrollContent"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:fillViewport="true"
+        app:layout_constraintTop_toBottomOf="@id/tilSearch"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/bottomNav"
+        android:layout_marginTop="16dp">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="32dp">
+
+            <!-- ===== Trạng thái: Chưa tra cứu (gợi ý gần đây) ===== -->
+            <LinearLayout
+                android:id="@+id/layoutRecent"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Tra cứu gần đây"
+                    android:textColor="#0F172A"
+                    android:textSize="15sp"
+                    android:fontFamily="sans-serif-medium"
+                    android:layout_marginStart="24dp"/>
+
+                <androidx.cardview.widget.CardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="3dp"
+                    app:cardBackgroundColor="#FFFFFF"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginStart="24dp"
+                    android:layout_marginEnd="24dp">
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rvRecentSearches"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:nestedScrollingEnabled="false"
+                        tools:listitem="@layout/item_recent_search"
+                        tools:itemCount="3"/>
+
+                </androidx.cardview.widget.CardView>
+
+            </LinearLayout>
+
+            <!-- ===== Trạng thái: Kết quả tra cứu ===== -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cardResult"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="6dp"
+                app:cardBackgroundColor="#FFFFFF"
+                android:visibility="gone"
+                tools:visibility="visible"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginStart="24dp"
+                android:layout_marginEnd="24dp">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="20dp">
+
+                    <!-- Từ + phiên âm + phát âm + lưu -->
+                    <TextView
+                        android:id="@+id/tvResultWord"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="Serendipity"
+                        android:textColor="#0F172A"
+                        android:textSize="24sp"
+                        android:fontFamily="sans-serif-black"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toStartOf="@id/btnSpeak"/>
+
+                    <TextView
+                        android:id="@+id/tvResultPhonetic"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="/ˌser.ənˈdɪp.ə.ti/ • danh từ"
+                        android:textColor="#64748B"
+                        android:textSize="14sp"
+                        app:layout_constraintTop_toBottomOf="@id/tvResultWord"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toStartOf="@id/btnSpeak"
+                        android:layout_marginTop="4dp"/>
+
+                    <ImageButton
+                        android:id="@+id/btnSpeak"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:background="#E0E7FF"
+                        android:src="@android:drawable/ic_lock_silent_mode_off"
+                        app:tint="#4F46E5"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintEnd_toStartOf="@id/btnSave"
+                        android:layout_marginEnd="8dp"/>
+
+                    <ImageButton
+                        android:id="@+id/btnSave"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:background="#FEF3C7"
+                        android:src="@android:drawable/btn_star_big_off"
+                        app:tint="#D97706"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"/>
+
+                    <View
+                        android:id="@+id/dividerResult1"
+                        android:layout_width="0dp"
+                        android:layout_height="1dp"
+                        android:background="#F1F5F9"
+                        app:layout_constraintTop_toBottomOf="@id/tvResultPhonetic"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        android:layout_marginTop="16dp"/>
+
+                    <!-- Nghĩa -->
+                    <TextView
+                        android:id="@+id/tvMeaningLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Nghĩa"
+                        android:textColor="#4F46E5"
+                        android:textSize="12sp"
+                        android:fontFamily="sans-serif-medium"
+                        app:layout_constraintTop_toBottomOf="@id/dividerResult1"
+                        app:layout_constraintStart_toStartOf="parent"
+                        android:layout_marginTop="16dp"/>
+
+                    <TextView
+                        android:id="@+id/tvResultMeaning"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="Sự tình cờ may mắn; khả năng tìm thấy điều tốt đẹp một cách ngẫu nhiên."
+                        android:textColor="#0F172A"
+                        android:textSize="15sp"
+                        app:layout_constraintTop_toBottomOf="@id/tvMeaningLabel"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        android:layout_marginTop="4dp"/>
+
+                    <!-- Ví dụ -->
+                    <TextView
+                        android:id="@+id/tvExampleLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Ví dụ"
+                        android:textColor="#4F46E5"
+                        android:textSize="12sp"
+                        android:fontFamily="sans-serif-medium"
+                        app:layout_constraintTop_toBottomOf="@id/tvResultMeaning"
+                        app:layout_constraintStart_toStartOf="parent"
+                        android:layout_marginTop="16dp"/>
+
+                    <TextView
+                        android:id="@+id/tvResultExample"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="&quot;Meeting you here was pure serendipity.&quot;"
+                        android:textColor="#64748B"
+                        android:textSize="14sp"
+                        android:fontStyle="italic"
+                        app:layout_constraintTop_toBottomOf="@id/tvExampleLabel"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        android:layout_marginTop="4dp"/>
+
+                    <!-- Từ đồng nghĩa -->
+                    <TextView
+                        android:id="@+id/tvSynonymLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Từ đồng nghĩa"
+                        android:textColor="#4F46E5"
+                        android:textSize="12sp"
+                        android:fontFamily="sans-serif-medium"
+                        app:layout_constraintTop_toBottomOf="@id/tvResultExample"
+                        app:layout_constraintStart_toStartOf="parent"
+                        android:layout_marginTop="16dp"/>
+
+                    <TextView
+                        android:id="@+id/tvResultSynonyms"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="fluke, chance, luck"
+                        android:textColor="#0F172A"
+                        android:textSize="14sp"
+                        app:layout_constraintTop_toBottomOf="@id/tvSynonymLabel"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        android:layout_marginTop="4dp"/>
+
+                    <!-- Nút thêm vào bộ từ vựng -->
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnAddToVocab"
+                        android:layout_width="0dp"
+                        android:layout_height="48dp"
+                        android:text="Thêm vào bộ từ vựng của tôi"
+                        android:textSize="14sp"
+                        android:textAllCaps="false"
+                        android:textStyle="bold"
+                        app:backgroundTint="#52F800"
+                        app:cornerRadius="14dp"
+                        app:elevation="0dp"
+                        app:layout_constraintTop_toBottomOf="@id/tvResultSynonyms"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        android:layout_marginTop="20dp"/>
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- ===== Trạng thái: Không tìm thấy ===== -->
+            <LinearLayout
+                android:id="@+id/layoutNotFound"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:visibility="gone"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginTop="40dp"
+                android:layout_marginStart="24dp"
+                android:layout_marginEnd="24dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="🔍"
+                    android:textSize="40sp"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Không tìm thấy từ này"
+                    android:textColor="#0F172A"
+                    android:textSize="15sp"
+                    android:fontFamily="sans-serif-medium"
+                    android:layout_marginTop="12dp"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Kiểm tra lại chính tả hoặc thử từ khác"
+                    android:textColor="#94A3B8"
+                    android:textSize="13sp"
+                    android:layout_marginTop="4dp"/>
+
+            </LinearLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.core.widget.NestedScrollView>
+
+    <!-- ===== Bottom Navigation ===== -->
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottomNav"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="#FFFFFF"
+        app:itemIconTint="#4F46E5"
+        app:itemTextColor="#4F46E5"
+        app:menu="@menu/menu_bottom_nav"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:elevation="8dp"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
