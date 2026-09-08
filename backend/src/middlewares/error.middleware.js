@@ -42,10 +42,12 @@ const globalExceptionHandler = (err, req, res, next) => {
 
 // Bắt lỗi đường dẫn không tồn tại 404 (Tương đương NoResourceFoundException)
 const noResourceFoundHandler = (req, res, next) => {
-  return res.status(404).json(
+  const errorCode = ErrorCode.RESOURCE_NOT_FOUND;
+
+  return res.status(errorCode.statusCode).json(
     ApiResponse.builder()
-      .code(404)
-      .message('Không tìm thấy đường dẫn hoặc tài nguyên (404)')
+      .code(errorCode.code)
+      .message(errorCode.message)
       .build()
   );
 };

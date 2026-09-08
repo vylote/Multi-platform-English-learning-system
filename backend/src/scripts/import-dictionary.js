@@ -21,6 +21,37 @@ const POS_MAP = {
   "số từ": "numeral",
 };
 
+const POS_NAMES = [
+  "nội động từ",
+  "ngoại động từ",
+  "động từ",
+  "danh từ",
+  "tính từ",
+  "phó từ",
+  "giới từ",
+  "liên từ",
+  "thán từ",
+  "đại từ",
+  "mạo từ",
+  "số từ",
+];
+// Sắp theo độ dài giảm dần -> ưu tiên khớp cụm dài hơn trước (vd "nội động từ" trước "động từ")
+const SORTED_POS_NAMES = [...POS_NAMES].sort((a, b) => b.length - a.length);
+
+function extractPosName(rawPosText) {
+  const text = rawPosText.trim();
+  for (const pos of SORTED_POS_NAMES) {
+    if (text.startsWith(pos)) return pos;
+  }
+  return text; // Không khớp mẫu nào -> giữ nguyên, hiếm gặp, nên rà soát log riêng
+}
+
+function normalizePos(posText) {
+  const posName = extractPosName(posText); // "tính từ farther,..." -> "tính từ"
+  const mapped = POS_MAP[posName];
+  return mapped || truncate(posName, 100); // fallback giờ cũng đã sạch, không còn dính đuôi
+}
+
 function parseLine(rawLine) {
   const line = rawLine.replace(/\r$/, "");
   const tabIndex = line.indexOf("\t"); //TODO: tôi ưu hơn split("\t") vì indexOf("\t") tìm tab đầu tiên rồi cắt chuỗi
@@ -82,11 +113,6 @@ function parseLine(rawLine) {
 function truncate(str, maxLen) {
   if (!str) return str;
   return str.length > maxLen ? str.slice(0, maxLen) : str;
-}
-
-function normalizePos(posText) {
-  const mapped = POS_MAP[posText];
-  return mapped || truncate(posText, 100);
 }
 
 async function importDictionary() {
