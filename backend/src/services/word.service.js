@@ -3,6 +3,7 @@ const Word = require("../models/word.model");
 const translationService = require("./translation.service");
 const { ErrorCode } = require("../common/error-code");
 const AppException = require("../exceptions/app.exception");
+const redisClient = require("../config/redis");
 
 const MW_COLLEGIATE_KEY = process.env.MW_COLLEGIATE_API_KEY;
 const MW_LEARNERS_KEY = process.env.MW_LEARNERS_API_KEY;
@@ -11,6 +12,9 @@ const MW_TIMEOUT_MS = 5000;
 
 const MAX_QUERY_WORDS = 4;
 const MAX_QUERY_LENGTH = 50;
+
+const CACHE_KEY_PREFIX = "word_search:";
+const CACHE_TTL_SECONDS = 3600; 
 
 class WordService {
   async fetchFromMerriamWebster(word, dictType) {
@@ -148,20 +152,56 @@ class WordService {
     }
   }
 
+  async getCachedResult(cacheKey) {
+    try {
+      const cached = await redisClient.get(cacheKey);
+      return cached ? JSON.parse(cached) : null;
+    } catch (error) {
+      // Redis lỗi (mất kết nối, timeout...) không được làm fail cả request tra từ
+      // -> chỉ log lại, coi như cache miss, để luồng tiếp tục tra DB/API ngoài bình thường
+      console.error("Lỗi đọc Redis cache (bỏ qua, tra trực tiếp):", error.message);
+      return null;
+    }
+  }
+
+  async setCachedResult(cacheKey, response) {
+    try {
+      await redisClient.set(cacheKey, JSON.stringify(response), {
+        EX: CACHE_TTL_SECONDS,
+      });
+    } catch (error) {
+      console.error("Lỗi ghi Redis cache:", error.message);
+    }
+  }
+
   async searchWords(rawQuery) {
     const queryStr = (rawQuery || "").trim();
     this.validateQuery(queryStr);
 
-    const localResults = await wordRepository.searchByFullText(queryStr);
-    if (localResults.length > 0) {
-      return { source: "local", results: localResults };
+    const cacheKey = `${CACHE_KEY_PREFIX}${queryStr.toLowerCase()}`;
+
+    // 1. Kiểm tra cache trước tiên - nếu người khác đã tra từ này gần đây, trả ngay không đụng DB/API ngoài
+    const cachedResponse = await this.getCachedResult(cacheKey);
+    if (cachedResponse) {
+      return cachedResponse;
     }
 
+    // 2. Cache miss -> tra local DB
+    const localResults = await wordRepository.searchByFullText(queryStr);
+    if (localResults.length > 0) {
+      const response = { source: "local", results: localResults };
+      await this.setCachedResult(cacheKey, response);
+      return response;
+    }
+
+    // 3. Local cũng miss -> tra external API
     const externalWord = await this.fetchFromExternalApi(queryStr);
     if (externalWord) {
       const cachedId = await wordRepository.upsert(externalWord);
       externalWord.id = cachedId;
-      return { source: "external", results: [externalWord] };
+      const response = { source: "external", results: [externalWord] };
+      await this.setCachedResult(cacheKey, response);
+      return response;
     }
 
     throw new AppException(

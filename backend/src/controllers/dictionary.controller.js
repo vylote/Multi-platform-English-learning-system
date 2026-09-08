@@ -16,7 +16,7 @@ class DictionaryController {
         ApiResponse.builder()
           .code("1000")
           .message(messageBySource[source])
-          .result(results.map((w) => w.toJSON()))
+          .result(results)
           .build(),
       );
     } catch (error) {
