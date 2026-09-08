@@ -4,70 +4,155 @@ const translationService = require("./translation.service");
 const { ErrorCode } = require("../common/error-code");
 const AppException = require("../exceptions/app.exception");
 
-const EXTERNAL_API_BASE = process.env.EXTERNAL_API_BASE
+const MW_COLLEGIATE_KEY = process.env.MW_COLLEGIATE_API_KEY;
+const MW_LEARNERS_KEY = process.env.MW_LEARNERS_API_KEY;
+
+const MW_TIMEOUT_MS = 5000;
+
+const MAX_QUERY_WORDS = 4;
+const MAX_QUERY_LENGTH = 50;
 
 class WordService {
-  async fetchFromExternalApi(word) {
+  async fetchFromMerriamWebster(word, dictType) {
+    const isCollegiate = dictType === "collegiate";
+    const apiKey = isCollegiate ? MW_COLLEGIATE_KEY : MW_LEARNERS_KEY;
+    if (!apiKey) {
+      console.error(`Thiếu API key Merriam-Webster (${dictType})`);
+      return null;
+    }
+
+    const baseUrl = isCollegiate
+      ? "https://www.dictionaryapi.com/api/v3/references/collegiate/json"
+      : "https://www.dictionaryapi.com/api/v3/references/learners/json";
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), MW_TIMEOUT_MS);
+
     try {
       const response = await fetch(
-        `${EXTERNAL_API_BASE}/${encodeURIComponent(word)}`,
+        `${baseUrl}/${encodeURIComponent(word)}?key=${apiKey}`,
+        { signal: controller.signal },
       );
-      if (!response.ok) return null;
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        console.error(`Merriam-Webster (${dictType}) HTTP lỗi:`, response.status);
+        return null;
+      }
 
       const data = await response.json();
-      if (!data || !Array.isArray(data) || data.length === 0) return null;
+      if (!Array.isArray(data) || data.length === 0) return null;
 
-      const entry = data[0];
-      const phonetics = entry.phonetics || [];
-      const pronunciation =
-        phonetics.find((p) => p.text)?.text || `/${entry.word}/`;
+      // Từ không tồn tại -> MW trả về mảng string gợi ý chính tả, không phải object
+      if (typeof data[0] === "string") return null;
 
-      const meanings = entry.meanings || [];
-      const firstMeaning = meanings[0] || {};
-      const partOfSpeech = firstMeaning.partOfSpeech || "noun";
-
-      const definitions = firstMeaning.definitions || [];
-      const exampleSentence = definitions[0]?.example || ""; // Giữ nguyên tiếng Anh, không dịch
-
-      // definition = nghĩa từ điển ngắn gọn tiếng Việt (dịch trực tiếp TỪ, không dịch câu giải thích)
-      const definitionVi = await translationService.translateWordConcise(
-        entry.word,
+      // Chỉ giữ entry THẬT SỰ có nghĩa (bỏ entry rỗng dạng cross-reference,
+      // vd "donut" -> chỉ trỏ sang "doughnut", không có shortdef riêng)
+      const validEntries = data.filter(
+        (e) => e && Array.isArray(e.shortdef) && e.shortdef.length > 0,
       );
+      if (validEntries.length === 0) return null;
 
-      return new Word({
-        id: null,
-        word: entry.word,
-        pronunciation,
-        part_of_speech: partOfSpeech,
-        meaning_vi: definitionVi,
-        isExternal: true,
-      });
+      // Ưu tiên: (1) khớp chính xác headword -> (2) khớp trong danh sách biến thể (stems) -> (3) entry đầu tiên có nghĩa
+      const entry =
+        validEntries.find(
+          (e) => e.meta?.id?.split(":")[0].toLowerCase() === word.toLowerCase(),
+        ) ||
+        validEntries.find(
+          (e) =>
+            Array.isArray(e.meta?.stems) &&
+            e.meta.stems.some((s) => s.toLowerCase() === word.toLowerCase()),
+        ) ||
+        validEntries[0];
+
+      return {
+        headword: word, // giữ đúng spelling người dùng đã gõ (vd "donut" không đổi thành "doughnut")
+        pronunciation: this.extractMwPronunciation(entry),
+        partOfSpeech: entry.fl || "",
+      };
     } catch (error) {
-      console.error("Lỗi kết nối API từ điển ngoài:", error);
+      clearTimeout(timeoutId);
+      if (error.name === "AbortError") {
+        console.error(`Merriam-Webster (${dictType}) timeout sau ${MW_TIMEOUT_MS}ms:`, word);
+      } else {
+        console.error(`Lỗi gọi Merriam-Webster (${dictType}):`, error.message);
+      }
       return null;
     }
   }
 
-  sanitizeQuery(rawQuery) {
-    return (rawQuery || "")
-      .trim()
-      .replace(/[^\p{L}\p{N}\s]/gu, " ")
-      .trim();
+  extractMwPronunciation(entry) {
+    const hwiPrs = entry.hwi?.prs;
+    if (hwiPrs && hwiPrs.length > 0) {
+      const first = hwiPrs[0];
+      if (first.ipa) return `/${first.ipa}/`;
+      if (first.mw) return `/${first.mw}/`;
+    }
+
+    // Fallback: phiên âm nằm trong biến thể chính tả (vd "donut" là biến thể của "doughnut")
+    if (Array.isArray(entry.vrs)) {
+      for (const variant of entry.vrs) {
+        const vPrs = variant.prs;
+        if (vPrs && vPrs.length > 0) {
+          const first = vPrs[0];
+          if (first.ipa) return `/${first.ipa}/`;
+          if (first.mw) return `/${first.mw}/`;
+        }
+      }
+    }
+
+    return "";
   }
 
-  async searchWords(rawQuery) {
-    const queryStr = (rawQuery || "").trim();
+  async fetchFromExternalApi(word) {
+    // Ưu tiên Collegiate (bao quát hơn), fallback Learner's (định nghĩa đơn giản, hợp người học)
+    let mwResult = await this.fetchFromMerriamWebster(word, "collegiate");
+    if (!mwResult) {
+      mwResult = await this.fetchFromMerriamWebster(word, "learners");
+    }
+    if (!mwResult) return null;
+
+    // Dịch nghĩa tiếng Việt ngắn gọn cho TỪ, không dịch định nghĩa tiếng Anh của MW
+    const definitionVi = await translationService.translateWordConcise(mwResult.headword);
+    if (!definitionVi) return null;
+
+    return new Word({
+      id: null,
+      word: mwResult.headword,
+      pronunciation: mwResult.pronunciation,
+      part_of_speech: mwResult.partOfSpeech,
+      meaning_vi: definitionVi,
+      isExternal: true,
+    });
+  }
+
+  validateQuery(queryStr) {
     if (!queryStr) {
       throw new AppException(
         ErrorCode.INVALID_DATA,
         "Từ khóa tìm kiếm không được để trống",
       );
     }
+    if (queryStr.length > MAX_QUERY_LENGTH) {
+      throw new AppException(
+        ErrorCode.INVALID_DATA,
+        "Vui lòng nhập một từ hoặc cụm từ ngắn để tra cứu, không phải cả câu.",
+      );
+    }
+    const wordCount = queryStr.split(/\s+/).filter(Boolean).length;
+    if (wordCount > MAX_QUERY_WORDS) {
+      throw new AppException(
+        ErrorCode.INVALID_DATA,
+        "Vui lòng nhập tối đa 4 từ để tra cứu từ điển.",
+      );
+    }
+  }
 
-    const sanitized = this.sanitizeQuery(queryStr);
-    const localResults = sanitized
-      ? await wordRepository.searchByFullText(sanitized, queryStr)
-      : [];
+  async searchWords(rawQuery) {
+    const queryStr = (rawQuery || "").trim();
+    this.validateQuery(queryStr);
+
+    const localResults = await wordRepository.searchByFullText(queryStr);
     if (localResults.length > 0) {
       return { source: "local", results: localResults };
     }
