@@ -172,6 +172,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS word_lower_unique_idx ON words (LOWER(word));
 
 -- Khi có tính năng "thống kê độ phổ biến của 1 từ vựng qua flashcards":
 -- CREATE INDEX IF NOT EXISTS idx_flashcards_word_id ON flashcards (word_id);
+CREATE INDEX IF NOT EXISTS uq_flashcards_user_topic ON flashcards (user_id, topic_id);
 
 -- Khi có tính năng "tìm role nào sở hữu quyền X":
 -- CREATE INDEX IF NOT EXISTS idx_role_permissions_permission_id ON role_permissions (permission_id);

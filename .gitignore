@@ -127,3 +127,5 @@ pgdata_new/
 *.log
 
 backend/src/data/stardict_en_vi.txt
+
+backend/borderline_review.csv
