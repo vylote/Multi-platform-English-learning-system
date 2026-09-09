@@ -10,6 +10,11 @@ const HttpStatus = {
 };
 
 const ErrorCode = Object.freeze({
+  SUCCESS: {
+    code: 1000,
+    message: "Thành công",
+    statusCode: HttpStatus.OK,
+  },
   // Hệ thống & Không xác định
   UNCATEGORIZED_EXCEPTION: {
     code: 9999,

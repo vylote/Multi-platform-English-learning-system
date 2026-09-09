@@ -1,0 +1,9 @@
+const express = require("express");
+const router = express.Router();
+const streakController = require("../controllers/streak.controller");
+const verifyToken = require("../middlewares/auth.middleware");
+
+router.post("/record", verifyToken, streakController.record);
+router.get("/status", verifyToken, streakController.status);
+
+module.exports = router;
