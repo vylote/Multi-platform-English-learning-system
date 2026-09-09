@@ -6,4 +6,6 @@ const verifyToken = require("../middlewares/auth.middleware");
 router.post("/record", verifyToken, streakController.record);
 router.get("/status", verifyToken, streakController.status);
 
+router.get("/week", verifyToken, streakController.week);
+
 module.exports = router;

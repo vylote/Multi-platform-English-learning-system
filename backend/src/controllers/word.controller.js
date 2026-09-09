@@ -1,7 +1,8 @@
 const wordService = require("../services/word.service");
 const ApiResponse = require("../common/api-response");
+const { ErrorCode } = require("../common/error-code");
 
-class DictionaryController {
+class WordController {
   
   async searchWords(req, res, next) {
     try {
@@ -12,9 +13,9 @@ class DictionaryController {
         external: "Tìm kiếm thành công (Từ điển Online)",
       };
 
-      return res.status(200).json(
+      return res.status(ErrorCode.SUCCESS.statusCode).json(
         ApiResponse.builder()
-          .code("1000")
+          .code(ErrorCode.SUCCESS.code)
           .message(messageBySource[source])
           .result(results)
           .build(),
@@ -25,4 +26,4 @@ class DictionaryController {
   }
 }
 
-module.exports = new DictionaryController();
+module.exports = new WordController();
