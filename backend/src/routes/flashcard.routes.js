@@ -3,8 +3,12 @@ const router = express.Router();
 const flashcardController = require('../controllers/flashcard.controller');
 const verifyToken = require('../middlewares/auth.middleware');
 
-// Toàn bộ route Flashcard đều gắn với user cụ thể -> bắt buộc xác thực
-router.post('/', verifyToken, flashcardController.addFlashcard);
 router.get('/', verifyToken, flashcardController.getMyFlashcards);
+
+// Đặt "/daily" TRƯỚC "/:id" - nếu để sau, Express sẽ hiểu nhầm "daily" là giá trị tham số :id
+router.get('/daily', verifyToken, flashcardController.getDaily);
+
+router.put('/:id', verifyToken, flashcardController.updateFlashcard);
+router.delete('/:id', verifyToken, flashcardController.deleteFlashcard);
 
 module.exports = router;

@@ -1,34 +1,72 @@
-const { Pool } = require("pg");
-const pool = new Pool();
+const db = require("../config/db");
 const Flashcard = require("../models/flashcard.model");
 const Word = require("../models/word.model");
 
 class FlashcardRepository {
   async getClient() {
-    return pool.connect();
+    return db.pool.connect();
   }
 
-  async insert({ userId, wordId, topicId }, client) {
-    const sql = `
-      INSERT INTO flashcards (user_id, word_id, topic_id, status)
-      VALUES ($1, $2, $3, 'NEW')
-      ON CONFLICT (user_id, word_id) DO NOTHING
-      RETURNING *;
-    `;
-    const { rows } = await client.query(sql, [userId, wordId, topicId]);
-    return rows.length > 0 ? new Flashcard(rows[0]) : null;
+  // Chèn hàng loạt thẻ mới cho bộ "Học hôm nay". DO NOTHING nếu đã tồn tại
+  // -> không reset tiến độ LEARNING/MASTERED cũ về NEW nếu user vô tình được bốc trùng từ đã học.
+  async bulkInsertNew(userId, topicId, wordItems, client = db) {
+    for (const w of wordItems) {
+      await client.query(
+        `INSERT INTO flashcards (user_id, word_id, topic_id, status)
+         VALUES ($1, $2, $3, 'NEW')
+         ON CONFLICT (user_id, word_id) DO NOTHING;`,
+        [userId, w.id, topicId],
+      );
+    }
   }
 
   async findByUser(userId) {
     const sql = `
-      SELECT f.id, f.user_id, f.word_id, f.topic_id, f.status, f.last_reviewed,
-             w.word, w.pronunciation, w.part_of_speech, w.definition, w.example_sentence
+      SELECT f.id, f.user_id, f.word_id, f.topic_id, f.status, f.last_reviewed, f.created_at,
+             w.word, w.pronunciation, w.part_of_speech, w.meaning_vi
       FROM flashcards f
       JOIN words w ON w.id = f.word_id
       WHERE f.user_id = $1
       ORDER BY f.id DESC;
     `;
-    const { rows } = await pool.query(sql, [userId]);
+    const { rows } = await db.query(sql, [userId]);
+    return this._mapRows(rows);
+  }
+
+  // Toàn bộ thẻ chưa MASTERED của user, giới hạn trong 1 topic cụ thể
+  async findByUserAndTopic(userId, topicId) {
+    const sql = `
+    SELECT f.id, f.user_id, f.word_id, f.topic_id, f.status, f.last_reviewed, f.created_at,
+           w.word, w.pronunciation, w.part_of_speech, w.meaning_vi
+    FROM flashcards f
+    JOIN words w ON w.id = f.word_id
+    WHERE f.user_id = $1 AND f.topic_id = $2 AND f.status != 'MASTERED'
+    ORDER BY
+      (f.status = 'NEW') DESC,
+      f.last_reviewed ASC NULLS FIRST;
+  `;
+    const { rows } = await db.query(sql, [userId, topicId]);
+    return this._mapRows(rows);
+  }
+
+  async updateStatus(id, userId, status) {
+    const sql = `
+      UPDATE flashcards
+      SET status = $1, last_reviewed = CURRENT_TIMESTAMP
+      WHERE id = $2 AND user_id = $3
+      RETURNING id, user_id, word_id, topic_id, status, last_reviewed, created_at;
+    `;
+    const { rows } = await db.query(sql, [status, id, userId]);
+    return rows[0] ? new Flashcard(rows[0]) : null;
+  }
+
+  async deleteById(id, userId) {
+    const sql = `DELETE FROM flashcards WHERE id = $1 AND user_id = $2 RETURNING id;`;
+    const { rows } = await db.query(sql, [id, userId]);
+    return rows.length > 0;
+  }
+
+  _mapRows(rows) {
     return rows.map(
       (row) =>
         new Flashcard({
@@ -38,13 +76,13 @@ class FlashcardRepository {
           topic_id: row.topic_id,
           status: row.status,
           last_reviewed: row.last_reviewed,
+          created_at: row.created_at,
           word: new Word({
             id: row.word_id,
             word: row.word,
             pronunciation: row.pronunciation,
             part_of_speech: row.part_of_speech,
-            definition: row.definition,
-            example_sentence: row.example_sentence,
+            meaning_vi: row.meaning_vi,
             isExternal: false,
           }),
         }),

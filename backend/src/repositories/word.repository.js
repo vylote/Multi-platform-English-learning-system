@@ -35,6 +35,20 @@ class WordRepository {
     ]);
     return rows[0].id;
   }
+
+  // Lấy ngẫu nhiên N từ thuộc 1 chủ đề mà user CHƯA SỞ HỮU (chưa có trong flashcards, bất kể status)
+  async findRandomByTopicExcludingOwned(topicId, userId, limit) {
+    const sql = `
+    SELECT id, word, pronunciation, part_of_speech, meaning_vi, topic_id
+    FROM words w
+    WHERE w.topic_id = $1
+      AND w.id NOT IN (SELECT word_id FROM flashcards WHERE user_id = $2)
+    ORDER BY RANDOM()
+    LIMIT $3;
+  `;
+    const { rows } = await db.query(sql, [topicId, userId, limit]);
+    return rows.map((row) => new Word({ ...row, isExternal: false }));
+  }
 }
 
 module.exports = new WordRepository();
