@@ -13,6 +13,14 @@ class FlashcardService {
   }
 
   async getDailySet(userId) {
+    const anyTopicExists = await topicRepository.existsAny();
+    if (!anyTopicExists) {
+      throw new AppException(
+        ErrorCode.SYSTEM_ERROR,
+        "Hệ thống chưa có chủ đề học tập nào được cấu hình. Vui lòng liên hệ quản trị viên.",
+      );
+    }
+
     const topicInProgress =
       await topicRepository.findRandomTopicInProgress(userId);
 
@@ -20,23 +28,22 @@ class FlashcardService {
       return this._buildDailySetForTopic(userId, topicInProgress);
     }
 
-    const randomTopic = await topicRepository.findRandomTopic();
-    if (!randomTopic) {
-      throw new AppException(
-        ErrorCode.TOPIC_NOT_FOUND
-      );
+    const freshTopic =
+      await topicRepository.findRandomTopicWithUnownedWords(userId);
+    if (!freshTopic) {
+      return []; //TODO: user học hết từ của toàn bộ hệ thống
     }
 
     const newWords = await wordRepository.findRandomByTopicExcludingOwned(
-      randomTopic.id,
+      freshTopic.id,
       userId,
       DAILY_TARGET,
     );
     if (newWords.length > 0) {
-      await flashcardRepository.bulkInsertNew(userId, randomTopic.id, newWords);
+      await flashcardRepository.bulkInsertNew(userId, freshTopic.id, newWords);
     }
 
-    return flashcardRepository.findByUserAndTopic(userId, randomTopic.id);
+    return flashcardRepository.findAllByUserAndTopic(userId, freshTopic.id);
   }
 
   async _buildDailySetForTopic(userId, topic) {

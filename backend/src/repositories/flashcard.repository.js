@@ -49,6 +49,21 @@ class FlashcardRepository {
     return this._mapRows(rows);
   }
 
+  // Toàn bộ thẻ của user thuộc 1 topic cụ thể, KHÔNG lọc status (dùng ngay sau khi vừa
+  // bulkInsertNew cho 1 topic hoàn toàn mới -> chắc chắn mọi thẻ đều NEW, không cần lọc)
+  async findAllByUserAndTopic(userId, topicId) {
+    const sql = `
+    SELECT f.id, f.user_id, f.word_id, f.topic_id, f.status, f.last_reviewed, f.created_at,
+           w.word, w.pronunciation, w.part_of_speech, w.meaning_vi
+    FROM flashcards f
+    JOIN words w ON w.id = f.word_id
+    WHERE f.user_id = $1 AND f.topic_id = $2
+    ORDER BY f.id ASC;
+  `;
+    const { rows } = await db.query(sql, [userId, topicId]);
+    return this._mapRows(rows);
+  }
+
   async updateStatus(id, userId, status) {
     const sql = `
       UPDATE flashcards
