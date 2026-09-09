@@ -5,7 +5,7 @@ require('dotenv').config();
 
 const authRoutes = require('./routes/auth.routes');
 const roleRoutes = require('./routes/role.routes');
-const dictionaryRoutes = require('./routes/dictionary.routes')
+const wordRoutes = require('./routes/word.routes')
 const flashcardRoutes = require('./routes/flashcard.routes')
 const streakRoutes = require('./routes/streak.routes')
 
@@ -31,7 +31,7 @@ app.get('/health', (req, res) => {
 
 app.use('/api/v1/auth', authRoutes);
 app.use("/api/v1/roles", roleRoutes);
-app.use('/api/v1/words', dictionaryRoutes);    
+app.use('/api/v1/words', wordRoutes);    
 app.use('/api/v1/flashcards', flashcardRoutes); 
 app.use('/api/v1/streaks', streakRoutes);
 

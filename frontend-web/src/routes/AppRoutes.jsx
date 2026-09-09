@@ -5,6 +5,8 @@ import HomePage from "../pages/HomePage";
 import LoginPage from "../pages/LoginPage";
 import RegisterPage from "../pages/RegisterPage";
 import MainPage from "../pages/MainPage"; // Trang chính sau khi đăng nhập (có Sidebar)
+import PracticeHubPage from "../components/PracticeHubPage";
+import ProfilePage from "../pages/ProfilePage";
 
 export const AppRoutes = () => {
   const { user } = useSelector((state) => state.auth);
@@ -30,6 +32,16 @@ export const AppRoutes = () => {
       <Route
         path="/learn"
         element={user ? <MainPage /> : <Navigate to="/login" />}
+      />
+
+      <Route
+        path="/practice-hub"
+        element={user ? <PracticeHubPage /> : <Navigate to="/login" />}
+      />
+
+      <Route
+        path="/profile"
+        element={user ? <ProfilePage /> : <Navigate to="/login" />}
       />
 
       {/* Route không khớp -> về trang chủ */}

@@ -5,7 +5,6 @@ const verifyToken = require('../middlewares/auth.middleware');
 
 router.get('/', verifyToken, flashcardController.getMyFlashcards);
 
-// Đặt "/daily" TRƯỚC "/:id" - nếu để sau, Express sẽ hiểu nhầm "daily" là giá trị tham số :id
 router.get('/daily', verifyToken, flashcardController.getDaily);
 
 router.put('/:id', verifyToken, flashcardController.updateFlashcard);

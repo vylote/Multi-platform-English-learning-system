@@ -2,7 +2,7 @@ const streakRepository = require("../repositories/streak.repository");
 const { StreakStatus } = require("../models/streak.model");
 
 class StreakService {
-    /* xử lí bài toán lệch múi giờ
+  /* xử lí bài toán lệch múi giờ
     tham số: số phút lệch, số ngày cần lùi */
   _getLocalDateStr(timezoneOffsetMinutes, daysAgo = 0) {
     const now = new Date();
@@ -73,6 +73,20 @@ class StreakService {
     }
 
     return new StreakStatus({ currentStreak, completedToday });
+  }
+
+  async getWeekView(userId, timezoneOffsetMinutes, days = 7) {
+    const dates = await streakRepository.findActivityDates(userId);
+    const dateSet = new Set(dates);
+
+    const todayStr = this._getLocalDateStr(timezoneOffsetMinutes);
+    const result = [];
+    let cursor = todayStr;
+    for (let i = 0; i < days; i++) {
+      result.unshift({ date: cursor, completed: dateSet.has(cursor) });
+      cursor = this._subtractOneDay(cursor);
+    }
+    return result;
   }
 }
 
