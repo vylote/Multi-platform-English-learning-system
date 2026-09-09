@@ -1,15 +1,24 @@
 class Word {
-  constructor({ id, word, pronunciation, part_of_speech, meaning_vi, isExternal, rank }) {
+  constructor({
+    id,
+    word,
+    pronunciation,
+    part_of_speech,
+    meaning_vi,
+    topic_id,
+    isExternal,
+    rank,
+  }) {
     this.id = id ?? null;
     this.word = word;
-    this.pronunciation = pronunciation || '';
-    this.part_of_speech = part_of_speech || '';
-    this.meaning_vi = meaning_vi || '';
-    this.isExternal = isExternal ?? false; // Đánh dấu từ vựng lấy từ API ngoài hay đã có sẵn trong hệ thống
-    this.rank = rank; // Điểm liên quan từ Full-Text Search, chỉ có khi tra từ nội bộ
+    this.pronunciation = pronunciation || "";
+    this.part_of_speech = part_of_speech || "";
+    this.meaning_vi = meaning_vi || "";
+    this.topic_id = topic_id ?? null;
+    this.isExternal = isExternal ?? false;
+    this.rank = rank; // mức độ liên quan -> only tra cứu local
   }
 
-  // Phương thức chuẩn hóa dữ liệu phản hồi về Client
   toJSON() {
     const json = {
       id: this.id,
@@ -19,12 +28,12 @@ class Word {
       meaning_vi: this.meaning_vi,
       isExternal: this.isExternal,
     };
-    
-    // Chỉ trả kèm rank khi có (kết quả tìm kiếm nội bộ), tránh rác dữ liệu khi trả từ API ngoài
+
+    if (this.topic_id !== null) json.topic_id = this.topic_id;
     if (this.rank !== undefined && this.rank !== null) {
       json.rank = Number(this.rank);
     }
-    
+
     return json;
   }
 }

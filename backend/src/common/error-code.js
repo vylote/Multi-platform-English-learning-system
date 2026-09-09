@@ -67,7 +67,11 @@ const ErrorCode = Object.freeze({
     message: "Thời gian làm bài thi đã hết",
     statusCode: HttpStatus.BAD_REQUEST,
   },
-
+  TOPIC_NOT_FOUND: {
+    code: 2004,
+    message: "Không tìm thấy chủ đề trong hệ thống",
+    statusCode: HttpStatus.NOT_FOUND,
+  },
   USERNAME_EXISTED: {
     code: "1022",
     message: "Tên đăng nhập đã tồn tại.",
