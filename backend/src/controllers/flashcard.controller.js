@@ -1,16 +1,16 @@
+const streakService = require("../services/streak.service");
 const flashcardService = require("../services/flashcard.service");
 const ApiResponse = require("../common/api-response");
 const { ErrorCode } = require("../common/error-code");
-const AppException = require("../exceptions/app.exception");
 
 class FlashcardController {
   async getMyFlashcards(req, res, next) {
     try {
       const userId = req.user.id;
       const flashcards = await flashcardService.getFlashcardsByUser(userId);
-      return res.status(200).json(
+      return res.status(ErrorCode.SUCCESS.statusCode).json(
         ApiResponse.builder()
-          .code("1000")
+          .code(ErrorCode.SUCCESS.code)
           .message("Lấy danh sách thẻ ghi nhớ thành công")
           .result(flashcards.map((f) => f.toJSON()))
           .build(),
@@ -24,9 +24,9 @@ class FlashcardController {
     try {
       const userId = req.user.id;
       const items = await flashcardService.getDailySet(userId);
-      return res.status(200).json(
+      return res.status(ErrorCode.SUCCESS.statusCode).json(
         ApiResponse.builder()
-          .code("1000")
+          .code(ErrorCode.SUCCESS.code)
           .message("Lấy bộ từ ôn tập hôm nay thành công")
           .result(items.map((f) => f.toJSON()))
           .build(),
@@ -40,18 +40,36 @@ class FlashcardController {
     try {
       const userId = req.user.id;
       const { id } = req.params;
-      const { status } = req.body;
+      const { status, timezone_offset } = req.body;
 
       const flashcard = await flashcardService.updateStatus(userId, id, status);
-      return res
-        .status(200)
-        .json(
-          ApiResponse.builder()
-            .code("1000")
-            .message("Cập nhật tiến độ ôn tập thành công")
-            .result(flashcard.toJSON())
-            .build(),
+
+      let streakData = null;
+
+      if (timezone_offset !== undefined && timezone_offset !== null) {
+        const isCompleted = await flashcardService.checkDailyCompletion(
+          userId,
+          Number(timezone_offset),
         );
+
+        if (isCompleted) {
+          streakData = await streakService.recordActivity(
+            userId,
+            Number(timezone_offset),
+          );
+        }
+      }
+
+      return res.status(ErrorCode.SUCCESS.statusCode).json(
+        ApiResponse.builder()
+          .code(ErrorCode.SUCCESS.code)
+          .message("Cập nhật tiến độ ôn tập thành công")
+          .result({
+            flashcard: flashcard.toJSON(),
+            streak: streakData ? streakData.toJSON() : null,
+          })
+          .build(),
+      );
     } catch (error) {
       next(error);
     }
@@ -64,10 +82,10 @@ class FlashcardController {
 
       await flashcardService.deleteFlashcard(userId, id);
       return res
-        .status(200)
+        .status(ErrorCode.SUCCESS.statusCode)
         .json(
           ApiResponse.builder()
-            .code("1000")
+            .code(ErrorCode.SUCCESS.code)
             .message("Xóa thẻ ghi nhớ thành công")
             .build(),
         );

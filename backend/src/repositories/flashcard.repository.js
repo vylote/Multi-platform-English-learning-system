@@ -81,6 +81,22 @@ class FlashcardRepository {
     return rows.length > 0;
   }
 
+  // Đếm số lượng thẻ đang ở trạng thái MASTERED và được ôn tập lần cuối vào hôm nay
+  // (Tính theo đúng múi giờ của người dùng, áp dụng cho cả thẻ cũ lẫn thẻ mới)
+  async countTodayMastered(userId, timezoneOffsetMinutes) {
+    const sql = `
+      SELECT COUNT(*)
+      FROM flashcards
+      WHERE user_id = $1
+        AND status = 'MASTERED'
+        AND last_reviewed IS NOT NULL
+        AND (last_reviewed AT TIME ZONE 'UTC' + ($2 * INTERVAL '1 minute'))::date =
+            (CURRENT_TIMESTAMP AT TIME ZONE 'UTC' + ($2 * INTERVAL '1 minute'))::date;
+    `;
+    const { rows } = await db.query(sql, [userId, timezoneOffsetMinutes]);
+    return parseInt(rows[0].count, 10);
+  }
+
   _mapRows(rows) {
     return rows.map(
       (row) =>

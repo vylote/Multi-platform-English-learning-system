@@ -100,6 +100,14 @@ class FlashcardService {
       );
     }
   }
+
+  async checkDailyCompletion(userId, timezoneOffsetMinutes) {
+    const masteredCount = await flashcardRepository.countTodayMastered(
+      userId, 
+      timezoneOffsetMinutes
+    );
+    return masteredCount >= DAILY_TARGET;
+  }
 }
 
 module.exports = new FlashcardService();
