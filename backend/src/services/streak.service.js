@@ -30,6 +30,16 @@ class StreakService {
     return `${year}-${month}-${day}`;
   }
 
+  async testRecordActivity(userId, timezoneOffsetMinutes, daysAgo) {
+    const todayStr = this._getLocalDateStr(timezoneOffsetMinutes, daysAgo);
+    await streakRepository.recordActivity(
+      userId,
+      todayStr,
+      timezoneOffsetMinutes
+    );
+    return this.getStatus(userId, timezoneOffsetMinutes);
+  }
+
   /**
    * API 1: Ghi nhận hoạt động cho ngày hôm nay (theo giờ địa phương client), rồi tính lại streak.
    */

@@ -1,16 +1,5 @@
--- =======================================================
 -- Kích hoạt extension UUID nếu cần dùng ở môi trường phân tán
--- =======================================================
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-
-
--- =========================================================================
--- PHẦN A: ĐỊNH NGHĨA BẢNG & RÀNG BUỘC (TABLES & CONSTRAINTS)
--- =========================================================================
--- Lưu ý: các ràng buộc PRIMARY KEY và UNIQUE bên dưới sẽ được PostgreSQL
--- TỰ ĐỘNG tạo index tương ứng (B-tree) - KHÔNG cần tự tạo thêm index
--- thủ công cho các cột này (ví dụ: users.username, users.email, roles.code...)
--- =========================================================================
 
 -- 1. BẢNG ROLES: Quản lý danh sách các vai trò hệ thống
 CREATE TABLE IF NOT EXISTS roles (
@@ -59,7 +48,8 @@ CREATE TABLE IF NOT EXISTS words (
     part_of_speech VARCHAR(100),
     meaning_vi TEXT NOT NULL
 );
--- Index thủ công cho bảng này: xem PHẦN B (word_lower_unique_idx)
+
+CREATE UNIQUE INDEX IF NOT EXISTS word_lower_unique_idx ON words (LOWER(word));
 
 -- 6. BẢNG IDIOMS: Thành ngữ tiếng Anh (Đọc tĩnh - Cached Redis)
 CREATE TABLE IF NOT EXISTS idioms (
@@ -88,8 +78,9 @@ CREATE TABLE IF NOT EXISTS flashcards (
     -- CHƯA CẦN: index riêng cho topic_id hoặc word_id một mình - chưa có
     -- repository nào query theo 2 cột này độc lập. Khi có tính năng
     -- "lọc flashcard theo chủ đề" hoặc "thống kê độ phổ biến từ vựng",
-    -- thêm index tương ứng vào PHẦN B lúc đó.
 );
+
+CREATE INDEX IF NOT EXISTS uq_flashcards_user_topic ON flashcards (user_id, topic_id);
 
 -- 9. BẢNG STREAK_LOGS: Ghi nhận lịch sử chuỗi ngày học liên tục
 CREATE TABLE IF NOT EXISTS streak_logs (
@@ -138,41 +129,26 @@ CREATE TABLE IF NOT EXISTS exam_results (
     -- khi thực sự có repository query theo 2 cột này.
 );
 
+-- Phiên làm bài: theo dõi mốc bắt đầu/nộp bài để tính time_spent chống gian lận
+CREATE TABLE IF NOT EXISTS exam_sessions (
+    id SERIAL PRIMARY KEY,
+    exam_id INTEGER NOT NULL REFERENCES exams(id) ON DELETE CASCADE,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    started_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    submitted_at TIMESTAMPTZ,
+    status VARCHAR(20) DEFAULT 'IN_PROGRESS' CHECK (status IN ('IN_PROGRESS', 'SUBMITTED'))
+);
+CREATE INDEX IF NOT EXISTS idx_exam_sessions_user_id ON exam_sessions (user_id);
 
--- =========================================================================
--- PHẦN B: INDEX THỦ CÔNG (CHỈ TẠO KHI CÓ REPOSITORY THỰC SỰ CẦN DÙNG)
--- =========================================================================
--- Nguyên tắc: mỗi index dưới đây PHẢI gắn với ít nhất 1 câu query thật
--- trong repository đang chạy. Không đánh index "phòng khi cần" - tránh
--- tốn dung lượng và làm chậm INSERT/UPDATE không cần thiết.
--- =========================================================================
+-- Đáp án học viên đã chọn cho từng câu, dùng để chấm điểm + hiển thị review chi tiết
+CREATE TABLE IF NOT EXISTS exam_answers (
+    id SERIAL PRIMARY KEY,
+    session_id INTEGER NOT NULL REFERENCES exam_sessions(id) ON DELETE CASCADE,
+    question_id INTEGER NOT NULL REFERENCES questions(id) ON DELETE CASCADE,
+    selected_option CHAR(1) CHECK (selected_option IN ('A', 'B', 'C', 'D')),
+    CONSTRAINT uq_session_question UNIQUE (session_id, question_id)
+);
+CREATE INDEX IF NOT EXISTS idx_exam_answers_session_id ON exam_answers (session_id);
 
--- Dùng bởi: word.repository.js -> searchByFullText() (WHERE LOWER(word) = ...)
---                                -> upsert() (ON CONFLICT (LOWER(word)))
--- Đồng thời đóng vai trò UNIQUE constraint chống trùng lặp từ vựng khi import.
-CREATE UNIQUE INDEX IF NOT EXISTS word_lower_unique_idx ON words (LOWER(word));
-
--- ---------------------------------------------------------------------
--- Các index dự kiến trong tương lai (ĐANG COMMENT, CHƯA TẠO) - chỉ bỏ
--- comment và chạy khi repository tương ứng đã thực sự triển khai:
--- ---------------------------------------------------------------------
-
--- Khi có exam.repository.js với query "lấy câu hỏi theo đề thi":
--- CREATE INDEX IF NOT EXISTS idx_questions_exam_id ON questions (exam_id);
-
--- Khi có exam.repository.js với query "lịch sử làm bài theo user/đề thi":
--- CREATE INDEX IF NOT EXISTS idx_exam_results_user_id ON exam_results (user_id);
--- CREATE INDEX IF NOT EXISTS idx_exam_results_exam_id ON exam_results (exam_id);
-
--- Khi có tính năng "danh sách đề thi theo chủ đề":
--- CREATE INDEX IF NOT EXISTS idx_exams_topic_id ON exams (topic_id);
-
--- Khi có tính năng "lọc flashcard theo chủ đề":
--- CREATE INDEX IF NOT EXISTS idx_flashcards_topic_id ON flashcards (topic_id);
-
--- Khi có tính năng "thống kê độ phổ biến của 1 từ vựng qua flashcards":
--- CREATE INDEX IF NOT EXISTS idx_flashcards_word_id ON flashcards (word_id);
-CREATE INDEX IF NOT EXISTS uq_flashcards_user_topic ON flashcards (user_id, topic_id);
-
--- Khi có tính năng "tìm role nào sở hữu quyền X":
--- CREATE INDEX IF NOT EXISTS idx_role_permissions_permission_id ON role_permissions (permission_id);
+-- Liên kết exam_results với đúng phiên đã sinh ra nó, phục vụ /exams/history xem lại chi tiết
+ALTER TABLE exam_results ADD COLUMN IF NOT EXISTS session_id INTEGER REFERENCES exam_sessions(id) ON DELETE SET NULL;

@@ -19,6 +19,7 @@ class TopicRepository {
   }
 
   // Bốc ngẫu nhiên 1 chủ đề mà user ĐANG CÓ ít nhất 1 thẻ chưa MASTERED
+  //idx uq_flashcards_user_topic
   async findRandomTopicInProgress(userId) {
     const sql = `
       SELECT t.id, t.title

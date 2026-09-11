@@ -1,11 +1,8 @@
 const db = require("../config/db");
 
 class StreakRepository {
-  /**
-   * Ghi nhận 1 hoạt động vào ngày localDateStr (tính sẵn theo timezone_offset của client).
-   * ON CONFLICT DO NOTHING vì 1 ngày chỉ cần đúng 1 bản ghi (đã hoàn thành hay chưa là nhị phân,
-   * làm nhiều task trong cùng 1 ngày không cần lưu thêm dòng nào nữa).
-   */
+  
+  //idx uq_user_activity
   async recordActivity(userId, localDateStr, timezoneOffset) {
     const sql = `
       INSERT INTO streak_logs (user_id, activity_date, timezone_offset)
@@ -21,9 +18,8 @@ class StreakRepository {
     return rows.length > 0;
   }
 
-  /**
-   * Lấy toàn bộ ngày đã học của user, mới nhất -> cũ nhất, dạng chuỗi 'YYYY-MM-DD'.
-   */
+  //Lấy toàn bộ ngày đã học của user, mới nhất -> cũ nhất, dạng chuỗi 'YYYY-MM-DD'.
+  //idx uq_user_activity
   async findActivityDates(userId) {
     const sql = `
       SELECT TO_CHAR(activity_date, 'YYYY-MM-DD') AS date_str

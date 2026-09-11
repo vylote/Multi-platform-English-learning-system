@@ -7,8 +7,7 @@ class FlashcardRepository {
     return db.pool.connect();
   }
 
-  // Chèn hàng loạt thẻ mới cho bộ "Học hôm nay". DO NOTHING nếu đã tồn tại
-  // -> không reset tiến độ LEARNING/MASTERED cũ về NEW nếu user vô tình được bốc trùng từ đã học.
+  //TODO: idx uq_user_word
   async bulkInsertNew(userId, topicId, wordItems, client = db) {
     for (const w of wordItems) {
       await client.query(
@@ -34,6 +33,7 @@ class FlashcardRepository {
   }
 
   // Toàn bộ thẻ chưa MASTERED của user, giới hạn trong 1 topic cụ thể
+  //idx uq_flashcards_user_topic
   async findByUserAndTopic(userId, topicId) {
     const sql = `
     SELECT f.id, f.user_id, f.word_id, f.topic_id, f.status, f.last_reviewed, f.created_at,

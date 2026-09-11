@@ -1,4 +1,5 @@
 const ApiResponse = require("../common/api-response");
+const { ErrorCode } = require("../common/error-code");
 const roleRepository = require("../repositories/role.repository");
 
 class RoleController {
@@ -6,9 +7,9 @@ class RoleController {
     try {
       const roles = await roleRepository.findAll();
 
-      return res.status(200).json(
+      return res.status(ErrorCode.SUCCESS.statusCode).json(
         ApiResponse.builder()
-          .code("1000")
+          .code(ErrorCode.SUCCESS.code)
           .message("Lấy danh sách vai trò thành công")
           .result(roles)
           .build(),
