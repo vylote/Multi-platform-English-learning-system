@@ -2,6 +2,7 @@ const db = require("../config/db");
 const Word = require("../models/word.model");
 
 class WordRepository {
+  //TODO: idx word_lower (LOWER(word)): có sẵn mục lục lower -> quét BTree với BinarySearch
   async searchByFullText(originalQuery) {
     const trimmed = originalQuery.trim();
 
@@ -15,7 +16,7 @@ class WordRepository {
     return rows.map((row) => new Word({ ...row, isExternal: false }));
   }
 
-  //TODO: client: cho phép tái sử dụng transaction đang mở từ FlashcardRepository, mặc định mở pool connection riêng
+  //TODO: vẫn dùng idx word_lower: ON CONFLICT yêu cầu chỉ đích danh constrant/idx -> vì có Btree nên rất nhanh
   async upsert(wordData, client = db) {
     const sql = `
       INSERT INTO words (word, pronunciation, part_of_speech, meaning_vi)
@@ -47,6 +48,18 @@ class WordRepository {
     LIMIT $3;
   `;
     const { rows } = await db.query(sql, [topicId, userId, limit]);
+    return rows.map((row) => new Word({ ...row, isExternal: false }));
+  }
+
+  async findRandomByTopic(topicId, limit) {
+    const sql = `
+    SELECT id, word, pronunciation, part_of_speech, meaning_vi
+    FROM words
+    WHERE topic_id = $1
+    ORDER BY RANDOM()
+    LIMIT $2;
+  `;
+    const { rows } = await db.query(sql, [topicId, limit]);
     return rows.map((row) => new Word({ ...row, isExternal: false }));
   }
 }

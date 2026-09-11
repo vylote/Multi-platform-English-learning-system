@@ -31,6 +31,42 @@ class StreakController {
     }
   }
 
+  // hàm test record theo ngày
+  async testRecord(req, res, next) {
+    try {
+      const userId = req.user.id;
+      const timezoneOffset = parseInt(req.body?.timezone_offset, 10);
+      const daysAgo = parseInt(req.body?.daysAgo, 10);
+
+      if (Number.isNaN(timezoneOffset)) {
+        throw new AppException(
+          ErrorCode.INVALID_DATA,
+          "Thiếu hoặc sai định dạng timezone_offset (đơn vị: phút)",
+        );
+      }
+
+      if (Number.isNaN(daysAgo)) {
+        throw new AppException(
+          ErrorCode.INVALID_DATA,
+          "Thiếu hoặc sai định dạng daysAgo",
+        );
+      }
+
+      const status = await streakService.testRecordActivity(userId, timezoneOffset, daysAgo);
+      return res
+        .status(ErrorCode.SUCCESS.statusCode)
+        .json(
+          ApiResponse.builder()
+            .code(ErrorCode.SUCCESS.code)
+            .message("Ghi nhận hoạt động thành công")
+            .result(status.toJSON())
+            .build(),
+        );
+    } catch (error) {
+      next(error);
+    }
+  }
+
   async status(req, res, next) {
     try {
       const userId = req.user.id;
