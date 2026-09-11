@@ -5,7 +5,7 @@ import HomePage from "../pages/HomePage";
 import LoginPage from "../pages/LoginPage";
 import RegisterPage from "../pages/RegisterPage";
 import MainPage from "../pages/MainPage"; // Trang chính sau khi đăng nhập (có Sidebar)
-import PracticeHubPage from "../components/PracticeHubPage";
+import PracticeHubPage from "../pages/PracticeHubPage";
 import ProfilePage from "../pages/ProfilePage";
 
 export const AppRoutes = () => {

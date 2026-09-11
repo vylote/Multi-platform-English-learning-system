@@ -20,7 +20,6 @@ function App() {
         dispatch(loginSuccess({ user: res.data.result }));
       } catch (error) {
         console.log("Lỗi đăng nhập/session timeout: ", error)
-        // 401 = chưa đăng nhập / session hết hạn -> coi như logout, không cần báo lỗi
         dispatch(logout());
       } finally {
         setLoading(false);

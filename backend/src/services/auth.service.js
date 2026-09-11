@@ -1,6 +1,7 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const ms = require("ms");
+const crypto = require("crypto");
 const userRepository = require("../repositories/user.repository");
 const roleRepository = require("../repositories/role.repository");
 const redisClient = require("../config/redis");
@@ -8,7 +9,7 @@ const { ErrorCode } = require("../common/error-code");
 const AppException = require("../exceptions/app.exception");
 
 const DEFAULT_ROLE_CODE = "STUDENT";
-const SESSION_KEY_PREFIX = "session:"; // session:{userId} -> access token hiện hành
+const SESSION_KEY_PREFIX = "session:";
 
 class AuthService {
   async registerUser({ username, email, password }) {
@@ -66,10 +67,13 @@ class AuthService {
       );
     }
 
+    const sessionId = crypto.randomUUID(); 
+
     const payload = {
       id: user.id,
       username: user.username,
       role: user.role,
+      sid: sessionId,
     };
 
     const expiresIn = process.env.JWT_ACCESS_EXPIRES_IN;
@@ -81,7 +85,7 @@ class AuthService {
 
     // Lưu session vào Redis với TTL trùng thời hạn JWT
     // -> cho phép server chủ động thu hồi (logout) mà không cần chờ JWT tự hết hạn
-    await redisClient.set(`${SESSION_KEY_PREFIX}${user.id}`, accessToken, {
+    await redisClient.set(`${SESSION_KEY_PREFIX}${user.id}:${sessionId}`, accessToken, {
       EX: expirySeconds,
     });
 
@@ -92,8 +96,15 @@ class AuthService {
     };
   }
 
-  async logoutUser(userId) {
-    await redisClient.del(`${SESSION_KEY_PREFIX}${userId}`);
+  async logoutUser(userId, sessionId) {
+    await redisClient.del(`${SESSION_KEY_PREFIX}${userId}:${sessionId}`);
+  }
+
+  async logoutAllSessions(userId) {
+    const keys = await redisClient.keys(`${SESSION_KEY_PREFIX}${userId}:*`);
+    if (keys.length > 0) {
+      await redisClient.del(keys);
+    }
   }
 
   async getUserProfile(userId) {

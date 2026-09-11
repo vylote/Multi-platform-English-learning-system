@@ -3,7 +3,7 @@ import toast from "react-hot-toast";
 
 import api from "../api/api";
 import { logout } from "../store/slice/authSlice";
-import MainLayout from "../components/MainLayout";
+import MainLayout from "../layouts/MainLayout";
 
 export default function ProfilePage() {
   const dispatch = useDispatch();
