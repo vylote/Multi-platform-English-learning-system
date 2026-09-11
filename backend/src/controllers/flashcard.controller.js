@@ -93,6 +93,24 @@ class FlashcardController {
       next(error);
     }
   }
+
+  async getPracticeSet(req, res, next) {
+    try {
+      const userId = req.user.id;
+      const { topicId } = req.params;
+
+      const items = await flashcardService.getPracticeSet(userId, topicId);
+      return res.status(ErrorCode.SUCCESS.statusCode).json(
+        ApiResponse.builder()
+          .code(ErrorCode.SUCCESS.code)
+          .message("Lấy bộ từ luyện tập thành công")
+          .result(items.map((f) => f.toJSON()))
+          .build(),
+      );
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 module.exports = new FlashcardController();

@@ -69,6 +69,18 @@ class FlashcardService {
     return flashcardRepository.findByUserAndTopic(userId, topic.id);
   }
 
+  async getPracticeSet(userId, topicId) {
+    const topic = await topicRepository.findById(topicId);
+    if (!topic) {
+      throw new AppException(
+        ErrorCode.RESOURCE_NOT_FOUND,
+        "Không tìm thấy chủ đề này",
+      );
+    }
+
+    return this._buildDailySetForTopic(userId, topic);
+  }
+
   async updateStatus(userId, flashcardId, newStatus) {
     if (!VALID_STATUSES.includes(newStatus)) {
       throw new AppException(
@@ -103,8 +115,8 @@ class FlashcardService {
 
   async checkDailyCompletion(userId, timezoneOffsetMinutes) {
     const masteredCount = await flashcardRepository.countTodayMastered(
-      userId, 
-      timezoneOffsetMinutes
+      userId,
+      timezoneOffsetMinutes,
     );
     return masteredCount >= DAILY_TARGET;
   }

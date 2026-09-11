@@ -1,6 +1,18 @@
 const db = require("../config/db");
 
 class TopicRepository {
+  async findAll() {
+    const sql = `SELECT id, title, description FROM topics ORDER BY title ASC;`;
+    const { rows } = await db.query(sql);
+    return rows;
+  }
+
+  async findById(topicId) {
+    const sql = `SELECT id, title, description FROM topics WHERE id = $1;`;
+    const { rows } = await db.query(sql, [topicId]);
+    return rows[0] || null;
+  }
+
   async existsAny() {
     const { rows } = await db.query(`SELECT 1 FROM topics LIMIT 1;`);
     return rows.length > 0;

@@ -4,7 +4,10 @@ import { setStreak, fetchStreakWeek } from "../store/slice/streakSlice";
 import { getBackendTimezoneOffset } from "../utils/timezone";
 import api from "../api/api";
 
-export default function DailyFlashcardReview() {
+export default function DailyFlashcardReview({
+  endpoint = "/flashcards/daily",
+  onBack,
+}) {
   const [cards, setCards] = useState(null);
   const [loadError, setLoadError] = useState("");
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -18,20 +21,20 @@ export default function DailyFlashcardReview() {
     const controller = new AbortController();
 
     api
-      .get("/flashcards/daily", { signal: controller.signal })
+      .get(endpoint, { signal: controller.signal })
       .then((response) => {
         setCards(response.data?.result || []);
       })
       .catch((error) => {
         if (error.code === "ERR_CANCELED") return;
         setLoadError(
-          error.response?.data?.message || "Không thể tải bộ ôn tập hôm nay.",
+          error.response?.data?.message || "Không thể tải bộ ôn tập.",
         );
         setCards([]);
       });
 
     return () => controller.abort();
-  }, []);
+  }, [endpoint]);
 
   const currentCard = cards && cards[currentIndex];
   const isSessionDone = cards !== null && currentIndex >= cards.length;
@@ -82,6 +85,17 @@ export default function DailyFlashcardReview() {
     );
   }
 
+  {
+    onBack && (
+      <button
+        onClick={onBack}
+        className="mb-4 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200
+               flex items-center gap-1 mx-auto"
+      >
+        ← Chọn chủ đề khác
+      </button>
+    );
+  }
   if (cards.length === 0) {
     return (
       <div className="w-full max-w-[560px] mx-auto text-center py-16">
@@ -95,6 +109,17 @@ export default function DailyFlashcardReview() {
     );
   }
 
+  {
+    onBack && (
+      <button
+        onClick={onBack}
+        className="mb-4 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200
+               flex items-center gap-1 mx-auto"
+      >
+        ← Chọn chủ đề khác
+      </button>
+    );
+  }
   if (isSessionDone) {
     return (
       <div className="w-full max-w-[560px] mx-auto text-center py-16">
@@ -115,7 +140,15 @@ export default function DailyFlashcardReview() {
 
   return (
     <div className="w-full max-w-[560px] mx-auto">
-      {/* Thanh tiến độ */}
+      {onBack && (
+        <button
+          onClick={onBack}
+          className="mb-4 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200
+               flex items-center gap-1 mx-auto"
+        >
+          ← Chọn chủ đề khác
+        </button>
+      )}
       <div className="mb-6">
         <div className="flex justify-between items-center mb-2 text-sm">
           <span className="text-gray-500 dark:text-gray-400 font-medium">

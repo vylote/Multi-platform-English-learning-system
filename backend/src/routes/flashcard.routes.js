@@ -10,4 +10,6 @@ router.get('/daily', verifyToken, flashcardController.getDaily);
 router.put('/:id', verifyToken, flashcardController.updateFlashcard);
 router.delete('/:id', verifyToken, flashcardController.deleteFlashcard);
 
+router.get('/practice/:topicId', verifyToken, flashcardController.getPracticeSet);
+
 module.exports = router;

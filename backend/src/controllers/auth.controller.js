@@ -103,7 +103,7 @@ class AuthController {
 
   async logout(req, res, next) {
     try {
-      await authService.logoutUser(req.user.id);
+      await authService.logoutUser(req.user.id, req.user.sid);
       res.clearCookie(COOKIE_NAME);
 
       return res

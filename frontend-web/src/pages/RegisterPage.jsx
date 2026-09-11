@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 
-import AuthLayout from "../components/AuthLayout";
+import AuthLayout from "../layouts/AuthLayout";
 import SocialButtons from "../components/SocialButtons";
 import PolicyFooter from "../components/PolicyFooter";
 import api from "../api/api";

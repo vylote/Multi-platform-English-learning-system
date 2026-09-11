@@ -8,6 +8,7 @@ const roleRoutes = require('./routes/role.routes');
 const wordRoutes = require('./routes/word.routes')
 const flashcardRoutes = require('./routes/flashcard.routes')
 const streakRoutes = require('./routes/streak.routes')
+const topicRoutes = require('./routes/topic.routes')
 
 const { noResourceFoundHandler, globalExceptionHandler } = require('./middlewares/error.middleware');
 
@@ -34,6 +35,7 @@ app.use("/api/v1/roles", roleRoutes);
 app.use('/api/v1/words', wordRoutes);    
 app.use('/api/v1/flashcards', flashcardRoutes); 
 app.use('/api/v1/streaks', streakRoutes);
+app.use('/api/v1/topics', topicRoutes);
 
 app.use(noResourceFoundHandler);
 app.use(globalExceptionHandler);

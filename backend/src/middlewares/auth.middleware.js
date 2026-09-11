@@ -22,13 +22,16 @@ module.exports = async (req, res, next) => {
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    // Đối chiếu với Redis: nếu session đã bị xoá (logout/thu hồi thủ công)
-    // hoặc đã hết TTL (đồng bộ với thời hạn JWT) -> coi như hết hạn
-    const storedToken = await redisClient.get(
-      `${SESSION_KEY_PREFIX}${decoded.id}`,
-    );
+    if (!decoded.sid) {
+      // Token cũ (được tạo trước khi có sessionId) -> không hợp lệ với thiết kế mới, bắt đăng nhập lại
+      return next(new AppException(ErrorCode.UNAUTHENTICATED, "Phiên đăng nhập không hợp lệ. Vui lòng đăng nhập lại."));
+    }
+
+    // Kiểm tra ĐÚNG phiên này (userId + sessionId), không còn ảnh hưởng bởi các phiên khác
+    const storedToken = await redisClient.get(`${SESSION_KEY_PREFIX}${decoded.id}:${decoded.sid}`);
 
     if (!storedToken || storedToken !== token) {
+      console.log("token from cookies", token)
       return next(
         new AppException(
           ErrorCode.UNAUTHENTICATED,

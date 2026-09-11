@@ -1,5 +1,5 @@
 import { useSelector } from "react-redux";
-import MainLayout from "../components/MainLayout";
+import MainLayout from "../layouts/MainLayout";
 import QuickWordSearch from "../components/QuickWordSearch";
 
 export default function MainPage() {
