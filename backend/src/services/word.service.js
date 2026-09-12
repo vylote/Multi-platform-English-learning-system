@@ -14,12 +14,13 @@ const MAX_QUERY_WORDS = 4;
 const MAX_QUERY_LENGTH = 50;
 
 const CACHE_KEY_PREFIX = "word_search:";
-const CACHE_TTL_SECONDS = 3600; 
+const CACHE_TTL_SECONDS = 3600;
 
 class WordService {
   async fetchFromMerriamWebster(word, dictType) {
     const isCollegiate = dictType === "collegiate";
     const apiKey = isCollegiate ? MW_COLLEGIATE_KEY : MW_LEARNERS_KEY;
+
     if (!apiKey) {
       console.error(`Thiếu API key Merriam-Webster (${dictType})`);
       return null;
@@ -40,7 +41,10 @@ class WordService {
       clearTimeout(timeoutId);
 
       if (!response.ok) {
-        console.error(`Merriam-Webster (${dictType}) HTTP lỗi:`, response.status);
+        console.error(
+          `Merriam-Webster (${dictType}) HTTP lỗi:`,
+          response.status,
+        );
         return null;
       }
 
@@ -77,7 +81,10 @@ class WordService {
     } catch (error) {
       clearTimeout(timeoutId);
       if (error.name === "AbortError") {
-        console.error(`Merriam-Webster (${dictType}) timeout sau ${MW_TIMEOUT_MS}ms:`, word);
+        console.error(
+          `Merriam-Webster (${dictType}) timeout sau ${MW_TIMEOUT_MS}ms:`,
+          word,
+        );
       } else {
         console.error(`Lỗi gọi Merriam-Webster (${dictType}):`, error.message);
       }
@@ -117,7 +124,9 @@ class WordService {
     if (!mwResult) return null;
 
     // Dịch nghĩa tiếng Việt ngắn gọn cho TỪ, không dịch định nghĩa tiếng Anh của MW
-    const definitionVi = await translationService.translateWordConcise(mwResult.headword);
+    const definitionVi = await translationService.translateWordConcise(
+      mwResult.headword,
+    );
     if (!definitionVi) return null;
 
     return new Word({
@@ -159,7 +168,10 @@ class WordService {
     } catch (error) {
       // Redis lỗi (mất kết nối, timeout...) không được làm fail cả request tra từ
       // -> chỉ log lại, coi như cache miss, để luồng tiếp tục tra DB/API ngoài bình thường
-      console.error("Lỗi đọc Redis cache (bỏ qua, tra trực tiếp):", error.message);
+      console.error(
+        "Lỗi đọc Redis cache (bỏ qua, tra trực tiếp):",
+        error.message,
+      );
       return null;
     }
   }

@@ -15,6 +15,11 @@ const ErrorCode = Object.freeze({
     message: "Thành công",
     statusCode: HttpStatus.OK,
   },
+  CREATED: {
+    code: 1000, // giữ chung code nghiệp vụ "1000" (thành công) - chỉ khác statusCode HTTP
+    message: "Tạo mới thành công",
+    statusCode: HttpStatus.CREATED,
+  },
   // Hệ thống & Không xác định
   UNCATEGORIZED_EXCEPTION: {
     code: 9999,
@@ -70,6 +75,16 @@ const ErrorCode = Object.freeze({
   EXAM_EXPIRED: {
     code: 2003,
     message: "Thời gian làm bài thi đã hết",
+    statusCode: HttpStatus.BAD_REQUEST,
+  },
+  EXAM_ALREADY_IN_PROGRESS: {
+    code: 2005,
+    message: "Bạn đang có một phiên làm bài thi này chưa hoàn thành",
+    statusCode: HttpStatus.CONFLICT,
+  },
+  EXAM_SESSION_INVALID: {
+    code: 2006,
+    message: "Phiên làm bài không hợp lệ hoặc đã kết thúc",
     statusCode: HttpStatus.BAD_REQUEST,
   },
   TOPIC_NOT_FOUND: {

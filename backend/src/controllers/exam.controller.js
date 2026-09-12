@@ -4,30 +4,44 @@ const { ErrorCode } = require("../common/error-code");
 const AppException = require("../exceptions/app.exception");
 
 class ExamController {
-  // GET /api/v1/exams?topic_id=X
   async getExams(req, res, next) {
     try {
-      const { topic_id } = req.query;
-      if (!topic_id) {
+      const { topic_id, duration, page, pageSize } = req.query;
+
+      const parsedPage = parseInt(page, 10) || 1;
+      const parsedPageSize = parseInt(pageSize, 10) || 10;
+
+      if (parsedPage < 1) {
+        throw new AppException(ErrorCode.INVALID_DATA, "page phải >= 1");
+      }
+      if (parsedPageSize < 1 || parsedPageSize > 100) {
         throw new AppException(
           ErrorCode.INVALID_DATA,
-          "Yêu cầu cung cấp topic_id",
+          "pageSize phải trong khoảng 1-100",
         );
       }
-      const exams = await examService.getExamsByTopic(topic_id);
-      return res.status(ErrorCode.SUCCESS.statusCode).json(
-        ApiResponse.builder()
-          .code(ErrorCode.SUCCESS.code)
-          .message("Lấy danh sách đề thi thành công")
-          .result(exams.map((e) => e.toJSON()))
-          .build(),
-      );
+
+      const result = await examService.searchExams({
+        topicId: topic_id ? parseInt(topic_id, 10) : null,
+        duration: duration ? parseInt(duration, 10) : null,
+        page: parsedPage,
+        pageSize: parsedPageSize,
+      });
+
+      return res
+        .status(ErrorCode.SUCCESS.statusCode)
+        .json(
+          ApiResponse.builder()
+            .code(ErrorCode.SUCCESS.code)
+            .message("Lấy danh sách đề thi thành công")
+            .result(result.toJSON())
+            .build(),
+        );
     } catch (error) {
       next(error);
     }
   }
 
-  // GET /api/v1/exams/history
   async getHistory(req, res, next) {
     try {
       const userId = req.user.id;
@@ -46,14 +60,13 @@ class ExamController {
     }
   }
 
-  // POST /api/v1/exams/:id/start
   async start(req, res, next) {
     try {
       const userId = req.user.id;
       const { id } = req.params;
       const data = await examService.startExam(userId, id);
       return res
-        .status(201)
+        .status(ErrorCode.CREATED.statusCode)
         .json(
           ApiResponse.builder()
             .code(ErrorCode.SUCCESS.code)
@@ -66,7 +79,6 @@ class ExamController {
     }
   }
 
-  // POST /api/v1/exams/:id/submit
   async submit(req, res, next) {
     try {
       const userId = req.user.id;
@@ -84,13 +96,14 @@ class ExamController {
         ? timezone_offset
         : parseInt(timezone_offset, 10);
 
-      const result = await examService.submitExam(
+      const result = await examService.submitExam({
         userId,
-        id,
-        session_id,
+        examId: id,
+        sessionId: session_id,
         answers,
         timezoneOffsetMinutes,
-      );
+      });
+
       return res
         .status(ErrorCode.SUCCESS.statusCode)
         .json(
@@ -100,6 +113,36 @@ class ExamController {
             .result(result.toJSON())
             .build(),
         );
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async cancel(req, res, next) {
+    try {
+      const userId = req.user.id;
+      const { id } = req.params;
+      const { session_id } = req.body || {};
+
+      if (!session_id) {
+        throw new AppException(
+          ErrorCode.INVALID_DATA,
+          "Yêu cầu cung cấp session_id",
+        );
+      }
+
+      const result = await examService.cancelExam(userId, id, session_id);
+      return res.status(ErrorCode.SUCCESS.statusCode).json(
+        ApiResponse.builder()
+          .code(ErrorCode.SUCCESS.code)
+          .message(
+            result.cancelled
+              ? "Đã hủy phiên làm bài"
+              : "Phiên làm bài không ở trạng thái đang làm dở",
+          )
+          .result(result)
+          .build(),
+      );
     } catch (error) {
       next(error);
     }

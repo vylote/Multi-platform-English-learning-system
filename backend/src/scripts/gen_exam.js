@@ -7,9 +7,9 @@
  *   3. Chỉnh 2 đường dẫn require() bên dưới cho khớp cấu trúc project của bạn.
  *
  * Cách dùng:
- *   node scripts/generate-exam-questions.js
- *   node scripts/generate-exam-questions.js --topics=1-36 --count=10 --duration=15
- *   node scripts/generate-exam-questions.js --topics=5 --force
+ *   node scripts/gen_exam.js
+ *   node scripts/gen_exam.js --topics=1-36 --count=10 --duration=15
+ *   node scripts/gen_exam.js --topics=5 --force
  *
  * Options:
  *   --topics   "1-36" (khoảng) hoặc "1,3,7" (danh sách). Mặc định: 1-36
@@ -19,7 +19,7 @@
  */
 
 require("dotenv").config();
-const db = require("../config/db"); // đặt script trong src/scripts/ -> ../config/db = src/config/db
+const db = require("../config/db");
 const topicRepository = require("../repositories/topic.repository");
 
 const GROQ_API_KEY = process.env.GROQ_API_KEY;

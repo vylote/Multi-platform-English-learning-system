@@ -3,12 +3,27 @@ const streakService = require("./streak.service");
 const { ExamReviewItem, ExamResultDetail } = require("../models/exam.model");
 const { ErrorCode } = require("../common/error-code");
 const AppException = require("../exceptions/app.exception");
+const PageResponse = require("../models/page-response.model");
 
-const NETWORK_BUFFER_SECONDS = 15; // Khoảng đệm bù độ trễ mạng khi nộp bài
+//TODO: Khoảng đệm bù độ trễ mạng khi nộp bài
+const NETWORK_BUFFER_SECONDS = 15;
 
 class ExamService {
-  async getExamsByTopic(topicId) {
-    return examRepository.findByTopic(topicId);
+  
+  async searchExams({ topicId, duration, page, pageSize }) {
+    const { exams, totalElements } = await examRepository.search({
+      topicId,
+      duration,
+      page,
+      pageSize,
+    });
+
+    return PageResponse.of({
+      currentPage: page,
+      pageSize,
+      totalElements,
+      data: exams.map((e) => e.toJSON()),
+    });
   }
 
   async getHistory(userId) {
@@ -19,6 +34,14 @@ class ExamService {
     const exam = await examRepository.findById(examId);
     if (!exam) {
       throw new AppException(ErrorCode.EXAM_NOT_FOUND);
+    }
+
+    const activeSession = await examRepository.findActiveSession(
+      userId,
+      examId,
+    );
+    if (activeSession) {
+      throw new AppException(ErrorCode.EXAM_ALREADY_IN_PROGRESS);
     }
 
     const session = await examRepository.createSession(userId, examId);
@@ -32,27 +55,45 @@ class ExamService {
     };
   }
 
-  /**
-   * @param answers [{ question_id, selected_option }]
-   */
-  async submitExam(userId, examId, sessionId, answers, timezoneOffsetMinutes) {
-    const exam = await examRepository.findById(examId);
-    if (!exam) {
-      throw new AppException(ErrorCode.EXAM_NOT_FOUND);
-    }
-
+  async cancelExam(userId, examId, sessionId) {
     const session = await examRepository.findSessionById(sessionId, userId);
     if (!session || session.exam_id !== Number(examId)) {
-      throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Không tìm thấy phiên làm bài hợp lệ");
+      throw new AppException(ErrorCode.EXAM_SESSION_INVALID);
     }
-    if (session.status === "SUBMITTED") {
-      throw new AppException(ErrorCode.INVALID_DATA, "Bài thi này đã được nộp trước đó");
+    if (session.status !== "IN_PROGRESS") {
+      // Đã SUBMITTED hoặc đã CANCELLED trước đó -> coi như thao tác thừa, không cần lỗi gắt
+      return { cancelled: false, status: session.status };
     }
 
-    // ANTI-CHEAT: tính time_spent dựa trên started_at LƯU Ở SERVER, không tin thời gian client gửi lên
+    const cancelled = await examRepository.cancelSession(sessionId, userId);
+    return { cancelled, status: "CANCELLED" };
+  }
+
+  async _validateAntiCheat(session, exam, examId) {
+    if (!session || session.exam_id !== Number(examId)) {
+      throw new AppException(
+        ErrorCode.RESOURCE_NOT_FOUND,
+        "Không tìm thấy phiên làm bài hợp lệ",
+      );
+    }
+    if (session.status === "SUBMITTED") {
+      throw new AppException(
+        ErrorCode.INVALID_DATA,
+        "Bài thi này đã được nộp trước đó",
+      );
+    }
+    if (session.status === "CANCELLED") {
+      throw new AppException(
+        ErrorCode.EXAM_SESSION_INVALID,
+        "Phiên làm bài này đã bị hủy",
+      );
+    }
+
     const now = new Date();
     const startedAt = new Date(session.started_at);
-    const timeSpentSeconds = Math.floor((now.getTime() - startedAt.getTime()) / 1000);
+    const timeSpentSeconds = Math.floor(
+      (now.getTime() - startedAt.getTime()) / 1000,
+    );
 
     const maxAllowedSeconds = exam.duration * 60 + NETWORK_BUFFER_SECONDS;
     if (timeSpentSeconds > maxAllowedSeconds) {
@@ -62,8 +103,13 @@ class ExamService {
       );
     }
 
-    const questionsWithAnswer = await examRepository.findQuestionsWithAnswer(examId);
-    const answerMap = new Map(answers.map((a) => [Number(a.question_id), a.selected_option]));
+    return timeSpentSeconds;
+  }
+
+  _gradeExam(questionsWithAnswer, answers) {
+    const answerMap = new Map(
+      answers.map((a) => [Number(a.question_id), a.selected_option]),
+    );
 
     let correctCount = 0;
     const review = questionsWithAnswer.map((q) => {
@@ -83,14 +129,55 @@ class ExamService {
     });
 
     const totalQuestions = questionsWithAnswer.length;
-    const score = totalQuestions > 0 ? Number(((correctCount / totalQuestions) * 10).toFixed(2)) : 0;
+    const score =
+      totalQuestions > 0
+        ? Number(((correctCount / totalQuestions) * 10).toFixed(2))
+        : 0;
+
+    return { correctCount, totalQuestions, score, review };
+  }
+
+  async _recordStreakSafely(userId, timezoneOffsetMinutes) {
+    if (!Number.isInteger(timezoneOffsetMinutes)) return;
+    try {
+      await streakService.recordActivity(userId, timezoneOffsetMinutes);
+    } catch (err) {
+      console.error("Lỗi ghi nhận streak sau khi nộp bài thi:", err);
+    }
+  }
+
+  /**
+   * @param {{ userId, examId, sessionId, answers, timezoneOffsetMinutes }} params
+   */
+  async submitExam(params) {
+    const { userId, examId, sessionId, answers, timezoneOffsetMinutes } =
+      params;
+
+    const exam = await examRepository.findById(examId);
+    if (!exam) {
+      throw new AppException(ErrorCode.EXAM_NOT_FOUND);
+    }
+
+    const session = await examRepository.findSessionById(sessionId, userId);
+    const timeSpentSeconds = await this._validateAntiCheat(
+      session,
+      exam,
+      examId,
+    );
+
+    const questionsWithAnswer =
+      await examRepository.findQuestionsWithAnswer(examId);
+    const { correctCount, totalQuestions, score, review } = this._gradeExam(
+      questionsWithAnswer,
+      answers,
+    );
 
     const client = await examRepository.getClient();
     try {
       await client.query("BEGIN");
 
       await examRepository.markSessionSubmitted(sessionId, client);
-      await examRepository.insertAnswers(sessionId, answers, client);
+      await examRepository.insertAnswers({ sessionId, answers }, client);
       await examRepository.insertResult(
         { userId, examId, sessionId, score, timeSpent: timeSpentSeconds },
         client,
@@ -104,14 +191,7 @@ class ExamService {
       client.release();
     }
 
-    // Ghi nhận streak SAU KHI commit thành công, không để lỗi streak làm hỏng kết quả bài thi
-    if (Number.isInteger(timezoneOffsetMinutes)) {
-      try {
-        await streakService.recordActivity(userId, timezoneOffsetMinutes);
-      } catch (err) {
-        console.error("Lỗi ghi nhận streak sau khi nộp bài thi:", err);
-      }
-    }
+    await this._recordStreakSafely(userId, timezoneOffsetMinutes);
 
     return new ExamResultDetail({
       score,

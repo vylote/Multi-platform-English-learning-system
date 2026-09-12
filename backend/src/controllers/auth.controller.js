@@ -2,7 +2,7 @@ const authService = require("../services/auth.service");
 const ApiResponse = require("../common/api-response");
 const { ErrorCode } = require("../common/error-code");
 
-const COOKIE_NAME = "access_token";
+const COOKIE_NAME = process.env.COOKIE_NAME;
 
 class AuthController {
   async register(req, res, next) {
@@ -27,10 +27,10 @@ class AuthController {
       });
 
       return res
-        .status(201)
+        .status(ErrorCode.SUCCESS.statusCode)
         .json(
           ApiResponse.builder()
-            .code("1000")
+            .code(ErrorCode.SUCCESS.code)
             .message("Đăng ký tài khoản học viên thành công!")
             .result(newUser)
             .build(),

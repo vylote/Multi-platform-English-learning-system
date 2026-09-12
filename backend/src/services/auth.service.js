@@ -9,7 +9,7 @@ const { ErrorCode } = require("../common/error-code");
 const AppException = require("../exceptions/app.exception");
 
 const DEFAULT_ROLE_CODE = "STUDENT";
-const SESSION_KEY_PREFIX = "session:";
+const SESSION_KEY_PREFIX = process.env.SESSION_KEY_PREFIX;
 
 class AuthService {
   async registerUser({ username, email, password }) {
