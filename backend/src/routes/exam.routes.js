@@ -9,4 +9,6 @@ router.get("/history", verifyToken, examController.getHistory);
 router.post("/:id/start", verifyToken, examController.start);
 router.post("/:id/submit", verifyToken, examController.submit);
 
+router.post("/:id/cancel", verifyToken, examController.cancel);
+
 module.exports = router;

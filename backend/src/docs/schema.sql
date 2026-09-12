@@ -152,3 +152,7 @@ CREATE INDEX IF NOT EXISTS idx_exam_answers_session_id ON exam_answers (session_
 
 -- Liên kết exam_results với đúng phiên đã sinh ra nó, phục vụ /exams/history xem lại chi tiết
 ALTER TABLE exam_results ADD COLUMN IF NOT EXISTS session_id INTEGER REFERENCES exam_sessions(id) ON DELETE SET NULL;
+
+ALTER TABLE exam_sessions DROP CONSTRAINT IF EXISTS exam_sessions_status_check;
+ALTER TABLE exam_sessions ADD CONSTRAINT exam_sessions_status_check
+  CHECK (status IN ('IN_PROGRESS', 'SUBMITTED', 'CANCELLED'));
