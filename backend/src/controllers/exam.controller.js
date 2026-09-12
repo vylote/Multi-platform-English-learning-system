@@ -46,9 +46,9 @@ class ExamController {
   async getDetailExam(req, res, next) {
     try {
       const { id } = req.params;
-  
+
       const data = await examService.getDetailExam(id);
-  
+
       return res
         .status(ErrorCode.SUCCESS.statusCode)
         .json(
@@ -57,8 +57,7 @@ class ExamController {
             .message("Lấy chi tiết đề thi thành công")
             .result(data.toJSON())
             .build(),
-        );  
-
+        );
     } catch (error) {
       next(error);
     }
@@ -86,7 +85,16 @@ class ExamController {
     try {
       const userId = req.user.id;
       const { id } = req.params;
-      const data = await examService.startExam(userId, id);
+      const page = parseInt(req.query.page, 10) || 1;
+      const pageSize = parseInt(req.query.pageSize, 10) || 10;
+
+      const data = await examService.startExam({
+        userId,
+        examId: id,
+        page,
+        pageSize,
+      });
+
       return res
         .status(ErrorCode.CREATED.statusCode)
         .json(
@@ -94,6 +102,42 @@ class ExamController {
             .code(ErrorCode.SUCCESS.code)
             .message("Bắt đầu bài thi thành công")
             .result(data)
+            .build(),
+        );
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async getQuestionsPage(req, res, next) {
+    try {
+      const userId = req.user.id;
+      const { id } = req.params;
+      const { session_id } = req.query;
+      const page = parseInt(req.query.page, 10) || 1;
+      const pageSize = parseInt(req.query.pageSize, 10) || 10;
+
+      if (!session_id) {
+        throw new AppException(
+          ErrorCode.INVALID_DATA,
+          "Yêu cầu cung cấp session_id",
+        );
+      }
+
+      const pageResult = await examService.getQuestionsPage({
+        userId,
+        examId: id,
+        sessionId: session_id,
+        page,
+        pageSize,
+      });
+      return res
+        .status(ErrorCode.SUCCESS.statusCode)
+        .json(
+          ApiResponse.builder()
+            .code(ErrorCode.SUCCESS.code)
+            .message("Lấy trang câu hỏi thành công")
+            .result(pageResult.toJSON())
             .build(),
         );
     } catch (error) {

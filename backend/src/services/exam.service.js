@@ -7,6 +7,7 @@ const PageResponse = require("../models/page-response.model");
 
 //TODO: Khoảng đệm bù độ trễ mạng khi nộp bài
 const NETWORK_BUFFER_SECONDS = 15;
+const DEFAULT_PAGE_SIZE = 10;
 
 class ExamService {
   async getDetailExam(id) {
@@ -19,7 +20,13 @@ class ExamService {
     return exam;
   }
 
-  async searchExams({ topicId, title, duration, page, pageSize }) {
+  async searchExams({
+    topicId,
+    title,
+    duration,
+    page,
+    pageSize = DEFAULT_PAGE_SIZE,
+  }) {
     const { exams, totalElements } = await examRepository.search({
       topicId,
       title,
@@ -40,7 +47,12 @@ class ExamService {
     return examRepository.findHistoryByUser(userId);
   }
 
-  async startExam(userId, examId) {
+  /**
+   * @param {{ userId, examId, page, pageSize }} params
+   */
+  async startExam(params) {
+    const { userId, examId, page, pageSize = DEFAULT_PAGE_SIZE } = params;
+
     const exam = await examRepository.findById(examId);
     if (!exam) {
       throw new AppException(ErrorCode.EXAM_NOT_FOUND);
@@ -50,19 +62,60 @@ class ExamService {
       userId,
       examId,
     );
-    if (activeSession) {
-      throw new AppException(ErrorCode.EXAM_ALREADY_IN_PROGRESS);
-    }
+    const session =
+      activeSession || (await examRepository.createSession(userId, examId));
 
-    const session = await examRepository.createSession(userId, examId);
-    const questions = await examRepository.findQuestionsSafe(examId);
+    const [questions, totalElements] = await Promise.all([
+      examRepository.findQuestionsSafePage(examId, page, pageSize),
+      examRepository.countQuestions(examId),
+    ]);
 
     return {
       session_id: session.id,
       started_at: session.started_at,
       duration: exam.duration,
-      questions: questions.map((q) => q.toJSON()),
+      questions: PageResponse.of({
+        currentPage: page,
+        pageSize,
+        totalElements,
+        data: questions.map((q) => q.toJSON()),
+      }).toJSON(),
     };
+  }
+
+  //TODO: lấy trang câu tiếp theo trong 1 session
+  async getQuestionsPage({
+    userId,
+    examId,
+    sessionId,
+    page,
+    pageSize = DEFAULT_PAGE_SIZE,
+  }) {
+    const session = await examRepository.findSessionById(sessionId, userId);
+    if (!session || session.exam_id !== Number(examId)) {
+      throw new AppException(
+        ErrorCode.RESOURCE_NOT_FOUND,
+        "Không tìm thấy phiên làm bài hợp lệ",
+      );
+    }
+    if (session.status !== "IN_PROGRESS") {
+      throw new AppException(
+        ErrorCode.EXAM_SESSION_INVALID,
+        "Phiên làm bài này không còn hoạt động",
+      );
+    }
+
+    const [questions, totalElements] = await Promise.all([
+      examRepository.findQuestionsSafePage(examId, page, pageSize),
+      examRepository.countQuestions(examId),
+    ]);
+
+    return PageResponse.of({
+      currentPage: page,
+      pageSize,
+      totalElements,
+      data: questions.map((q) => q.toJSON()),
+    });
   }
 
   async cancelExam(userId, examId, sessionId) {

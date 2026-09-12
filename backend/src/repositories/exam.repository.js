@@ -65,15 +65,23 @@ class ExamRepository {
     return rows[0] ? new Exam(rows[0]) : null;
   }
 
-  // Câu hỏi để LÀM BÀI - không lấy correct_option
-  async findQuestionsSafe(examId) {
-    const sql = `
-      SELECT id, question_text, option_a, option_b, option_c, option_d
-      FROM questions
-      WHERE exam_id = $1
-      ORDER BY id ASC;
-    `;
+  async countQuestions(examId) {
+    const sql = `SELECT COUNT(*) AS total FROM questions WHERE exam_id = $1;`;
     const { rows } = await db.query(sql, [examId]);
+    return Number(rows[0].total);
+  }
+
+  // Câu hỏi để LÀM BÀI theo trang - không lấy correct_option
+  async findQuestionsSafePage(examId, page, pageSize) {
+    const offset = (page - 1) * pageSize;
+    const sql = `
+    SELECT id, question_text, option_a, option_b, option_c, option_d
+    FROM questions
+    WHERE exam_id = $1
+    ORDER BY id ASC
+    LIMIT $2 OFFSET $3;
+  `;
+    const { rows } = await db.query(sql, [examId, pageSize, offset]);
     return rows.map((row) => new ExamQuestionSafe(row));
   }
 
