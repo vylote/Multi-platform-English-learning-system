@@ -4,6 +4,9 @@ const examController = require("../controllers/exam.controller");
 const verifyToken = require("../middlewares/auth.middleware");
 
 router.get("/", verifyToken, examController.getExams);
+
+router.get("/:id", verifyToken, examController.getDetailExam);
+
 router.get("/history", verifyToken, examController.getHistory);
 
 router.post("/:id/start", verifyToken, examController.start);

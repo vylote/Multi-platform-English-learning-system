@@ -6,7 +6,7 @@ const AppException = require("../exceptions/app.exception");
 class ExamController {
   async getExams(req, res, next) {
     try {
-      const { topic_id, duration, page, pageSize } = req.query;
+      const { topic_id, title, duration, page, pageSize } = req.query;
 
       const parsedPage = parseInt(page, 10) || 1;
       const parsedPageSize = parseInt(pageSize, 10) || 10;
@@ -23,6 +23,7 @@ class ExamController {
 
       const result = await examService.searchExams({
         topicId: topic_id ? parseInt(topic_id, 10) : null,
+        title: title,
         duration: duration ? parseInt(duration, 10) : null,
         page: parsedPage,
         pageSize: parsedPageSize,
@@ -37,6 +38,27 @@ class ExamController {
             .result(result.toJSON())
             .build(),
         );
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async getDetailExam(req, res, next) {
+    try {
+      const { id } = req.params;
+  
+      const data = await examService.getDetailExam(id);
+  
+      return res
+        .status(ErrorCode.SUCCESS.statusCode)
+        .json(
+          ApiResponse.builder()
+            .code(ErrorCode.SUCCESS.code)
+            .message("Lấy chi tiết đề thi thành công")
+            .result(data.toJSON())
+            .build(),
+        );  
+
     } catch (error) {
       next(error);
     }
