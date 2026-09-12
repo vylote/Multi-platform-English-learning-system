@@ -2,7 +2,7 @@ const db = require("../config/db");
 const { Exam, ExamQuestionSafe } = require("../models/exam.model");
 
 class ExamRepository {
-  async search({ topicId, duration, page, pageSize }) {
+  async search({ topicId, title, duration, page, pageSize }) {
     const conditions = [];
     const params = [];
     let paramIndex = 1;
@@ -10,6 +10,10 @@ class ExamRepository {
     if (topicId) {
       conditions.push(`e.topic_id = $${paramIndex++}`);
       params.push(topicId);
+    }
+    if (title) {
+      conditions.push(`e.title ILIKE $${paramIndex++}`);
+      params.push(`%${title}%`);
     }
     if (duration) {
       conditions.push(`e.duration = $${paramIndex++}`);
@@ -50,9 +54,15 @@ class ExamRepository {
   }
 
   async findById(examId) {
-    const sql = `SELECT id, topic_id, title, duration FROM exams WHERE id = $1;`;
+    const sql = `
+    SELECT e.id, e.topic_id, e.title, e.duration, COUNT(q.id) AS question_count
+    FROM exams e
+    LEFT JOIN questions q ON q.exam_id = e.id
+    WHERE e.id = $1
+    GROUP BY e.id;
+  `;
     const { rows } = await db.query(sql, [examId]);
-    return rows[0] || null;
+    return rows[0] ? new Exam(rows[0]) : null;
   }
 
   // Câu hỏi để LÀM BÀI - không lấy correct_option

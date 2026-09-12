@@ -4,9 +4,13 @@ import { useSelector } from "react-redux";
 import HomePage from "../pages/HomePage";
 import LoginPage from "../pages/LoginPage";
 import RegisterPage from "../pages/RegisterPage";
-import MainPage from "../pages/MainPage"; // Trang chính sau khi đăng nhập (có Sidebar)
 import PracticeHubPage from "../pages/PracticeHubPage";
 import ProfilePage from "../pages/ProfilePage";
+import ExamTopicsPage from "../pages/ExamTopicsPage";
+import ExamDetailPage from "../pages/ExamDetailPage";
+import ExamTakingPage from "../pages/ExamTakingPage";
+import DictionaryPage from "../pages/DictionaryPage";
+import ExamListPage from "../pages/ExamListPage";
 
 export const AppRoutes = () => {
   const { user } = useSelector((state) => state.auth);
@@ -28,10 +32,22 @@ export const AppRoutes = () => {
         element={!user ? <RegisterPage /> : <Navigate to="/learn" />}
       />
 
-      {/* Trang chính chứa MainLayout (Sidebar): Bắt buộc phải có user */}
       <Route
         path="/learn"
-        element={user ? <MainPage /> : <Navigate to="/login" />}
+        element={user ? <ExamTopicsPage /> : <Navigate to="/login" />}
+      />
+      <Route path="/learn/topics/:topicId" element={user ? <ExamListPage /> : <Navigate to="/login" />} />
+      <Route
+        path="/learn/exams/:id"
+        element={user ? <ExamDetailPage /> : <Navigate to="/login" />}
+      />
+      <Route
+        path="/learn/exams/:id/take"
+        element={user ? <ExamTakingPage /> : <Navigate to="/login" />}
+      />
+      <Route
+        path="/dictionary"
+        element={user ? <DictionaryPage /> : <Navigate to="/login" />}
       />
 
       <Route

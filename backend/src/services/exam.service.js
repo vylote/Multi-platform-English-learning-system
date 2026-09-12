@@ -9,10 +9,20 @@ const PageResponse = require("../models/page-response.model");
 const NETWORK_BUFFER_SECONDS = 15;
 
 class ExamService {
-  
-  async searchExams({ topicId, duration, page, pageSize }) {
+  async getDetailExam(id) {
+    const exam = await examRepository.findById(id);
+
+    if (!exam) {
+      throw new AppException(ErrorCode.EXAM_NOT_FOUND);
+    }
+
+    return exam;
+  }
+
+  async searchExams({ topicId, title, duration, page, pageSize }) {
     const { exams, totalElements } = await examRepository.search({
       topicId,
+      title,
       duration,
       page,
       pageSize,

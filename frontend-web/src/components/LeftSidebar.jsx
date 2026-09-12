@@ -3,7 +3,7 @@ import { Link } from "react-router-dom"; // Dùng Link của react-router-dom th
 export default function LeftSidebar() {
   const navItems = [
     { name: "Học", icon: "https://d35aaqx5ub95lt.cloudfront.net/vendor/784035717e2ff1d448c0f6cc4efc89fb.svg", path: "/learn" },
-    { name: "Phát âm", icon: "https://d35aaqx5ub95lt.cloudfront.net/vendor/3b4928101472fce4e9edac920c1b3817.svg", path: "/characters" },
+    { name: "Tra cứu", icon: "https://d35aaqx5ub95lt.cloudfront.net/vendor/3b4928101472fce4e9edac920c1b3817.svg", path: "/dictionary" },
     { name: "Luyện tập", icon: "https://d35aaqx5ub95lt.cloudfront.net/vendor/5187f6694476a769d4a4e28149867e3e.svg", path: "/practice-hub" },
     { name: "Bảng xếp hạng", icon: "https://d35aaqx5ub95lt.cloudfront.net/vendor/ca9178510134b4b0893dbac30b6670aa.svg", path: "/leaderboard" },
     { name: "Nhiệm vụ", icon: "https://d35aaqx5ub95lt.cloudfront.net/vendor/7ef36bae3f9d68fc763d3451b5167836.svg", path: "/quests" },
