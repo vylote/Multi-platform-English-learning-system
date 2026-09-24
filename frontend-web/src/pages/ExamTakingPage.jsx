@@ -186,7 +186,7 @@ export default function ExamTakingPage() {
     } catch (error) {
       console.log("Lỗi hủy phiên:", error);
     } finally {
-      navigate(`/learn/exams/${id}`);
+      navigate(`/exams/${id}`);
     }
   };
 
@@ -293,7 +293,7 @@ export default function ExamTakingPage() {
         title="Kết quả bài thi"
         onExit={() => {
           clearCachedResult(id);
-          navigate(`/learn/exams/${id}`);
+          navigate(`/exams/${id}`);
         }}
       >
         <div className="max-w-[720px] mx-auto py-8">

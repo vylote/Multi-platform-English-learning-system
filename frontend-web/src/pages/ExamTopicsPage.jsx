@@ -43,7 +43,7 @@ export default function ExamTopicsPage() {
           {topics.map((topic, index) => (
             <button
               key={topic.id}
-              onClick={() => navigate(`/learn/topics/${topic.id}`)}
+              onClick={() => navigate(`/exams/topics/${topic.id}`)}
               style={{ backgroundColor: TILE_COLORS[index % TILE_COLORS.length] }}
               className="inline-flex items-center justify-center whitespace-nowrap px-7 py-6 rounded-3xl
                          text-white font-extrabold text-lg shadow-md hover:scale-[1.03] hover:shadow-xl

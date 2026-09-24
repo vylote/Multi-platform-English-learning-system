@@ -46,7 +46,7 @@ export default function ExamDetailPage() {
         </div>
 
         <button
-          onClick={() => navigate(`/learn/exams/${id}/take`)}
+          onClick={() => navigate(`/exams/${id}/take`)}
           className="w-full py-3.5 rounded-xl font-bold text-white bg-[#58cc02] hover:bg-[#4cb001] transition-colors"
         >
           BẮT ĐẦU LÀM BÀI

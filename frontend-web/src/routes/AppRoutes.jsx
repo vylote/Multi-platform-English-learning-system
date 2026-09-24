@@ -4,7 +4,7 @@ import { useSelector } from "react-redux";
 import HomePage from "../pages/HomePage";
 import LoginPage from "../pages/LoginPage";
 import RegisterPage from "../pages/RegisterPage";
-import PracticeHubPage from "../pages/PracticeHubPage";
+import ReviewPage from "../pages/ReviewPage";
 import ProfilePage from "../pages/ProfilePage";
 import ExamTopicsPage from "../pages/ExamTopicsPage";
 import ExamDetailPage from "../pages/ExamDetailPage";
@@ -13,6 +13,7 @@ import DictionaryPage from "../pages/DictionaryPage";
 import ExamListPage from "../pages/ExamListPage";
 import OnboardingPage from "../pages/OnboardingPage";
 import PlacementTestPage from "../pages/PlacementTestPage";
+import LearningPathPage from "../pages/LearningPathPage";
 
 // 1. Đưa ProtectedRoute ra ngoài AppRoutes
 const ProtectedRoute = ({ children }) => {
@@ -76,12 +77,22 @@ export const AppRoutes = () => {
         path="/learn"
         element={
           <ProtectedRoute>
+            <LearningPathPage />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* 2. LUYỆN ĐỀ (Đổi path thành /exams cho chuẩn nghĩa) */}
+      <Route
+        path="/exams"
+        element={
+          <ProtectedRoute>
             <ExamTopicsPage />
           </ProtectedRoute>
         }
       />
       <Route
-        path="/learn/topics/:topicId"
+        path="/exams/topics/:topicId"
         element={
           <ProtectedRoute>
             <ExamListPage />
@@ -89,7 +100,7 @@ export const AppRoutes = () => {
         }
       />
       <Route
-        path="/learn/exams/:id"
+        path="/exams/:id"
         element={
           <ProtectedRoute>
             <ExamDetailPage />
@@ -97,7 +108,7 @@ export const AppRoutes = () => {
         }
       />
       <Route
-        path="/learn/exams/:id/take"
+        path="/exams/:id/take"
         element={
           <ProtectedRoute>
             <ExamTakingPage />
@@ -114,10 +125,10 @@ export const AppRoutes = () => {
         }
       />
       <Route
-        path="/practice-hub"
+        path="/review"
         element={
           <ProtectedRoute>
-            <PracticeHubPage />
+            <ReviewPage />
           </ProtectedRoute>
         }
       />
