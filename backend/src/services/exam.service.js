@@ -59,12 +59,26 @@ class ExamService {
       throw new AppException(ErrorCode.EXAM_NOT_FOUND);
     }
 
-    const activeSession = await examRepository.findActiveSession(
-      userId,
-      examId,
-    );
-    const session =
-      activeSession || (await examRepository.createSession(userId, examId));
+    let session = await examRepository.findActiveSession(userId, examId);
+
+    if (session) {
+      // Phiên cũ có thể đã "treo" quá lâu (đóng tab, mất mạng, chưa kịp cancel...)
+      // -> nếu đã vượt thời hạn làm bài, coi như hết hiệu lực, không tái sử dụng nữa
+      const startedAt = new Date(session.started_at);
+      const elapsedSeconds = Math.floor(
+        (Date.now() - startedAt.getTime()) / 1000,
+      );
+      const maxAllowedSeconds = exam.duration * 60 + NETWORK_BUFFER_SECONDS;
+
+      if (elapsedSeconds > maxAllowedSeconds) {
+        await examRepository.cancelSession(session.id, userId);
+        session = null;
+      }
+    }
+
+    if (!session) {
+      session = await examRepository.createSession(userId, examId);
+    }
 
     const [questions, totalElements] = await Promise.all([
       examRepository.findQuestionsSafePage(examId, page, pageSize),
