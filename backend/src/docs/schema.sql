@@ -156,3 +156,18 @@ ALTER TABLE exam_results ADD COLUMN IF NOT EXISTS session_id INTEGER REFERENCES 
 ALTER TABLE exam_sessions DROP CONSTRAINT IF EXISTS exam_sessions_status_check;
 ALTER TABLE exam_sessions ADD CONSTRAINT exam_sessions_status_check
   CHECK (status IN ('IN_PROGRESS', 'SUBMITTED', 'CANCELLED'));
+
+ALTER TABLE topics ADD COLUMN IF NOT EXISTS order_index INTEGER NOT NULL DEFAULT 0;
+CREATE INDEX IF NOT EXISTS idx_topics_order ON topics (order_index);
+
+-- Cho phép topic_id NULL riêng cho bài placement (không gắn với 1 chủ đề cụ thể)
+ALTER TABLE exams ALTER COLUMN topic_id DROP NOT NULL;
+
+ALTER TABLE exams ADD COLUMN IF NOT EXISTS exam_type VARCHAR(20) NOT NULL DEFAULT 'TOPIC'
+  CHECK (exam_type IN ('TOPIC', 'PLACEMENT'));
+
+ALTER TABLE topics ADD COLUMN IF NOT EXISTS difficulty VARCHAR(20) NOT NULL DEFAULT 'BEGINNER'
+  CHECK (difficulty IN ('BEGINNER', 'INTERMEDIATE', 'ADVANCED'));
+
+CREATE UNIQUE INDEX IF NOT EXISTS uq_single_placement_exam
+  ON exams ((exam_type)) WHERE exam_type = 'PLACEMENT';

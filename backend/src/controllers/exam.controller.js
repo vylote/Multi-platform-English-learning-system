@@ -4,6 +4,23 @@ const { ErrorCode } = require("../common/error-code");
 const AppException = require("../exceptions/app.exception");
 
 class ExamController {
+  async getPlacementExam(req, res, next) {
+    try {
+      const exam = await examService.getPlacementExam();
+      return res
+        .status(ErrorCode.SUCCESS.statusCode)
+        .json(
+          ApiResponse.builder()
+            .code(ErrorCode.SUCCESS.code)
+            .message("Lấy bài kiểm tra đầu vào thành công")
+            .result(exam.toJSON())
+            .build(),
+        );
+    } catch (error) {
+      next(error);
+    }
+  }
+
   async getExams(req, res, next) {
     try {
       const { topic_id, title, duration, page, pageSize } = req.query;

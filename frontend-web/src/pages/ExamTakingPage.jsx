@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../api/api";
 import ExamLayout from "../layouts/ExamLayout";
@@ -18,6 +18,15 @@ export default function ExamTakingPage() {
   const [pageLoading, setPageLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState(null);
+
+  const [timeLeft, setTimeLeft] = useState(null); // giây còn lại, null = chưa tính được
+  const timerIntervalRef = useRef(null);
+  const resultRef = useRef(null);
+  const handleSubmitRef = useRef(null);
+
+  useEffect(() => {
+    resultRef.current = result;
+  }, [result]);
 
   // Gộp việc set currentPage + ghi nhớ question_id vào 1 chỗ duy nhất,
   // gọi tại nơi dữ liệu trang được nhận về (đã ở trong .then/.catch, không đồng bộ trong effect)
@@ -58,6 +67,46 @@ export default function ExamTakingPage() {
       cancelled = true;
     };
   }, [id, applyPageData]);
+
+  useEffect(() => {
+    if (!sessionInfo) return;
+
+    // --- CODE THẬT (Tạm comment lại) ---
+    const deadline =
+      new Date(sessionInfo.started_at).getTime() +
+      sessionInfo.duration * 60 * 1000;
+
+    // --- CODE TEST: Ép thời gian đếm ngược còn 10 giây ---
+    // const deadline = Date.now() + 20 * 1000;
+
+    const tick = () => {
+      // Đã có kết quả (nộp thành công) -> dừng hẳn đồng hồ, không auto-submit lần nữa
+      if (resultRef.current) {
+        clearInterval(timerIntervalRef.current);
+        return;
+      }
+
+      const remaining = Math.max(0, Math.floor((deadline - Date.now()) / 1000));
+      setTimeLeft(remaining);
+
+      if (remaining <= 0) {
+        clearInterval(timerIntervalRef.current);
+        handleSubmitRef.current(true); // auto = true -> nộp thẳng, không hỏi confirm
+      }
+    };
+
+    tick(); // chạy ngay lần đầu, không đợi 1s mới hiện số
+    timerIntervalRef.current = setInterval(tick, 1000);
+
+    return () => clearInterval(timerIntervalRef.current);
+  }, [sessionInfo]);
+
+  function formatTime(totalSeconds) {
+    if (totalSeconds == null) return "--:--";
+    const m = Math.floor(totalSeconds / 60);
+    const s = totalSeconds % 60;
+    return `${m}:${String(s).padStart(2, "0")}`;
+  }
 
   useEffect(() => {
     if (!sessionInfo) return;
@@ -145,41 +194,53 @@ export default function ExamTakingPage() {
     [sessionInfo, currentPage, pageLoading, id, applyPageData],
   );
 
-  const handleSubmit = useCallback(async () => {
-    if (!sessionInfo || submitting) return;
+  const handleSubmit = useCallback(
+    async (auto = false) => {
+      if (!sessionInfo || submitting) return;
 
-    const totalElements = currentPage?.totalElements ?? 0;
-    const answeredCount = Object.keys(answers).length;
-    if (answeredCount < totalElements) {
-      const confirmed = window.confirm(
-        `Bạn đã trả lời ${answeredCount}/${totalElements} câu.\n\nBạn có chắc muốn nộp bài?`,
+      const totalElements = currentPage?.totalElements ?? 0;
+      const answeredCount = Object.keys(answers).length;
+
+      // Chỉ hỏi xác nhận khi user CHỦ ĐỘNG bấm nút - auto-submit do hết giờ thì nộp thẳng
+      if (!auto && answeredCount < totalElements) {
+        const confirmed = window.confirm(
+          `Bạn đã trả lời ${answeredCount}/${totalElements} câu.\n\nBạn có chắc muốn nộp bài?`,
+        );
+        if (!confirmed) return;
+      }
+
+      setSubmitting(true);
+      const answerList = Object.entries(answers).map(
+        ([question_id, selected_option]) => ({
+          question_id: Number(question_id),
+          selected_option,
+        }),
       );
-      if (!confirmed) return;
-    }
 
-    setSubmitting(true);
-    const answerList = Object.entries(answers).map(
-      ([question_id, selected_option]) => ({
-        question_id: Number(question_id),
-        selected_option,
-      }),
-    );
+      try {
+        const response = await api.post(`/exams/${id}/submit`, {
+          session_id: sessionInfo.session_id,
+          answers: answerList,
+          timezone_offset: getBackendTimezoneOffset(),
+        });
+        setResult(response.data?.result);
+      } catch (error) {
+        setLoadError(
+          error.response?.data?.message ||
+            "Không thể nộp bài, vui lòng thử lại.",
+        );
+      } finally {
+        setSubmitting(false);
+      }
+    },
+    [sessionInfo, answers, submitting, id, currentPage],
+  );
 
-    try {
-      const response = await api.post(`/exams/${id}/submit`, {
-        session_id: sessionInfo.session_id,
-        answers: answerList,
-        timezone_offset: getBackendTimezoneOffset(),
-      });
-      setResult(response.data?.result);
-    } catch (error) {
-      setLoadError(
-        error.response?.data?.message || "Không thể nộp bài, vui lòng thử lại.",
-      );
-    } finally {
-      setSubmitting(false);
-    }
-  }, [sessionInfo, answers, submitting, id, currentPage]);
+  // Giữ tham chiếu mới nhất để effect đếm giờ không cần liệt kê handleSubmit vào dependency
+  // (tránh việc mỗi lần chọn đáp án -> handleSubmit đổi identity -> effect chạy lại, reset interval)
+  useEffect(() => {
+    handleSubmitRef.current = handleSubmit;
+  }, [handleSubmit]);
 
   if (loadError && !sessionInfo) {
     return (
@@ -350,7 +411,7 @@ export default function ExamTakingPage() {
         <aside className="w-full lg:w-[260px] shrink-0 lg:sticky lg:top-20">
           <div className="border border-gray-200 dark:border-gray-700 rounded-2xl p-4">
             <button
-              onClick={handleSubmit}
+              onClick={() => handleSubmit()} // gọi qua arrow function, KHÔNG truyền thẳng handleSubmit
               disabled={submitting || pageLoading}
               className="w-full py-3 mb-4 rounded-xl font-bold text-white bg-[#58cc02] hover:bg-[#4cb001] disabled:opacity-50 transition-colors"
             >
@@ -399,6 +460,20 @@ export default function ExamTakingPage() {
             </p>
           </div>
         </aside>
+      </div>
+
+      <div className="fixed bottom-6 right-6 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-[0_8px_30px_rgb(0,0,0,0.12)] rounded-full px-5 py-2.5 flex items-center justify-center backdrop-blur-sm bg-white/90 dark:bg-gray-800/90">
+        <span
+          className={`text-lg font-bold tabular-nums tracking-wider ${
+            timeLeft !== null && timeLeft <= 60
+              ? "text-red-500 animate-pulse"
+              : timeLeft !== null && timeLeft <= 300
+                ? "text-orange-500"
+                : "text-gray-800 dark:text-gray-200"
+          }`}
+        >
+          ⏱ {formatTime(timeLeft)}
+        </span>
       </div>
     </ExamLayout>
   );

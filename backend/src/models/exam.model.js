@@ -1,10 +1,11 @@
 class Exam {
-  constructor({ id, topic_id, title, duration, question_count }) {
+  constructor({ id, topic_id, title, duration, question_count, exam_type }) {
     this.id = id;
     this.topic_id = topic_id;
     this.title = title;
     this.duration = duration; // phút
     this.question_count = Number(question_count) || 0;
+    this.exam_type = exam_type;
   }
 
   toJSON() {
@@ -14,6 +15,7 @@ class Exam {
       title: this.title,
       duration: this.duration,
       question_count: this.question_count,
+      exam_type: this.exam_type,
     };
   }
 }
@@ -71,12 +73,13 @@ class ExamReviewItem {
 }
 
 class ExamResultDetail {
-  constructor({ score, correct_count, total_questions, time_spent, review }) {
+  constructor({ score, correct_count, total_questions, time_spent, review, tier_assigned }) {
     this.score = score;
     this.correct_count = correct_count;
     this.total_questions = total_questions;
     this.time_spent = time_spent; // giây
     this.review = review; // ExamReviewItem[]
+    this.tier_assigned = tier_assigned;
   }
 
   toJSON() {
@@ -86,6 +89,7 @@ class ExamResultDetail {
       total_questions: this.total_questions,
       time_spent: this.time_spent,
       review: this.review.map((r) => r.toJSON()),
+      tier_assigned: this.tier_assigned,
     };
   }
 }

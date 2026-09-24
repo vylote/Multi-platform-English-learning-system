@@ -1,4 +1,5 @@
 const examRepository = require("../repositories/exam.repository");
+const userRepository = require("../repositories/user.repository");
 const streakService = require("./streak.service");
 const { ExamReviewItem, ExamResultDetail } = require("../models/exam.model");
 const { ErrorCode } = require("../common/error-code");
@@ -256,13 +257,39 @@ class ExamService {
 
     await this._recordStreakSafely(userId, timezoneOffsetMinutes);
 
-    return new ExamResultDetail({
+    // --- BỔ SUNG LOGIC XÁC ĐỊNH VÀ LƯU TIER NẾU LÀ BÀI PLACEMENT ---
+    let assignedTier = null;
+    if (exam.exam_type === "PLACEMENT") {
+      // Phân loại trình độ theo logic của bạn: < 5 BEGINNER, < 8 INTERMEDIATE, >= 8 ADVANCED
+      if (score < 5) assignedTier = "BEGINNER";
+      else if (score < 8) assignedTier = "INTERMEDIATE";
+      else assignedTier = "ADVANCED";
+
+      // Gọi repository để cập nhật dữ liệu vào bảng users
+      await userRepository.updateTier(userId, assignedTier);
+    }
+    // -------------------------------------------------------------
+
+    const result = new ExamResultDetail({
       score,
       correct_count: correctCount,
       total_questions: totalQuestions,
       time_spent: timeSpentSeconds,
       review,
+      tier_assigned: assignedTier,
     });
+
+    return result;
+  }
+
+  async getPlacementExam() {
+    const exam = await examRepository.findByType("PLACEMENT");
+    if (!exam)
+      throw new AppException(
+        ErrorCode.EXAM_NOT_FOUND,
+        "Chưa có bài kiểm tra đầu vào",
+      );
+    return exam;
   }
 }
 
