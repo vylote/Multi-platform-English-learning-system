@@ -5,9 +5,11 @@ const verifyToken = require("../middlewares/auth.middleware");
 
 router.get("/", verifyToken, examController.getExams);
 
-router.get("/:id", verifyToken, examController.getDetailExam);
+router.get("/placement-exam", verifyToken, examController.getPlacementExam);
 
 router.get("/history", verifyToken, examController.getHistory);
+
+router.get("/:id", verifyToken, examController.getDetailExam);
 
 router.post("/:id/start", verifyToken, examController.start);
 

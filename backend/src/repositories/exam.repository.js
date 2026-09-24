@@ -55,7 +55,7 @@ class ExamRepository {
 
   async findById(examId) {
     const sql = `
-    SELECT e.id, e.topic_id, e.title, e.duration, COUNT(q.id) AS question_count
+    SELECT e.id, e.topic_id, e.title, e.duration, e.exam_type, COUNT(q.id) AS question_count
     FROM exams e
     LEFT JOIN questions q ON q.exam_id = e.id
     WHERE e.id = $1
@@ -172,16 +172,6 @@ class ExamRepository {
 
   async findActiveSession(userId, examId) {
     const sql = `
-    SELECT id FROM exam_sessions
-    WHERE user_id = $1 AND exam_id = $2 AND status = 'IN_PROGRESS'
-    LIMIT 1;
-  `;
-    const { rows } = await db.query(sql, [userId, examId]);
-    return rows[0] || null;
-  }
-
-  async findActiveSession(userId, examId) {
-    const sql = `
     SELECT id, exam_id, user_id, started_at, status
     FROM exam_sessions
     WHERE user_id = $1 AND exam_id = $2 AND status = 'IN_PROGRESS'
@@ -204,6 +194,31 @@ class ExamRepository {
 
   async getClient() {
     return db.pool.connect();
+  }
+
+  async findBestScoreByType(userId, examType) {
+    const sql = `
+    SELECT MAX(er.score) AS best_score
+    FROM exam_results er
+    JOIN exams e ON e.id = er.exam_id
+    WHERE er.user_id = $1 AND e.exam_type = $2;
+  `;
+    const { rows } = await db.query(sql, [userId, examType]);
+    return rows[0]?.best_score !== null ? Number(rows[0].best_score) : null;
+  }
+
+  async findByType(examType) {
+    const sql = `
+    SELECT e.id, e.topic_id, e.title, e.duration, e.exam_type, COUNT(q.id) AS question_count
+    FROM exams e
+    LEFT JOIN questions q ON q.exam_id = e.id
+    WHERE e.exam_type = $1
+    GROUP BY e.id
+    ORDER BY e.created_at DESC
+    LIMIT 1;
+  `;
+    const { rows } = await db.query(sql, [examType]);
+    return rows[0] ? new Exam(rows[0]) : null;
   }
 }
 
