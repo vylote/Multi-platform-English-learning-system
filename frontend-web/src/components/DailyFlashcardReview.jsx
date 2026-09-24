@@ -53,7 +53,7 @@ export default function DailyFlashcardReview({
 
       if (response.data?.result?.streak) {
         dispatch(setStreak(response.data.result.streak));
-        dispatch(fetchStreakWeek()); // đồng bộ lại panel 7 ngày - ô hôm nay chuyển cam ngay
+        dispatch(fetchStreakWeek()); 
         setStreakInfo(response.data.result.streak);
       }
 
@@ -69,6 +69,7 @@ export default function DailyFlashcardReview({
     }
   };
 
+  // 1. TRẠNG THÁI ĐANG TẢI
   if (cards === null) {
     return (
       <div className="flex items-center justify-center py-20 text-gray-400 dark:text-gray-500 text-sm">
@@ -77,28 +78,35 @@ export default function DailyFlashcardReview({
     );
   }
 
+  // 2. TRẠNG THÁI LỖI
   if (loadError && cards.length === 0 && currentIndex === 0) {
     return (
       <div className="w-full max-w-[560px] mx-auto text-center py-16">
+        {onBack && (
+          <button
+            onClick={onBack}
+            className="mb-6 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 flex items-center gap-1 mx-auto"
+          >
+            ← Chọn chủ đề khác
+          </button>
+        )}
         <p className="text-red-500 dark:text-red-400 text-sm">{loadError}</p>
       </div>
     );
   }
 
-  {
-    onBack && (
-      <button
-        onClick={onBack}
-        className="mb-4 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200
-               flex items-center gap-1 mx-auto"
-      >
-        ← Chọn chủ đề khác
-      </button>
-    );
-  }
+  // 3. TRẠNG THÁI HẾT TỪ VỰNG (TRỐNG)
   if (cards.length === 0) {
     return (
       <div className="w-full max-w-[560px] mx-auto text-center py-16">
+        {onBack && (
+          <button
+            onClick={onBack}
+            className="mb-6 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 flex items-center gap-1 mx-auto"
+          >
+            ← Chọn chủ đề khác
+          </button>
+        )}
         <p className="text-lg font-bold text-gray-900 dark:text-white mb-2">
           Bạn đã học hết toàn bộ từ vựng hiện có!
         </p>
@@ -109,20 +117,18 @@ export default function DailyFlashcardReview({
     );
   }
 
-  {
-    onBack && (
-      <button
-        onClick={onBack}
-        className="mb-4 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200
-               flex items-center gap-1 mx-auto"
-      >
-        ← Chọn chủ đề khác
-      </button>
-    );
-  }
+  // 4. TRẠNG THÁI HỌC XONG
   if (isSessionDone) {
     return (
       <div className="w-full max-w-[560px] mx-auto text-center py-16">
+        {onBack && (
+          <button
+            onClick={onBack}
+            className="mb-6 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 flex items-center gap-1 mx-auto"
+          >
+            ← Chọn chủ đề khác
+          </button>
+        )}
         <p className="text-lg font-bold text-gray-900 dark:text-white mb-2">
           Hoàn thành bộ ôn tập hôm nay! 🎉
         </p>
@@ -135,6 +141,7 @@ export default function DailyFlashcardReview({
     );
   }
 
+  // 5. TRẠNG THÁI ĐANG HỌC (MAIN)
   const { word } = currentCard;
   const progressPercent = ((currentIndex + 1) / cards.length) * 100;
 
@@ -143,8 +150,7 @@ export default function DailyFlashcardReview({
       {onBack && (
         <button
           onClick={onBack}
-          className="mb-4 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200
-               flex items-center gap-1 mx-auto"
+          className="mb-4 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 flex items-center gap-1 mr-auto"
         >
           ← Chọn chủ đề khác
         </button>
@@ -174,7 +180,7 @@ export default function DailyFlashcardReview({
         </div>
       </div>
 
-      {/* Thẻ flip - dùng CSS Grid overlay để 2 mặt tự căn theo nội dung dài nhất, không cần cuộn */}
+      {/* Thẻ flip */}
       <div
         className="w-full [perspective:1200px] cursor-pointer select-none"
         onClick={handleFlip}
@@ -211,7 +217,7 @@ export default function DailyFlashcardReview({
             </p>
           </div>
 
-          {/* Mặt sau - đặt cùng ô grid với mặt trước, chiều cao tự bằng mặt cao hơn */}
+          {/* Mặt sau */}
           <div
             className="col-start-1 row-start-1 [backface-visibility:hidden] min-h-[280px]
                        rounded-3xl border-2 border-gray-200 dark:border-gray-700

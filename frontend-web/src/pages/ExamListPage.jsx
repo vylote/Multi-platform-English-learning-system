@@ -55,7 +55,7 @@ export default function ExamListPage() {
       <div className="py-6">
         <div className="mb-8">
           <button 
-            onClick={() => navigate('/learn')}
+            onClick={() => navigate('/exams')}
             className="text-sm font-semibold text-gray-500 hover:text-gray-900 dark:hover:text-white mb-2"
           >
             ← Quay lại danh sách Chủ đề
@@ -86,7 +86,7 @@ export default function ExamListPage() {
                 <div 
                   key={exam.id}
                   className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 flex flex-col justify-between min-h-[170px] hover:shadow-[0_6px_18px_rgba(0,0,0,0.06)] dark:hover:shadow-black/30 transition-shadow cursor-pointer group"
-                  onClick={() => navigate(`/learn/exams/${exam.id}`)}
+                  onClick={() => navigate(`/exams/${exam.id}`)}
                 >
                   <div>
                     <h2 className="text-base font-bold text-gray-900 dark:text-white mb-2 line-clamp-2 group-hover:text-[#007bff] transition-colors">
@@ -108,7 +108,7 @@ export default function ExamListPage() {
                   <button 
                     onClick={(e) => {
                       e.stopPropagation();
-                      navigate(`/learn/exams/${exam.id}`);
+                      navigate(`/exams/${exam.id}`);
                     }}
                     className="mt-4 w-full py-2 rounded-lg border border-[#007bff] text-[#007bff] font-semibold text-sm hover:bg-[#007bff] hover:text-white transition-colors"
                   >

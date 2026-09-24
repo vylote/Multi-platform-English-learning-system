@@ -3,7 +3,7 @@ import DailyFlashcardReview from "../components/DailyFlashcardReview";
 import TopicSelector from "../components/TopicSelector";
 import { useState } from "react";
 
-export default function PracticeHubPage() {
+export default function ReviewPage() {
   const [selection, setSelection] = useState(null);
 
   const endpoint =
