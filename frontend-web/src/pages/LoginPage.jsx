@@ -68,16 +68,16 @@ export default function LoginPage() {
             value={form.password}
             onChange={handleChange}
             required
-            className="w-full px-3 py-2.5 pr-10 border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-300 rounded-md mb-2.5 outline-none focus:border-[#58cc02] dark:focus:border-[#58cc02] focus:ring-2 focus:ring-[#58cc02]/20 transition-shadow"
+            className="w-full px-3 py-2.5 pr-10 border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-300 rounded-md outline-none focus:border-[#58cc02] dark:focus:border-[#58cc02] focus:ring-2 focus:ring-[#58cc02]/20 transition-shadow"
           />
 
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
+            tabIndex={-1}
             className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors outline-none"
           >
             {showPassword ? (
-              // Icon mắt mở
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
@@ -98,7 +98,6 @@ export default function LoginPage() {
                 />
               </svg>
             ) : (
-              // Icon mắt nhắm (có đường gạch chéo)
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"

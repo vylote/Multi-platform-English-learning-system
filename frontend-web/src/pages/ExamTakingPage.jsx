@@ -5,6 +5,28 @@ import ExamLayout from "../layouts/ExamLayout";
 import { getBackendTimezoneOffset } from "../utils/timezone";
 
 const PAGE_SIZE = 10;
+const resultCacheKey = (examId) => `exam_result_${examId}`;
+
+const readCachedResult = (examId) => {
+  try {
+    const raw = sessionStorage.getItem(resultCacheKey(examId));
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+};
+
+const writeCachedResult = (examId, result) => {
+  try {
+    sessionStorage.setItem(resultCacheKey(examId), JSON.stringify(result));
+  } catch {
+    // sessionStorage đầy hoặc bị chặn -> bỏ qua, không critical
+  }
+};
+
+const clearCachedResult = (examId) => {
+  sessionStorage.removeItem(resultCacheKey(examId));
+};
 
 export default function ExamTakingPage() {
   const { id } = useParams();
@@ -17,7 +39,7 @@ export default function ExamTakingPage() {
   const [loadError, setLoadError] = useState("");
   const [pageLoading, setPageLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [result, setResult] = useState(null);
+  const [result, setResult] = useState(() => readCachedResult(id));
 
   const [timeLeft, setTimeLeft] = useState(null); // giây còn lại, null = chưa tính được
   const timerIntervalRef = useRef(null);
@@ -42,7 +64,10 @@ export default function ExamTakingPage() {
   }, []);
 
   useEffect(() => {
+    if (result) return;
+
     let cancelled = false;
+
     api
       .post(`/exams/${id}/start`, null, {
         params: { page: 1, pageSize: PAGE_SIZE },
@@ -66,7 +91,7 @@ export default function ExamTakingPage() {
     return () => {
       cancelled = true;
     };
-  }, [id, applyPageData]);
+  }, [id, applyPageData, result]);
 
   useEffect(() => {
     if (!sessionInfo) return;
@@ -224,6 +249,7 @@ export default function ExamTakingPage() {
           timezone_offset: getBackendTimezoneOffset(),
         });
         setResult(response.data?.result);
+        writeCachedResult(id, response.data?.result);
       } catch (error) {
         setLoadError(
           error.response?.data?.message ||
@@ -265,7 +291,10 @@ export default function ExamTakingPage() {
     return (
       <ExamLayout
         title="Kết quả bài thi"
-        onExit={() => navigate(`/learn/exams/${id}`)}
+        onExit={() => {
+          clearCachedResult(id);
+          navigate(`/learn/exams/${id}`);
+        }}
       >
         <div className="max-w-[720px] mx-auto py-8">
           <div className="text-center mb-8">

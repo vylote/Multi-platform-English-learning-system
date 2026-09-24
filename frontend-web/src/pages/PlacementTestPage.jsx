@@ -20,6 +20,7 @@ export default function PlacementTestPage() {
   const [pageLoading, setPageLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState(null);
+  const [visitedQuestionIds, setVisitedQuestionIds] = useState({});
 
   const resultRef = useRef(null);
 
@@ -29,6 +30,12 @@ export default function PlacementTestPage() {
 
   const applyPageData = useCallback((pageData) => {
     setCurrentPage(pageData);
+    if (pageData?.data) {
+      setVisitedQuestionIds((prev) => ({
+        ...prev,
+        [pageData.currentPage]: pageData.data.map((q) => q.id),
+      }));
+    }
   }, []);
 
   // 1. LẤY ID BÀI PLACEMENT VÀ BẮT ĐẦU THI BẰNG API DÙNG CHUNG CỦA EXAMS
@@ -150,7 +157,7 @@ export default function PlacementTestPage() {
         applyPageData(res.data?.result);
         window.scrollTo({ top: 0, behavior: "smooth" });
       } catch (error) {
-        setLoadError("Không thể tải trang câu hỏi.");
+        setLoadError("Không thể tải trang câu hỏi.", error);
       } finally {
         setPageLoading(false);
       }
@@ -188,7 +195,7 @@ export default function PlacementTestPage() {
       });
       setResult(response.data?.result);
     } catch (error) {
-      setLoadError("Không thể nộp bài, vui lòng thử lại.");
+      setLoadError("Không thể nộp bài, vui lòng thử lại.", error);
     } finally {
       setSubmitting(false);
     }
@@ -243,15 +250,23 @@ export default function PlacementTestPage() {
     );
   }
 
-  const pageQuestions = currentPage?.data ?? [];
+    const pageQuestions = currentPage?.data ?? [];
   const totalElements = currentPage?.totalElements ?? 0;
+  const answeredCountThisPage = pageQuestions.filter(
+    (q) => answers[q.id],
+  ).length;
   const totalAnsweredCount = Object.keys(answers).length;
 
   return (
     <ExamLayout title="Kiểm tra trình độ" onExit={handleExit}>
-      {/* ... Phần JSX giao diện render câu hỏi giữ nguyên 100% không đổi ... */}
       <div className="max-w-[1100px] mx-auto flex flex-col lg:flex-row gap-6 items-start">
         <div className="flex-1 min-w-0 w-full">
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-sm text-gray-500 dark:text-gray-400">
+              Trang {currentPage?.currentPage} / {currentPage?.totalPages}
+            </span>
+          </div>
+
           <div className="space-y-6">
             {pageQuestions.map((q, index) => {
               const globalIndex =
@@ -292,43 +307,85 @@ export default function PlacementTestPage() {
             })}
           </div>
 
-          <div className="flex items-center justify-between mt-6">
-            <span className="text-sm text-gray-500">
+          <div className="flex items-center justify-between mb-4 mt-6">
+            <span className="text-sm text-gray-500 dark:text-gray-400">
               Trang {currentPage?.currentPage} / {currentPage?.totalPages}
             </span>
+
             {currentPage &&
               currentPage.currentPage < currentPage.totalPages && (
                 <button
                   onClick={() => goToPage(currentPage.currentPage + 1)}
                   disabled={pageLoading}
-                  className="text-sm font-bold text-[#58cc02] hover:text-[#4cb001] disabled:opacity-50"
+                  className="text-sm font-bold text-[#58cc02] hover:text-[#4cb001] disabled:opacity-50 transition-colors"
                 >
                   {pageLoading ? "Đang tải..." : "Trang tiếp →"}
                 </button>
               )}
           </div>
+
+          <p className="text-center text-sm text-gray-400 dark:text-gray-500 mt-4">
+            Đã trả lời {answeredCountThisPage}/{pageQuestions.length} câu ở
+            trang này
+          </p>
+
           {loadError && (
-            <p className="text-sm text-red-500 mt-4">{loadError}</p>
+            <p className="text-sm text-red-500 dark:text-red-400 text-center mt-4">
+              {loadError}
+            </p>
           )}
         </div>
 
         <aside className="w-full lg:w-[260px] shrink-0 lg:sticky lg:top-20">
           <div className="border border-gray-200 dark:border-gray-700 rounded-2xl p-4">
             <button
-              onClick={handleSubmit}
+              onClick={() => handleSubmit()}
               disabled={submitting || pageLoading}
               className="w-full py-3 mb-4 rounded-xl font-bold text-white bg-[#58cc02] hover:bg-[#4cb001] disabled:opacity-50 transition-colors"
             >
               {submitting
                 ? "Đang xử lý..."
-                : `HOÀN THÀNH (${totalAnsweredCount}/${totalElements})`}
+                : `NỘP BÀI (${totalAnsweredCount}/${totalElements})`}
             </button>
-            <h3 className="text-xs font-semibold text-gray-500 mb-3">
-              Trạng thái
+
+            <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-3">
+              Danh sách câu hỏi
             </h3>
-            <p className="text-[11px] text-gray-400">
-              Lưu ý: Nếu bạn thoát trang khi chưa nộp bài, quá trình kiểm tra sẽ
-              bị hủy và bạn phải làm lại vào lần sau.
+
+            <div className="flex flex-wrap gap-2">
+              {Array.from({ length: totalElements }, (_, index) => {
+                const pageOfIndex = Math.floor(index / PAGE_SIZE) + 1;
+                const indexWithinPage = index % PAGE_SIZE;
+                const questionId =
+                  visitedQuestionIds[pageOfIndex]?.[indexWithinPage];
+                const isAnswered = questionId != null && !!answers[questionId];
+                const isCurrentPageOfSquare =
+                  pageOfIndex === currentPage?.currentPage;
+
+                return (
+                  <button
+                    key={index}
+                    type="button"
+                    onClick={() => goToPage(pageOfIndex)}
+                    disabled={pageLoading}
+                    className={`w-8 h-8 flex items-center justify-center rounded-lg text-xs font-medium border transition-colors disabled:opacity-50 ${
+                      isAnswered
+                        ? "bg-[#58cc02] border-[#58cc02] text-white"
+                        : isCurrentPageOfSquare
+                          ? "border-[#1cb0f6] text-[#1cb0f6]"
+                          : "border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:border-gray-400"
+                    }`}
+                  >
+                    {index + 1}
+                  </button>
+                );
+              })}
+            </div>
+
+            <p className="text-[11px] text-gray-400 dark:text-gray-500 mt-3">
+              Bấm vào số thứ tự để chuyển nhanh tới câu hỏi thuộc trang tương
+              ứng. Nếu bạn thoát khi chưa nộp bài, bài kiểm tra sẽ bị hủy và
+              phải làm lại vào lần sau.
             </p>
           </div>
         </aside>
