@@ -171,3 +171,13 @@ ALTER TABLE topics ADD COLUMN IF NOT EXISTS difficulty VARCHAR(20) NOT NULL DEFA
 
 CREATE UNIQUE INDEX IF NOT EXISTS uq_single_placement_exam
   ON exams ((exam_type)) WHERE exam_type = 'PLACEMENT';
+
+CREATE TABLE IF NOT EXISTS lesson_attempts (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    topic_id INTEGER NOT NULL REFERENCES topics(id) ON DELETE CASCADE,
+    quiz_score NUMERIC(5,2) NOT NULL,        -- % đúng phần trắc nghiệm (0-100)
+    pronunciation_score NUMERIC(5,2) NOT NULL, -- % đúng phần phát âm (0-100)
+    completed_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_lesson_attempts_user_topic ON lesson_attempts (user_id, topic_id);

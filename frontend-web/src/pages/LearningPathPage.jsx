@@ -59,7 +59,7 @@ export default function LearningPathPage() {
             <button
               key={topic.id}
               disabled={!topic.isUnlocked}
-              onClick={() => navigate(`/practice-hub/topics/${topic.id}`)}
+              onClick={() => navigate(`/learn/topics/${topic.id}`)}
               className={`w-full flex items-center gap-4 p-4 rounded-2xl border-2 text-left transition-all ${
                 topic.isUnlocked
                   ? "border-transparent hover:scale-[1.02] cursor-pointer"

@@ -97,6 +97,17 @@ class ExamRepository {
     return rows;
   }
 
+  async findQuestionsByIds(questionIds) {
+    if (questionIds.length === 0) return [];
+    const sql = `
+    SELECT id, question_text, option_a, option_b, option_c, option_d, correct_option
+    FROM questions
+    WHERE id = ANY($1::int[]);
+  `;
+    const { rows } = await db.query(sql, [questionIds]);
+    return rows;
+  }
+
   async createSession(userId, examId) {
     const sql = `
       INSERT INTO exam_sessions (exam_id, user_id, status)
@@ -219,6 +230,30 @@ class ExamRepository {
   `;
     const { rows } = await db.query(sql, [examType]);
     return rows[0] ? new Exam(rows[0]) : null;
+  }
+
+  async findQuestionsForTopicLesson(topicId, limit = 5) {
+    const sql = `
+    SELECT q.id, q.question_text, q.option_a, q.option_b, q.option_c, q.option_d, q.correct_option
+    FROM questions q
+    JOIN exams e ON e.id = q.exam_id
+    WHERE e.topic_id = $1 AND e.exam_type = 'TOPIC'
+    ORDER BY RANDOM()
+    LIMIT $2;
+  `;
+    const { rows } = await db.query(sql, [topicId, limit]);
+    return rows;
+  }
+
+  async findQuestionsByIds(questionIds) {
+    if (questionIds.length === 0) return [];
+    const sql = `
+    SELECT id, question_text, option_a, option_b, option_c, option_d, correct_option
+    FROM questions
+    WHERE id = ANY($1::int[]);
+  `;
+    const { rows } = await db.query(sql, [questionIds]);
+    return rows;
   }
 }
 

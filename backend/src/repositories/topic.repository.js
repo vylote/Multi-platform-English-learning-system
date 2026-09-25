@@ -59,12 +59,14 @@ class TopicRepository {
       t.id, t.title, t.order_index, t.difficulty,
       COUNT(DISTINCT w.id) AS total_words,
       COUNT(DISTINCT f.id) FILTER (WHERE f.status = 'MASTERED') AS mastered_words,
-      MAX(er.score) FILTER (WHERE e.exam_type = 'TOPIC') AS best_exam_score
+      MAX(er.score) FILTER (WHERE e.exam_type = 'TOPIC') AS best_exam_score,
+      MAX((la.quiz_score + la.pronunciation_score) / 2) AS best_lesson_score
     FROM topics t
     LEFT JOIN words w ON w.topic_id = t.id
     LEFT JOIN flashcards f ON f.word_id = w.id AND f.user_id = $1
     LEFT JOIN exams e ON e.topic_id = t.id
     LEFT JOIN exam_results er ON er.exam_id = e.id AND er.user_id = $1
+    LEFT JOIN lesson_attempts la ON la.topic_id = t.id AND la.user_id = $1
     GROUP BY t.id
     ORDER BY t.order_index ASC;
   `;
@@ -78,6 +80,8 @@ class TopicRepository {
       masteredWords: Number(r.mastered_words),
       bestExamScore:
         r.best_exam_score !== null ? Number(r.best_exam_score) : null,
+      bestLessonScore:
+        r.best_lesson_score !== null ? Number(r.best_lesson_score) : null,
     }));
   }
 

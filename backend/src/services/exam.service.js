@@ -5,6 +5,7 @@ const { ExamReviewItem, ExamResultDetail } = require("../models/exam.model");
 const { ErrorCode } = require("../common/error-code");
 const AppException = require("../exceptions/app.exception");
 const PageResponse = require("../models/page-response.model");
+const { classifyTier } = require("../utils/tier-classifier");
 
 //TODO: Khoảng đệm bù độ trễ mạng khi nộp bài
 const NETWORK_BUFFER_SECONDS = 15;
@@ -271,15 +272,9 @@ class ExamService {
 
     await this._recordStreakSafely(userId, timezoneOffsetMinutes);
 
-    // --- BỔ SUNG LOGIC XÁC ĐỊNH VÀ LƯU TIER NẾU LÀ BÀI PLACEMENT ---
     let assignedTier = null;
     if (exam.exam_type === "PLACEMENT") {
-      // Phân loại trình độ theo logic của bạn: < 5 BEGINNER, < 8 INTERMEDIATE, >= 8 ADVANCED
-      if (score < 5) assignedTier = "BEGINNER";
-      else if (score < 8) assignedTier = "INTERMEDIATE";
-      else assignedTier = "ADVANCED";
-
-      // Gọi repository để cập nhật dữ liệu vào bảng users
+      assignedTier = classifyTier(score);
       await userRepository.updateTier(userId, assignedTier);
     }
     // -------------------------------------------------------------
