@@ -12,6 +12,7 @@ const topicRoutes = require('./routes/topic.routes')
 const examRoutes = require('./routes/exam.routes');
 const learningPathRoutes = require('./routes/learning-path.routes');
 const onBoardingRoutes = require('./routes/onboarding.route');
+const lessonRoutes = require('./routes/lesson.routes');
 
 const { noResourceFoundHandler, globalExceptionHandler } = require('./middlewares/error.middleware');
 
@@ -42,6 +43,7 @@ app.use('/api/v1/topics', topicRoutes);
 app.use('/api/v1/exams', examRoutes);
 app.use('/api/v1/learning-path', learningPathRoutes);
 app.use('/api/v1/onboarding', onBoardingRoutes);
+app.use('/api/v1/lessons', lessonRoutes);
 
 app.use(noResourceFoundHandler);
 app.use(globalExceptionHandler);

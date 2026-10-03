@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import api from "../api/api";
 import ExamLayout from "../layouts/ExamLayout";
 import { getBackendTimezoneOffset } from "../utils/timezone";
+import { getReturnTo } from "../utils/navigation";
 
 const PAGE_SIZE = 10;
 const resultCacheKey = (examId) => `exam_result_${examId}`;
@@ -31,6 +32,8 @@ const clearCachedResult = (examId) => {
 export default function ExamTakingPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const returnTo = getReturnTo(searchParams);
 
   const [sessionInfo, setSessionInfo] = useState(null);
   const [currentPage, setCurrentPage] = useState(null);
@@ -41,7 +44,7 @@ export default function ExamTakingPage() {
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState(() => readCachedResult(id));
 
-  const [timeLeft, setTimeLeft] = useState(null); // giây còn lại, null = chưa tính được
+  const [timeLeft, setTimeLeft] = useState(null);
   const timerIntervalRef = useRef(null);
   const resultRef = useRef(null);
   const handleSubmitRef = useRef(null);
@@ -50,9 +53,6 @@ export default function ExamTakingPage() {
     resultRef.current = result;
   }, [result]);
 
-  // Gộp việc set currentPage + ghi nhớ question_id vào 1 chỗ duy nhất,
-  // gọi tại nơi dữ liệu trang được nhận về (đã ở trong .then/.catch, không đồng bộ trong effect)
-  // -> thay thế cho useEffect riêng theo dõi currentPage rồi setState, tránh lỗi "set-state-in-effect"
   const applyPageData = useCallback((pageData) => {
     setCurrentPage(pageData);
     if (pageData?.data) {
@@ -65,7 +65,6 @@ export default function ExamTakingPage() {
 
   useEffect(() => {
     if (result) return;
-
     let cancelled = false;
 
     api
@@ -96,16 +95,11 @@ export default function ExamTakingPage() {
   useEffect(() => {
     if (!sessionInfo) return;
 
-    // --- CODE THẬT (Tạm comment lại) ---
     const deadline =
       new Date(sessionInfo.started_at).getTime() +
       sessionInfo.duration * 60 * 1000;
 
-    // --- CODE TEST: Ép thời gian đếm ngược còn 10 giây ---
-    // const deadline = Date.now() + 20 * 1000;
-
     const tick = () => {
-      // Đã có kết quả (nộp thành công) -> dừng hẳn đồng hồ, không auto-submit lần nữa
       if (resultRef.current) {
         clearInterval(timerIntervalRef.current);
         return;
@@ -116,11 +110,11 @@ export default function ExamTakingPage() {
 
       if (remaining <= 0) {
         clearInterval(timerIntervalRef.current);
-        handleSubmitRef.current(true); // auto = true -> nộp thẳng, không hỏi confirm
+        handleSubmitRef.current(true);
       }
     };
 
-    tick(); // chạy ngay lần đầu, không đợi 1s mới hiện số
+    tick();
     timerIntervalRef.current = setInterval(tick, 1000);
 
     return () => clearInterval(timerIntervalRef.current);
@@ -186,7 +180,8 @@ export default function ExamTakingPage() {
     } catch (error) {
       console.log("Lỗi hủy phiên:", error);
     } finally {
-      navigate(`/exams/${id}`);
+      // Khi hủy thi ngang, ưu tiên quay lại LearningPath hoặc trang trước đó
+      navigate(returnTo || `/exams/${id}`);
     }
   };
 
@@ -226,7 +221,6 @@ export default function ExamTakingPage() {
       const totalElements = currentPage?.totalElements ?? 0;
       const answeredCount = Object.keys(answers).length;
 
-      // Chỉ hỏi xác nhận khi user CHỦ ĐỘNG bấm nút - auto-submit do hết giờ thì nộp thẳng
       if (!auto && answeredCount < totalElements) {
         const confirmed = window.confirm(
           `Bạn đã trả lời ${answeredCount}/${totalElements} câu.\n\nBạn có chắc muốn nộp bài?`,
@@ -262,8 +256,6 @@ export default function ExamTakingPage() {
     [sessionInfo, answers, submitting, id, currentPage],
   );
 
-  // Giữ tham chiếu mới nhất để effect đếm giờ không cần liệt kê handleSubmit vào dependency
-  // (tránh việc mỗi lần chọn đáp án -> handleSubmit đổi identity -> effect chạy lại, reset interval)
   useEffect(() => {
     handleSubmitRef.current = handleSubmit;
   }, [handleSubmit]);
@@ -287,13 +279,15 @@ export default function ExamTakingPage() {
     );
   }
 
+  // --- MÀN HÌNH KẾT QUẢ ---
   if (result) {
     return (
       <ExamLayout
         title="Kết quả bài thi"
         onExit={() => {
           clearCachedResult(id);
-          navigate(`/exams/${id}`);
+          // Nút đóng "X" trên Navbar cũng sẽ ưu tiên returnTo
+          navigate(returnTo || `/exams/${id}`);
         }}
       >
         <div className="max-w-[720px] mx-auto py-8">
@@ -346,11 +340,25 @@ export default function ExamTakingPage() {
               </div>
             ))}
           </div>
+
+          {/* Bổ sung nút quay về lộ trình thật nổi bật phía dưới kết quả */}
+          <div className="mt-8 flex justify-center">
+            <button
+              onClick={() => {
+                clearCachedResult(id);
+                navigate(returnTo || `/exams/${id}`);
+              }}
+              className="w-full max-w-sm py-3.5 rounded-xl font-bold text-white bg-[#58cc02] hover:bg-[#4cb001] transition-colors"
+            >
+              {returnTo ? "VỀ LỘ TRÌNH" : "QUAY LẠI"}
+            </button>
+          </div>
         </div>
       </ExamLayout>
     );
   }
 
+  // --- MÀN HÌNH LÀM BÀI ---
   const pageQuestions = currentPage?.data ?? [];
   const totalElements = currentPage?.totalElements ?? 0;
   const answeredCountThisPage = pageQuestions.filter(
@@ -440,7 +448,7 @@ export default function ExamTakingPage() {
         <aside className="w-full lg:w-[260px] shrink-0 lg:sticky lg:top-20">
           <div className="border border-gray-200 dark:border-gray-700 rounded-2xl p-4">
             <button
-              onClick={() => handleSubmit()} // gọi qua arrow function, KHÔNG truyền thẳng handleSubmit
+              onClick={() => handleSubmit()}
               disabled={submitting || pageLoading}
               className="w-full py-3 mb-4 rounded-xl font-bold text-white bg-[#58cc02] hover:bg-[#4cb001] disabled:opacity-50 transition-colors"
             >

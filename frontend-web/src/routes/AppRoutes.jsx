@@ -14,6 +14,7 @@ import ExamListPage from "../pages/ExamListPage";
 import OnboardingPage from "../pages/OnboardingPage";
 import PlacementTestPage from "../pages/PlacementTestPage";
 import LearningPathPage from "../pages/LearningPathPage";
+import TopicLessonPage from "../pages/TopicLessonPage";
 
 // 1. Đưa ProtectedRoute ra ngoài AppRoutes
 const ProtectedRoute = ({ children }) => {
@@ -81,6 +82,8 @@ export const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
+
+      <Route path="/learn/topics/:topicId" element={<ProtectedRoute><TopicLessonPage /></ProtectedRoute>} />
 
       {/* 2. LUYỆN ĐỀ (Đổi path thành /exams cho chuẩn nghĩa) */}
       <Route
