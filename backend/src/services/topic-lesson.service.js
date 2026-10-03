@@ -15,7 +15,10 @@ class TopicLessonService {
     ]);
 
     if (words.length === 0) {
-      throw new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Chủ đề này chưa có từ vựng.");
+      throw new AppException(
+        ErrorCode.RESOURCE_NOT_FOUND,
+        "Chủ đề này chưa có từ vựng.",
+      );
     }
     if (questions.length === 0) {
       throw new AppException(
@@ -40,27 +43,43 @@ class TopicLessonService {
         optionC: q.option_c,
         optionD: q.option_d,
       })),
-      // Từ dùng để luyện phát âm - lấy đúng những từ vừa học ở giai đoạn 1
-      pronunciationWords: words.map((w) => w.word),
+      pronunciationWords: words.map((w) => ({
+        word: w.word,
+        pronunciation: w.pronunciation,
+      })),
     };
   }
 
   gradeQuiz(questionsWithAnswer, answers) {
-    const answerMap = new Map(answers.map((a) => [Number(a.question_id), a.selected_option]));
+    const answerMap = new Map(
+      answers.map((a) => [Number(a.question_id), a.selected_option]),
+    );
     let correctCount = 0;
     for (const q of questionsWithAnswer) {
       if (answerMap.get(q.id) === q.correct_option) correctCount++;
     }
-    return questionsWithAnswer.length > 0 ? (correctCount / questionsWithAnswer.length) * 100 : 0;
+    return questionsWithAnswer.length > 0
+      ? (correctCount / questionsWithAnswer.length) * 100
+      : 0;
   }
 
-  async completeLesson({ userId, topicId, questionIds, quizAnswers, pronunciationResults }) {
-    const questionsWithAnswer = await examRepository.findQuestionsByIds(questionIds);
+  async completeLesson({
+    userId,
+    topicId,
+    questionIds,
+    quizAnswers,
+    pronunciationResults,
+  }) {
+    const questionsWithAnswer =
+      await examRepository.findQuestionsByIds(questionIds);
     const quizScore = this.gradeQuiz(questionsWithAnswer, quizAnswers);
 
     const totalPronounced = pronunciationResults.length;
-    const correctPronounced = pronunciationResults.filter((r) => r.isCorrect).length;
-    const pronunciationScore = totalPronounced > 0 ? (correctPronounced / totalPronounced) * 100 : 0;
+    const correctPronounced = pronunciationResults.filter(
+      (r) => r.isCorrect,
+    ).length;
+    const pronunciationScore =
+      totalPronounced > 0 ? (correctPronounced / totalPronounced) * 100 : 0;
 
     const attempt = await lessonRepository.saveAttempt({
       userId,

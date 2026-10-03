@@ -1,11 +1,15 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import api from "../api/api";
 import MainLayout from "../layouts/MainLayout";
+import { getReturnTo, withReturnTo } from "../utils/navigation";
 
 export default function ExamDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const returnTo = getReturnTo(searchParams);
+  
   const [exam, setExam] = useState(null);
   const [loadError, setLoadError] = useState("");
 
@@ -39,6 +43,14 @@ export default function ExamDetailPage() {
   return (
     <MainLayout>
       <div className="max-w-[640px] mx-auto py-10">
+        {/* Nút quay lại dành cho màn hình chi tiết */}
+        <button
+          onClick={() => navigate(returnTo || "/exams")}
+          className="text-sm font-semibold text-gray-500 hover:text-gray-900 dark:hover:text-white mb-6"
+        >
+          ← Quay lại
+        </button>
+
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">{exam.title}</h1>
         <div className="flex flex-wrap gap-4 text-sm text-gray-500 dark:text-gray-400 mb-8">
           <span>⏰ {exam.duration} phút</span>
@@ -46,7 +58,8 @@ export default function ExamDetailPage() {
         </div>
 
         <button
-          onClick={() => navigate(`/exams/${id}/take`)}
+          // Nối tiếp returnTo vào URL sang trang làm bài
+          onClick={() => navigate(withReturnTo(`/exams/${id}/take`, returnTo))}
           className="w-full py-3.5 rounded-xl font-bold text-white bg-[#58cc02] hover:bg-[#4cb001] transition-colors"
         >
           BẮT ĐẦU LÀM BÀI

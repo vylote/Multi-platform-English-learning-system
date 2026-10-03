@@ -5,7 +5,7 @@ function normalizeText(text) {
   return text.trim().toLowerCase().replace(/[^\w\s]/g, "");
 }
 
-export default function PronunciationPractice({ targetWord, onResult }) {
+export default function PronunciationPractice({ targetWord, pronunciation, onResult }) {
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState("");
   const [result, setResult] = useState(null); // null | "correct" | "incorrect" | "unsupported"
@@ -62,6 +62,11 @@ export default function PronunciationPractice({ targetWord, onResult }) {
   return (
     <div className="max-w-[420px] mx-auto p-6 rounded-2xl border border-gray-200 dark:border-gray-700 text-center">
       <p className="text-3xl font-bold text-gray-900 dark:text-white mb-1">{targetWord}</p>
+      {pronunciation && (
+        <p className="text-base text-gray-500 dark:text-gray-400 font-mono mb-1">
+          {pronunciation}
+        </p>
+      )}
       <p className="text-sm text-gray-400 dark:text-gray-500 mb-6">Nghe mẫu, sau đó bấm micro và đọc theo</p>
 
       <div className="flex justify-center gap-3 mb-6">
