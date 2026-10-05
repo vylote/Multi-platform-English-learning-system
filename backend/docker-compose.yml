@@ -21,3 +21,6 @@ services:
       - "6379:6379"
     environment:
       TZ: Asia/Ho_Chi_Minh
+      
+volumes:
+  pgdata:
