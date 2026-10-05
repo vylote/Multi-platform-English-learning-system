@@ -181,3 +181,13 @@ CREATE TABLE IF NOT EXISTS lesson_attempts (
     completed_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX IF NOT EXISTS idx_lesson_attempts_user_topic ON lesson_attempts (user_id, topic_id);
+
+CREATE TABLE IF NOT EXISTS topic_goal_priority (
+    goal VARCHAR(30) NOT NULL
+      CHECK (goal IN ('DAILY_COMMUNICATION', 'CAREER', 'TRAVEL', 'HOBBY')),
+    topic_id INTEGER NOT NULL REFERENCES topics(id) ON DELETE CASCADE,
+    PRIMARY KEY (goal, topic_id)
+);
+
+ALTER TABLE users ADD COLUMN IF NOT EXISTS learning_goal VARCHAR(30)
+  CHECK (learning_goal IN ('DAILY_COMMUNICATION', 'CAREER', 'TRAVEL', 'HOBBY'));
