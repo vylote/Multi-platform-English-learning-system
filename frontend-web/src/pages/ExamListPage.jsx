@@ -149,9 +149,6 @@ export default function ExamListPage() {
 
               <div className="min-w-0">
                 <div className="flex items-center gap-2 mb-2 flex-wrap">
-                  <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider bg-[#58cc02]/15 text-[#58cc02] border border-[#58cc02]/30">
-                    <span>🎯</span> Chủ đề luyện thi
-                  </span>
                   {topic?.difficulty && (
                     <span className="text-xs font-bold px-3 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
                       {topic.difficulty === "BEGINNER"

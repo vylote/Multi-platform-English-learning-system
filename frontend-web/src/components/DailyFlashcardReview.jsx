@@ -153,7 +153,7 @@ export default function DailyFlashcardReview({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isFlipped, currentCard, handleFlip, handleAnswer, playAudio]);
 
-  const backLabel = returnTo === "/learn" ? "← Quay lại lộ trình" : "← Chọn chủ đề khác";
+  const backLabel = returnTo === "/learn" ? "Quay lại lộ trình" : "Chọn chủ đề khác";
   const topicIcon = TOPIC_ICONS[topicName] || "🎴";
 
   // 1. TRẠNG THÁI ĐANG TẢI
@@ -173,9 +173,10 @@ export default function DailyFlashcardReview({
         {onBack && (
           <button
             onClick={onBack}
-            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 shadow-2xs hover:border-[#58cc02] transition-all cursor-pointer mb-6"
+            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 shadow-2xs hover:border-[#58cc02] transition-all cursor-pointer group active:scale-95 mb-6"
           >
-            {backLabel}
+            <span className="group-hover:-translate-x-1 transition-transform">←</span>
+            <span>{backLabel}</span>
           </button>
         )}
         <div className="p-6 rounded-3xl bg-rose-500/10 border-2 border-rose-500/20 text-rose-500 dark:text-rose-400 text-sm font-semibold">
@@ -192,9 +193,10 @@ export default function DailyFlashcardReview({
         {onBack && (
           <button
             onClick={onBack}
-            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 shadow-2xs hover:border-[#58cc02] transition-all cursor-pointer mb-6"
+            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 shadow-2xs hover:border-[#58cc02] transition-all cursor-pointer group active:scale-95 mb-6"
           >
-            {backLabel}
+            <span className="group-hover:-translate-x-1 transition-transform">←</span>
+            <span>{backLabel}</span>
           </button>
         )}
         <div className="p-8 rounded-3xl bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 shadow-sm text-center">

@@ -9,6 +9,7 @@
  *
  * Options:
  *   --topics    "1-36" (khoảng) hoặc "1,3,7" (danh sách). Bỏ qua nếu dùng --placement
+ *   --sets      số bộ đề/chủ đề. Mặc định: 1 (ví dụ --sets=3 sẽ tạo 3 đề khác nhau cho mỗi chủ đề)
  *   --placement Sinh 1 bài kiểm tra đầu vào (exam_type='PLACEMENT'), trộn độ khó từ topics.difficulty
  *   --count     số câu hỏi/đề. Mặc định: 10 (topic) / 30 (placement)
  *   --duration  thời gian làm bài (phút). Mặc định: 15
@@ -69,6 +70,7 @@ function parseArgs() {
     count: Number(args.count) || (isPlacement ? 30 : 10),
     duration: Number(args.duration) || 15,
     force: !!args.force,
+    sets: Math.max(1, Number(args.sets || args["exams-per-topic"]) || 1),
   };
 }
 
@@ -78,17 +80,23 @@ function parseArgs() {
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 function buildTopicPrompt(topic, count) {
-  return `Bạn là chuyên gia ra đề thi tiếng Anh. Hãy sinh đúng ${count} câu hỏi trắc nghiệm tiếng Anh (4 đáp án A/B/C/D, chỉ 1 đáp án đúng) cho chủ đề: "${topic.title}"${
-    topic.description ? ` (mô tả: ${topic.description})` : ""
+  return `You are an expert Cambridge/IELTS/TOEIC English test creator.
+Generate exactly ${count} multiple-choice English questions (4 options A/B/C/D, strictly 1 correct answer) for the topic: "${topic.title}"${
+    topic.description ? ` (${topic.description})` : ""
   }.
 
-Yêu cầu:
-- Trình độ: trung cấp (intermediate), phù hợp người Việt học tiếng Anh.
-- Có thể hỏi về từ vựng, ngữ pháp, hoặc cách dùng liên quan chủ đề trên.
-- Không trùng lặp câu hỏi, không trùng lặp đáp án trong cùng một câu.
-- Chỉ trả về JSON hợp lệ, không kèm giải thích, không markdown code block.
+STRICT REQUIREMENTS:
+1. 100% ENGLISH ONLY: Both the question text and all 4 options (A, B, C, D) MUST BE 100% IN ENGLISH. Absolutely DO NOT include any Vietnamese words, sentences, or translations anywhere.
+2. Question Styles (mix of the following):
+   - Fill-in-the-blank / Contextual sentence (Cloze): e.g. "The manager asked the team to prepare a preliminary ______ before the meeting."
+   - Vocabulary definition & usage: e.g. "Which of the following words describes a person/thing that ...?"
+   - Synonyms / Contextual meaning: e.g. "Which word is closest in meaning to '...' in the sentence: '...'?"
+3. Options:
+   - Each option (A, B, C, D) must be a single English word or short English phrase of the same grammatical category.
+   - All 4 options must be distinct, valid, plausible English words.
+4. Output format: Return ONLY a valid JSON object without markdown code blocks, without extra comments.
 
-Định dạng JSON bắt buộc:
+Format:
 {
   "questions": [
     { "question_text": "...", "option_a": "...", "option_b": "...", "option_c": "...", "option_d": "...", "correct_option": "A" }
@@ -98,25 +106,25 @@ Yêu cầu:
 
 function buildPlacementPrompt(topicsByTier, count) {
   const perTier = Math.floor(count / 3);
-  const lastTierCount = count - perTier * 2; // dồn phần dư vào tier khó nhất
+  const lastTierCount = count - perTier * 2;
 
   const listTitles = (tier) =>
-    (topicsByTier[tier] || []).map((t) => t.title).join(", ") || "(chủ đề tổng quát)";
+    (topicsByTier[tier] || []).map((t) => t.title).join(", ") || "(general English)";
 
-  return `Bạn là chuyên gia ra đề kiểm tra đầu vào (placement test) tiếng Anh, dùng để phân loại trình độ người học thành BEGINNER / INTERMEDIATE / ADVANCED.
+  return `You are an expert English language examiner designing a formal Placement Test to accurately assess and classify learners into BEGINNER, INTERMEDIATE, and ADVANCED levels.
 
-Hãy sinh đúng ${count} câu hỏi trắc nghiệm (4 đáp án A/B/C/D, chỉ 1 đáp án đúng), chia theo độ khó TĂNG DẦN, mỗi câu liên quan tới từ vựng/ngữ pháp phù hợp chủ đề gợi ý:
+Generate exactly ${count} multiple-choice English questions (4 options A/B/C/D, strictly 1 correct answer), arranged from EASIEST to HARDEST:
+- ${perTier} BEGINNER questions (A1-A2 level): basic grammar, common everyday vocabulary (topics: ${listTitles("BEGINNER")})
+- ${perTier} INTERMEDIATE questions (B1-B2 level): prepositions, phrasal verbs, tenses, collocations (topics: ${listTitles("INTERMEDIATE")})
+- ${lastTierCount} ADVANCED questions (C1-C2 level): complex grammar, subtle vocabulary nuances, idioms (topics: ${listTitles("ADVANCED")})
 
-- ${perTier} câu MỨC DỄ (beginner) - chủ đề gợi ý: ${listTitles("BEGINNER")}
-- ${perTier} câu MỨC TRUNG BÌNH (intermediate) - chủ đề gợi ý: ${listTitles("INTERMEDIATE")}
-- ${lastTierCount} câu MỨC KHÓ (advanced) - chủ đề gợi ý: ${listTitles("ADVANCED")}
+STRICT REQUIREMENTS:
+1. 100% ENGLISH ONLY: Both question text and all 4 options (A, B, C, D) MUST BE IN ENGLISH. Never use Vietnamese.
+2. Order questions strictly from easiest (question 1) to hardest (question ${count}).
+3. All 4 options must be distinct, plausible English words or phrases.
+4. Output format: Return ONLY valid JSON, no markdown code blocks.
 
-Yêu cầu:
-- Sắp xếp câu hỏi trong JSON theo đúng thứ tự TỪ DỄ ĐẾN KHÓ (câu 1 dễ nhất, câu cuối khó nhất).
-- Không trùng lặp câu hỏi, không trùng lặp đáp án trong cùng một câu.
-- Chỉ trả về JSON hợp lệ, không kèm giải thích, không markdown code block.
-
-Định dạng JSON bắt buộc:
+Format:
 {
   "questions": [
     { "question_text": "...", "option_a": "...", "option_b": "...", "option_c": "...", "option_d": "...", "correct_option": "A" }
@@ -290,15 +298,25 @@ async function generateQuestionsFromDb(topic, count) {
   }
 
   const { rows: otherWords } = await db.query(
-    "SELECT id, word, meaning_vi FROM words WHERE topic_id != $1 AND topic_id IS NOT NULL ORDER BY RANDOM() LIMIT 100",
+    "SELECT id, word, meaning_vi, part_of_speech FROM words WHERE topic_id != $1 AND topic_id IS NOT NULL ORDER BY RANDOM() LIMIT 150",
     [topic.id]
   );
 
   const cleanMeaning = (str) => {
     if (!str) return "";
-    const parts = str.split(",").map((s) => s.trim()).filter(Boolean);
+    const parts = str.split(/[;,]/).map((s) => s.trim()).filter(Boolean);
     return parts.slice(0, 2).join(", ");
   };
+
+  // Diverse templates for questions - ALL IN ENGLISH with English choices:
+  const TEMPLATES = [
+    (w, t, m) => `Which English word means "${m}" in the topic of "${t}"?`,
+    (w, t, m) => `Choose the correct word to complete: "The specialist explained the importance of ______ in our ${t.toLowerCase()} study."`,
+    (w, t, m) => `Select the English term that matches the following description: "${m}".`,
+    (w, t, m) => `Fill in the blank with the appropriate word: "During our discussion about ${t.toLowerCase()}, they focused on '______'."`,
+    (w, t, m) => `Which of the following English words corresponds to "${m}"?`,
+    (w, t, m) => `Choose the word that correctly fits the context: "We need to understand the concept of ______ before proceeding with the ${t.toLowerCase()} task."`,
+  ];
 
   const shuffledTopicWords = [...topicWords].sort(() => 0.5 - Math.random());
   const selectedWords = shuffledTopicWords.slice(0, Math.min(count, topicWords.length));
@@ -306,43 +324,22 @@ async function generateQuestionsFromDb(topic, count) {
 
   for (let i = 0; i < selectedWords.length; i++) {
     const target = selectedWords[i];
-    const isMeaningQuestion = i % 2 === 0;
+    const meaning = cleanMeaning(target.meaning_vi);
+    const templateFn = TEMPLATES[i % TEMPLATES.length];
+    const question_text = templateFn(target.word, topic.title, meaning);
+    const correctText = target.word;
 
-    let question_text = "";
-    let correctText = "";
-    let distractorPool = [];
+    // Distractors must be other ENGLISH words from the same topic or other topics:
+    const otherEnglishWords = shuffledTopicWords
+      .filter((w) => w.id !== target.id)
+      .map((w) => w.word)
+      .filter((w) => w.toLowerCase() !== correctText.toLowerCase());
 
-    if (isMeaningQuestion) {
-      question_text = `Nghĩa tiếng Việt chính xác của từ "${target.word}" là gì?`;
-      correctText = cleanMeaning(target.meaning_vi);
+    const fallbackWords = otherWords
+      .map((w) => w.word)
+      .filter((w) => w.toLowerCase() !== correctText.toLowerCase());
 
-      const otherMeanings = shuffledTopicWords
-        .filter((w) => w.id !== target.id)
-        .map((w) => cleanMeaning(w.meaning_vi))
-        .filter((m) => m && m.toLowerCase() !== correctText.toLowerCase());
-
-      const fallbackMeanings = otherWords
-        .map((w) => cleanMeaning(w.meaning_vi))
-        .filter((m) => m && m.toLowerCase() !== correctText.toLowerCase());
-
-      distractorPool = [...new Set([...otherMeanings, ...fallbackMeanings])];
-    } else {
-      const targetMeaning = cleanMeaning(target.meaning_vi);
-      question_text = `Từ tiếng Anh nào sau đây có nghĩa là: "${targetMeaning}"?`;
-      correctText = target.word;
-
-      const otherEnglishWords = shuffledTopicWords
-        .filter((w) => w.id !== target.id)
-        .map((w) => w.word)
-        .filter((w) => w.toLowerCase() !== correctText.toLowerCase());
-
-      const fallbackWords = otherWords
-        .map((w) => w.word)
-        .filter((w) => w.toLowerCase() !== correctText.toLowerCase());
-
-      distractorPool = [...new Set([...otherEnglishWords, ...fallbackWords])];
-    }
-
+    const distractorPool = [...new Set([...otherEnglishWords, ...fallbackWords])];
     distractorPool.sort(() => 0.5 - Math.random());
     const distractors = distractorPool.slice(0, 3);
     if (distractors.length < 3) continue;
@@ -367,7 +364,7 @@ async function generateQuestionsFromDb(topic, count) {
 // ---------------------------------------------------------------------------
 // Topic flow
 // ---------------------------------------------------------------------------
-async function runTopicGeneration({ topicIds, count, duration, force }) {
+async function runTopicGeneration({ topicIds, count, duration, force, sets = 1 }) {
   let okCount = 0;
   let failCount = 0;
 
@@ -379,42 +376,62 @@ async function runTopicGeneration({ topicIds, count, duration, force }) {
     }
 
     if (!force) {
-      const existing = await examExistsForTopic(topicId);
-      if (existing) {
-        console.log(`[Topic ${topicId}] "${topic.title}" đã có đề (id=${existing.id}), bỏ qua. Dùng --force để tạo thêm.`);
+      const { rows: existingExams } = await db.query(
+        "SELECT id FROM exams WHERE topic_id = $1 AND exam_type = 'TOPIC'",
+        [topicId]
+      );
+      if (existingExams.length >= sets) {
+        console.log(`[Topic ${topicId}] "${topic.title}" đã có ${existingExams.length} đề thi, bỏ qua. Dùng --force để tạo lại.`);
         continue;
       }
+    } else {
+      // Khi dùng --force, xóa sạch đề cũ và câu hỏi cũ của topic để thay bằng các bộ câu hỏi mới
+      const { rows: existingExams } = await db.query(
+        "SELECT id FROM exams WHERE topic_id = $1 AND exam_type = 'TOPIC'",
+        [topicId]
+      );
+      for (const ex of existingExams) {
+        await db.query("DELETE FROM questions WHERE exam_id = $1", [ex.id]);
+        await db.query("DELETE FROM exam_answers WHERE session_id IN (SELECT id FROM exam_sessions WHERE exam_id = $1)", [ex.id]).catch(() => {});
+        await db.query("DELETE FROM exam_results WHERE exam_id = $1", [ex.id]).catch(() => {});
+        await db.query("DELETE FROM exam_sessions WHERE exam_id = $1", [ex.id]).catch(() => {});
+        await db.query("DELETE FROM exams WHERE id = $1", [ex.id]);
+      }
     }
 
-    try {
-      let questions;
-      if (GROQ_API_KEY) {
-        console.log(`[Topic ${topicId}] "${topic.title}": đang gọi Groq...`);
-        const prompt = buildTopicPrompt(topic, count);
-        const parsed = await callGroq(prompt);
-        questions = validateQuestions(parsed);
-      } else {
-        console.log(`[Topic ${topicId}] "${topic.title}": đang sinh câu hỏi từ kho từ vựng DB...`);
-        questions = await generateQuestionsFromDb(topic, count);
+    for (let setIdx = 1; setIdx <= sets; setIdx++) {
+      try {
+        let questions;
+        if (GROQ_API_KEY) {
+          console.log(`[Topic ${topicId}] "${topic.title}" (Bộ đề ${setIdx}/${sets}): đang gọi Groq...`);
+          const prompt = buildTopicPrompt(topic, count);
+          const parsed = await callGroq(prompt);
+          questions = validateQuestions(parsed);
+        } else {
+          console.log(`[Topic ${topicId}] "${topic.title}" (Bộ đề ${setIdx}/${sets}): đang sinh câu hỏi chuẩn tiếng Anh từ kho DB...`);
+          questions = await generateQuestionsFromDb(topic, count);
+        }
+
+        const title = sets > 1 ? `Đề số ${setIdx}: ${topic.title}` : `Đề thi: ${topic.title}`;
+
+        const examId = await saveExam({
+          topicId: topic.id,
+          title,
+          duration,
+          examType: "TOPIC",
+          questions,
+        });
+
+        console.log(`   ✅ Tạo đề id=${examId} "${title}" với ${questions.length} câu hỏi tiếng Anh chuẩn.`);
+        okCount++;
+      } catch (err) {
+        console.error(`   ❌ Lỗi tạo bộ đề ${setIdx}: ${err.message}`);
+        failCount++;
       }
 
-      const examId = await saveExam({
-        topicId: topic.id,
-        title: `Đề thi: ${topic.title}`,
-        duration,
-        examType: "TOPIC",
-        questions,
-      });
-
-      console.log(`   ✅ Tạo đề id=${examId} với ${questions.length} câu hỏi.`);
-      okCount++;
-    } catch (err) {
-      console.error(`   ❌ Lỗi: ${err.message}`);
-      failCount++;
-    }
-
-    if (GROQ_API_KEY) {
-      await sleep(2500);
+      if (GROQ_API_KEY) {
+        await sleep(2500);
+      }
     }
   }
 
@@ -426,13 +443,13 @@ async function runTopicGeneration({ topicIds, count, duration, force }) {
 // Main
 // ---------------------------------------------------------------------------
 async function main() {
-  const { isPlacement, topicIds, count, duration, force } = parseArgs();
+  const { isPlacement, topicIds, count, duration, force, sets } = parseArgs();
 
   if (isPlacement) {
     await runPlacementGeneration({ count, duration, force });
   } else {
-    console.log(`Sinh câu hỏi cho ${topicIds.length} chủ đề, mỗi đề ${count} câu (model: ${ACTIVE_MODEL})...\n`);
-    await runTopicGeneration({ topicIds, count, duration, force });
+    console.log(`Sinh câu hỏi cho ${topicIds.length} chủ đề, mỗi chủ đề ${sets} bộ đề, mỗi đề ${count} câu (model: ${ACTIVE_MODEL})...\n`);
+    await runTopicGeneration({ topicIds, count, duration, force, sets });
   }
 
   await db.pool.end();

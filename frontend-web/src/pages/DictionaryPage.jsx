@@ -125,12 +125,9 @@ export default function DictionaryPage() {
 
   return (
     <MainLayout>
-      <div className="max-w-[720px] mx-auto py-6 px-4">
+      <div className="w-full max-w-[880px] mx-auto py-2 sm:py-4">
         {/* Header */}
         <div className="mb-6 text-center sm:text-left">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-[#58cc02]/10 text-[#58cc02] border border-[#58cc02]/30 mb-2">
-            <span>📖</span> Từ điển Anh - Việt
-          </div>
           <h1 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white tracking-tight">
             Tra cứu từ điển
           </h1>

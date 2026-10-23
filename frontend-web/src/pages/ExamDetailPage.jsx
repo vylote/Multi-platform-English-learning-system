@@ -100,9 +100,6 @@ export default function ExamDetailPage() {
               📝
             </div>
             <div className="min-w-0">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[#58cc02]/10 text-[#58cc02] border border-[#58cc02]/30 mb-2">
-                <span>🎯</span> {exam.exam_type === "PLACEMENT" ? "Đề kiểm tra đầu vào" : "Đề thi theo chủ đề"}
-              </span>
               <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-white leading-tight">
                 {exam.title}
               </h1>

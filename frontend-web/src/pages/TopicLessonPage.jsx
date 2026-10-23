@@ -288,9 +288,6 @@ export default function TopicLessonPage() {
         {phase === "learn" && (
           <div>
             <div className="mb-6 text-center">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-[#58cc02]/10 text-[#58cc02] border border-[#58cc02]/30 mb-2">
-                <span>📖</span> Phần 1: Học từ vựng
-              </div>
               <h2 className="text-xl sm:text-2xl font-black text-gray-900 dark:text-white mb-1">
                 Làm quen với {lesson.vocabulary.length} từ mới
               </h2>

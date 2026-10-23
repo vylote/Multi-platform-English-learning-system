@@ -1,33 +1,8 @@
 import { X, ArrowLeft, Sun, Moon } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useTheme } from "../context/ThemeContext";
 
 export default function AuthLayout({ onClose, onBack, children }) {
-  // 1. Kiểm tra trạng thái ngay khi khởi tạo state để tránh render thừa
-  const [isDarkMode, setIsDarkMode] = useState(() => {
-    if (typeof window !== "undefined") {
-      return (
-        localStorage.theme === "dark" ||
-        (!("theme" in localStorage) && window.matchMedia("(prefers-color-scheme: dark)").matches)
-      );
-    }
-    return false;
-  });
-
-  // 2. Dùng useEffect ĐỂ ĐỒNG BỘ state ra bên ngoài (DOM và localStorage)
-  useEffect(() => {
-    if (isDarkMode) {
-      document.documentElement.classList.add("dark");
-      localStorage.theme = "dark";
-    } else {
-      document.documentElement.classList.remove("dark");
-      localStorage.theme = "light";
-    }
-  }, [isDarkMode]); // Chạy lại mỗi khi isDarkMode thay đổi
-
-  // 3. Hàm toggle chỉ cần đảo ngược state hiện tại
-  const toggleDarkMode = () => {
-    setIsDarkMode((prev) => !prev);
-  };
+  const { isDark, toggleTheme } = useTheme();
 
   return (
     <div className="min-h-screen w-full bg-[#f9f9f9] dark:bg-gray-900 flex flex-col transition-colors duration-300">
@@ -57,11 +32,11 @@ export default function AuthLayout({ onClose, onBack, children }) {
         </div>
 
         <button
-          onClick={toggleDarkMode}
+          onClick={toggleTheme}
           className="p-2 rounded-full text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors"
           title="Bật/tắt chế độ ban đêm"
         >
-          {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+          {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
         </button>
       </header>
 

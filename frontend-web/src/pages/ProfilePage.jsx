@@ -83,11 +83,11 @@ export default function ProfilePage() {
 
   return (
     <MainLayout>
-      <div className="max-w-[760px] mx-auto py-6 px-4">
+      <div className="w-full mx-auto py-2 sm:py-4">
         {/* ============ USER HERO CARD ============ */}
-        <div className="p-6 sm:p-8 rounded-3xl bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 shadow-xs mb-6 relative overflow-hidden">
+        <div className="p-6 sm:p-8 rounded-3xl bg-white dark:bg-gray-800 border-2 border-[#e8e3d8] dark:border-gray-700 shadow-xs mb-6 relative overflow-hidden">
           {/* Top banner accent strip */}
-          <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-[#58cc02] via-[#1cb0f6] to-[#ce82ff]" />
+          <div className="absolute top-0 left-0 right-0 h-1.5 bg-[#58cc02]" />
 
           <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5 text-center sm:text-left mt-2">
             {/* Avatar Circle */}
@@ -162,7 +162,7 @@ export default function ProfilePage() {
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {/* 1. Chuỗi Streak */}
-            <div className="p-4 sm:p-5 rounded-3xl bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 shadow-2xs text-left">
+            <div className="p-4 sm:p-5 rounded-3xl bg-white dark:bg-gray-800 border-2 border-[#e8e3d8] dark:border-gray-700 shadow-2xs text-left">
               <span className="text-xl sm:text-2xl block mb-1">🔥</span>
               <p className="text-2xl sm:text-3xl font-black text-orange-500">
                 {currentStreak}
@@ -176,7 +176,7 @@ export default function ProfilePage() {
             </div>
 
             {/* 2. Chủ đề hoàn thành */}
-            <div className="p-4 sm:p-5 rounded-3xl bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 shadow-2xs text-left">
+            <div className="p-4 sm:p-5 rounded-3xl bg-white dark:bg-gray-800 border-2 border-[#e8e3d8] dark:border-gray-700 shadow-2xs text-left">
               <span className="text-xl sm:text-2xl block mb-1">🗺️</span>
               <p className="text-2xl sm:text-3xl font-black text-[#58cc02]">
                 {completedTopics}/{totalTopics || 0}
@@ -190,7 +190,7 @@ export default function ProfilePage() {
             </div>
 
             {/* 3. Từ vựng đã nắm vững */}
-            <div className="p-4 sm:p-5 rounded-3xl bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 shadow-2xs text-left">
+            <div className="p-4 sm:p-5 rounded-3xl bg-white dark:bg-gray-800 border-2 border-[#e8e3d8] dark:border-gray-700 shadow-2xs text-left">
               <span className="text-xl sm:text-2xl block mb-1">📖</span>
               <p className="text-2xl sm:text-3xl font-black text-[#1cb0f6]">
                 {masteredWords}
@@ -204,7 +204,7 @@ export default function ProfilePage() {
             </div>
 
             {/* 4. Bài thi đã làm */}
-            <div className="p-4 sm:p-5 rounded-3xl bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 shadow-2xs text-left">
+            <div className="p-4 sm:p-5 rounded-3xl bg-white dark:bg-gray-800 border-2 border-[#e8e3d8] dark:border-gray-700 shadow-2xs text-left">
               <span className="text-xl sm:text-2xl block mb-1">📝</span>
               <p className="text-2xl sm:text-3xl font-black text-[#ce82ff]">
                 {examHistory.length}
@@ -221,7 +221,7 @@ export default function ProfilePage() {
 
         {/* ============ CHUỖI HOẠT ĐỘNG TUẦN (WEEKLY STREAK) ============ */}
         {week && week.length > 0 && (
-          <div className="p-5 sm:p-6 rounded-3xl bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 shadow-2xs mb-6 text-left">
+          <div className="p-5 sm:p-6 rounded-3xl bg-white dark:bg-gray-800 border-2 border-[#e8e3d8] dark:border-gray-700 shadow-2xs mb-6 text-left">
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h3 className="text-sm font-black text-gray-900 dark:text-white flex items-center gap-1.5">
@@ -263,7 +263,7 @@ export default function ProfilePage() {
         )}
 
         {/* ============ LỊCH SỬ THI GẦN ĐÂY ============ */}
-        <div className="p-5 sm:p-6 rounded-3xl bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 shadow-2xs mb-6 text-left">
+        <div className="p-5 sm:p-6 rounded-3xl bg-white dark:bg-gray-800 border-2 border-[#e8e3d8] dark:border-gray-700 shadow-2xs mb-6 text-left">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-black text-gray-900 dark:text-white flex items-center gap-1.5">
               <span>🏆</span> Lịch sử làm bài thi gần đây
