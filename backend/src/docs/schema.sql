@@ -35,8 +35,9 @@ CREATE TABLE IF NOT EXISTS users (
     password_hash VARCHAR(255) NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,     -- Tự sinh index: users_email_key
     role_id INTEGER NOT NULL REFERENCES roles(id) ON DELETE CASCADE,
-    -- CHƯA CẦN: index cho role_id - user.repository.js hiện chỉ JOIN roles
-    -- sau khi đã lọc theo username/email/id (đã có index), không cần thêm
+    tier VARCHAR(50),
+    experience_level VARCHAR(50),
+    learning_purpose VARCHAR(150),
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -65,6 +66,11 @@ CREATE TABLE IF NOT EXISTS topics (
     title VARCHAR(100) NOT NULL,
     description TEXT
 );
+
+-- Khóa ngoại từ words -> topics
+ALTER TABLE words ADD COLUMN IF NOT EXISTS topic_id INTEGER REFERENCES topics(id) ON DELETE SET NULL;
+CREATE INDEX IF NOT EXISTS idx_words_topic_id ON words (topic_id);
+
 
 -- 8. BẢNG FLASHCARDS: Tiến trình học tập (Bảng nối đa chiều động)
 CREATE TABLE IF NOT EXISTS flashcards (

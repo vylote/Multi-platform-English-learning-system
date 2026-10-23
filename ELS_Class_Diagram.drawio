@@ -1,0 +1,516 @@
+<mxfile host="app.diagrams.net" modified="2026-10-18T20:30:00.000Z" agent="Antigravity" version="24.0.0" type="device">
+  <diagram id="els-class-diagram" name="ELS Class Diagram - 100% DB Match">
+    <mxGraphModel dx="2400" dy="1600" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2600" pageHeight="1800" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- ========================================================= -->
+        <!-- PACKAGES (Gói nghiệp vụ thực tế)                          -->
+        <!-- ========================================================= -->
+        
+        <!-- Package 1: User & Authentication (Khớp bảng: users, roles, permissions, streak_logs) -->
+        <mxCell id="pkg1" value="" style="shape=folder;tabWidth=220;tabHeight=32;tabPosition=left;html=1;boundedLbl=1;fillColor=#FFF2CC;strokeColor=#D6B656;" vertex="1" parent="1">
+          <mxGeometry x="60" y="50" width="940" height="520" as="geometry" />
+        </mxCell>
+        <mxCell id="pkg1_title" value="User &amp; Authentication" style="text;html=1;align=center;verticalAlign=middle;fontStyle=1;fontSize=13;fontColor=#000000;fillColor=none;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="60" y="50" width="220" height="32" as="geometry" />
+        </mxCell>
+
+        <!-- Package 2: Curriculum & Dictionary (Khớp bảng: topics, words, idioms, topic_goal_priority) -->
+        <mxCell id="pkg2" value="" style="shape=folder;tabWidth=220;tabHeight=32;tabPosition=left;html=1;boundedLbl=1;fillColor=#FFF2CC;strokeColor=#D6B656;" vertex="1" parent="1">
+          <mxGeometry x="1050" y="50" width="950" height="260" as="geometry" />
+        </mxCell>
+        <mxCell id="pkg2_title" value="Curriculum &amp; Dictionary" style="text;html=1;align=center;verticalAlign=middle;fontStyle=1;fontSize=13;fontColor=#000000;fillColor=none;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="1050" y="50" width="220" height="32" as="geometry" />
+        </mxCell>
+
+        <!-- Package 3: Study Progress (Khớp bảng: flashcards, lesson_attempts) -->
+        <mxCell id="pkg3" value="" style="shape=folder;tabWidth=200;tabHeight=32;tabPosition=left;html=1;boundedLbl=1;fillColor=#FFF2CC;strokeColor=#D6B656;" vertex="1" parent="1">
+          <mxGeometry x="1050" y="340" width="950" height="230" as="geometry" />
+        </mxCell>
+        <mxCell id="pkg3_title" value="Study Progress" style="text;html=1;align=center;verticalAlign=middle;fontStyle=1;fontSize=13;fontColor=#000000;fillColor=none;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="1050" y="340" width="200" height="32" as="geometry" />
+        </mxCell>
+
+        <!-- Package 4: Examination & Assessment (Khớp bảng: exams, questions, exam_sessions, exam_answers, exam_results) -->
+        <mxCell id="pkg4" value="" style="shape=folder;tabWidth=250;tabHeight=32;tabPosition=left;html=1;boundedLbl=1;fillColor=#FFF2CC;strokeColor=#D6B656;" vertex="1" parent="1">
+          <mxGeometry x="60" y="610" width="1940" height="520" as="geometry" />
+        </mxCell>
+        <mxCell id="pkg4_title" value="Examination &amp; Assessment" style="text;html=1;align=center;verticalAlign=middle;fontStyle=1;fontSize=13;fontColor=#000000;fillColor=none;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="60" y="610" width="250" height="32" as="geometry" />
+        </mxCell>
+
+
+        <!-- ========================================================= -->
+        <!-- PACKAGE 1: USER & AUTHENTICATION CLASSES                  -->
+        <!-- ========================================================= -->
+
+        <!-- Permission Class (Bảng permissions) -->
+        <mxCell id="cls_perm" value="&lt;b&gt;Permission&lt;/b&gt;" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;fillColor=#F8CECC;strokeColor=#B85450;fontColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="90" y="125" width="150" height="160" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_perm_attrs" value="+ id : Integer&#xa;+ code : String&#xa;+ name : String&#xa;+ description : String&#xa;+ created_at : DateTime" style="text;strokeColor=none;fillColor=#FFFFFF;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontSize=11;fontColor=#000000;" vertex="1" parent="cls_perm">
+          <mxGeometry y="26" width="150" height="75" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_perm_div" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=#B85450;" vertex="1" parent="cls_perm">
+          <mxGeometry y="101" width="150" height="5" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_perm_methods" value="+ getCode() : String&#xa;+ getName() : String" style="text;strokeColor=none;fillColor=#FFFFFF;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontSize=11;fontColor=#000000;" vertex="1" parent="cls_perm">
+          <mxGeometry y="106" width="150" height="54" as="geometry" />
+        </mxCell>
+
+        <!-- Role Class (Bảng roles) -->
+        <mxCell id="cls_role" value="&lt;b&gt;Role&lt;/b&gt;" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;fillColor=#F8CECC;strokeColor=#B85450;fontColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="380" y="125" width="170" height="160" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_role_attrs" value="+ id : Integer&#xa;+ code : String&#xa;+ name : String&#xa;+ description : String&#xa;+ created_at : DateTime" style="text;strokeColor=none;fillColor=#FFFFFF;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontSize=11;fontColor=#000000;" vertex="1" parent="cls_role">
+          <mxGeometry y="26" width="170" height="75" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_role_div" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=#B85450;" vertex="1" parent="cls_role">
+          <mxGeometry y="101" width="170" height="5" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_role_methods" value="+ hasPermission(c) : Bool&#xa;+ getPermissions() : List" style="text;strokeColor=none;fillColor=#FFFFFF;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontSize=11;fontColor=#000000;" vertex="1" parent="cls_role">
+          <mxGeometry y="106" width="170" height="54" as="geometry" />
+        </mxCell>
+
+        <!-- User Class (Bảng users - Khớp 100% cột trong DB) -->
+        <mxCell id="cls_user" value="&lt;b&gt;User&lt;/b&gt;" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;fillColor=#F8CECC;strokeColor=#B85450;fontColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="700" y="110" width="240" height="190" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_user_attrs" value="+ id : Integer&#xa;+ username : String&#xa;+ password_hash : String&#xa;+ email : String&#xa;+ role_id : Integer&#xa;+ learning_goal : String&#xa;+ created_at : DateTime" style="text;strokeColor=none;fillColor=#FFFFFF;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontSize=11;fontColor=#000000;" vertex="1" parent="cls_user">
+          <mxGeometry y="26" width="240" height="104" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_user_div" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=#B85450;" vertex="1" parent="cls_user">
+          <mxGeometry y="130" width="240" height="5" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_user_methods" value="+ updateProfile(email) : Boolean&#xa;+ verifyPassword(pass) : Boolean&#xa;+ getRole() : Role" style="text;strokeColor=none;fillColor=#FFFFFF;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontSize=11;fontColor=#000000;" vertex="1" parent="cls_user">
+          <mxGeometry y="135" width="240" height="55" as="geometry" />
+        </mxCell>
+
+        <!-- StreakLog Class (Bảng streak_logs) -->
+        <mxCell id="cls_streak" value="&lt;b&gt;StreakLog&lt;/b&gt;" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;fillColor=#F8CECC;strokeColor=#B85450;fontColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="715" y="380" width="210" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_streak_attrs" value="+ id : Integer&#xa;+ user_id : Integer&#xa;+ activity_date : Date&#xa;+ timezone_offset : Integer" style="text;strokeColor=none;fillColor=#FFFFFF;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontSize=11;fontColor=#000000;" vertex="1" parent="cls_streak">
+          <mxGeometry y="26" width="210" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_streak_div" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=#B85450;" vertex="1" parent="cls_streak">
+          <mxGeometry y="86" width="210" height="5" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_streak_methods" value="+ isConsecutive(lastDate) : Bool&#xa;+ isValidToday(clientTz) : Bool" style="text;strokeColor=none;fillColor=#FFFFFF;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontSize=11;fontColor=#000000;" vertex="1" parent="cls_streak">
+          <mxGeometry y="91" width="210" height="49" as="geometry" />
+        </mxCell>
+
+
+        <!-- ========================================================= -->
+        <!-- PACKAGE 2: CURRICULUM & DICTIONARY CLASSES                -->
+        <!-- ========================================================= -->
+
+        <!-- Topic Class (Bảng topics) -->
+        <mxCell id="cls_topic" value="&lt;b&gt;Topic&lt;/b&gt;" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;fillColor=#F8CECC;strokeColor=#B85450;fontColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="1080" y="110" width="230" height="170" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_topic_attrs" value="+ id : Integer&#xa;+ title : String&#xa;+ description : String&#xa;+ order_index : Integer = 0&#xa;+ difficulty : String" style="text;strokeColor=none;fillColor=#FFFFFF;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontSize=11;fontColor=#000000;" vertex="1" parent="cls_topic">
+          <mxGeometry y="26" width="230" height="75" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_topic_div" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=#B85450;" vertex="1" parent="cls_topic">
+          <mxGeometry y="101" width="230" height="5" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_topic_methods" value="+ calculateMastery(userId) : Int&#xa;+ isUnlockedFor(user) : Boolean&#xa;+ getWords() : List&lt;Word&gt;" style="text;strokeColor=none;fillColor=#FFFFFF;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontSize=11;fontColor=#000000;" vertex="1" parent="cls_topic">
+          <mxGeometry y="106" width="230" height="64" as="geometry" />
+        </mxCell>
+
+        <!-- Word Class (Bảng words) -->
+        <mxCell id="cls_word" value="&lt;b&gt;Word&lt;/b&gt;" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;fillColor=#F8CECC;strokeColor=#B85450;fontColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="1460" y="110" width="230" height="170" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_word_attrs" value="+ id : Integer&#xa;+ word : String&#xa;+ pronunciation : String&#xa;+ part_of_speech : String&#xa;+ meaning_vi : String" style="text;strokeColor=none;fillColor=#FFFFFF;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontSize=11;fontColor=#000000;" vertex="1" parent="cls_word">
+          <mxGeometry y="26" width="230" height="75" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_word_div" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=#B85450;" vertex="1" parent="cls_word">
+          <mxGeometry y="101" width="230" height="5" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_word_methods" value="+ playPronunciation() : void&#xa;+ getDefinition() : String" style="text;strokeColor=none;fillColor=#FFFFFF;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontSize=11;fontColor=#000000;" vertex="1" parent="cls_word">
+          <mxGeometry y="106" width="230" height="64" as="geometry" />
+        </mxCell>
+
+        <!-- Idiom Class (Bảng idioms) -->
+        <mxCell id="cls_idiom" value="&lt;b&gt;Idiom&lt;/b&gt;" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;fillColor=#F8CECC;strokeColor=#B85450;fontColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="1750" y="110" width="220" height="150" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_idiom_attrs" value="+ id : Integer&#xa;+ idiom : String&#xa;+ meaning : String&#xa;+ example : String" style="text;strokeColor=none;fillColor=#FFFFFF;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontSize=11;fontColor=#000000;" vertex="1" parent="cls_idiom">
+          <mxGeometry y="26" width="220" height="65" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_idiom_div" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=#B85450;" vertex="1" parent="cls_idiom">
+          <mxGeometry y="91" width="220" height="5" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_idiom_methods" value="+ getDisplayContent() : String" style="text;strokeColor=none;fillColor=#FFFFFF;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontSize=11;fontColor=#000000;" vertex="1" parent="cls_idiom">
+          <mxGeometry y="96" width="220" height="54" as="geometry" />
+        </mxCell>
+
+
+        <!-- ========================================================= -->
+        <!-- PACKAGE 3: STUDY PROGRESS CLASSES                         -->
+        <!-- ========================================================= -->
+
+        <!-- LessonAttempt Class (Bảng lesson_attempts) -->
+        <mxCell id="cls_lesson" value="&lt;b&gt;LessonAttempt&lt;/b&gt;" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;fillColor=#F8CECC;strokeColor=#B85450;fontColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="1080" y="380" width="230" height="160" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_lesson_attrs" value="+ id : Integer&#xa;+ user_id : Integer&#xa;+ topic_id : Integer&#xa;+ quiz_score : Float&#xa;+ pronunciation_score : Float&#xa;+ completed_at : DateTime" style="text;strokeColor=none;fillColor=#FFFFFF;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontSize=11;fontColor=#000000;" vertex="1" parent="cls_lesson">
+          <mxGeometry y="26" width="230" height="85" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_lesson_div" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=#B85450;" vertex="1" parent="cls_lesson">
+          <mxGeometry y="111" width="230" height="5" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_lesson_methods" value="+ calculateScore() : Float&#xa;+ isPassed() : Boolean" style="text;strokeColor=none;fillColor=#FFFFFF;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontSize=11;fontColor=#000000;" vertex="1" parent="cls_lesson">
+          <mxGeometry y="116" width="230" height="44" as="geometry" />
+        </mxCell>
+
+        <!-- Flashcard Class (Bảng flashcards) -->
+        <mxCell id="cls_flashcard" value="&lt;b&gt;Flashcard&lt;/b&gt;" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;fillColor=#F8CECC;strokeColor=#B85450;fontColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="1460" y="380" width="230" height="160" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_flashcard_attrs" value="+ id : Integer&#xa;+ user_id : Integer&#xa;+ word_id : Integer&#xa;+ topic_id : Integer&#xa;+ status : String = 'NEW'&#xa;+ last_reviewed : DateTime" style="text;strokeColor=none;fillColor=#FFFFFF;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontSize=11;fontColor=#000000;" vertex="1" parent="cls_flashcard">
+          <mxGeometry y="26" width="230" height="85" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_flashcard_div" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=#B85450;" vertex="1" parent="cls_flashcard">
+          <mxGeometry y="111" width="230" height="5" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_flashcard_methods" value="+ markStatus(newStatus) : void&#xa;+ isMastered() : Boolean" style="text;strokeColor=none;fillColor=#FFFFFF;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontSize=11;fontColor=#000000;" vertex="1" parent="cls_flashcard">
+          <mxGeometry y="116" width="230" height="44" as="geometry" />
+        </mxCell>
+
+
+        <!-- ========================================================= -->
+        <!-- PACKAGE 4: EXAMINATION & ASSESSMENT CLASSES               -->
+        <!-- ========================================================= -->
+
+        <!-- ExamSession Class (Bảng exam_sessions) -->
+        <mxCell id="cls_session" value="&lt;b&gt;ExamSession&lt;/b&gt;" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;fillColor=#F8CECC;strokeColor=#B85450;fontColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="360" y="680" width="230" height="180" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_session_attrs" value="+ id : Integer&#xa;+ exam_id : Integer&#xa;+ user_id : Integer&#xa;+ started_at : DateTime&#xa;+ submitted_at : DateTime&#xa;+ status : String = 'IN_PROGRESS'" style="text;strokeColor=none;fillColor=#FFFFFF;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontSize=11;fontColor=#000000;" vertex="1" parent="cls_session">
+          <mxGeometry y="26" width="230" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_session_div" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=#B85450;" vertex="1" parent="cls_session">
+          <mxGeometry y="116" width="230" height="5" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_session_methods" value="+ isTimeout() : Boolean&#xa;+ endSession() : ExamResult" style="text;strokeColor=none;fillColor=#FFFFFF;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontSize=11;fontColor=#000000;" vertex="1" parent="cls_session">
+          <mxGeometry y="121" width="230" height="59" as="geometry" />
+        </mxCell>
+
+        <!-- Exam Class (Bảng exams) -->
+        <mxCell id="cls_exam" value="&lt;b&gt;Exam&lt;/b&gt;" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;fillColor=#F8CECC;strokeColor=#B85450;fontColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="1080" y="680" width="230" height="180" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_exam_attrs" value="+ id : Integer&#xa;+ topic_id : Integer&#xa;+ title : String&#xa;+ duration : Integer&#xa;+ exam_type : String&#xa;+ created_at : DateTime" style="text;strokeColor=none;fillColor=#FFFFFF;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontSize=11;fontColor=#000000;" vertex="1" parent="cls_exam">
+          <mxGeometry y="26" width="230" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_exam_div" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=#B85450;" vertex="1" parent="cls_exam">
+          <mxGeometry y="116" width="230" height="5" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_exam_methods" value="+ getQuestions() : List&lt;Question&gt;&#xa;+ validateDuration(spent) : Bool&#xa;+ isPlacement() : Boolean" style="text;strokeColor=none;fillColor=#FFFFFF;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontSize=11;fontColor=#000000;" vertex="1" parent="cls_exam">
+          <mxGeometry y="121" width="230" height="59" as="geometry" />
+        </mxCell>
+
+        <!-- Question Class (Bảng questions) -->
+        <mxCell id="cls_question" value="&lt;b&gt;Question&lt;/b&gt;" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;fillColor=#F8CECC;strokeColor=#B85450;fontColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="1460" y="680" width="230" height="190" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_question_attrs" value="+ id : Integer&#xa;+ exam_id : Integer&#xa;+ question_text : String&#xa;+ option_a : String&#xa;+ option_b : String&#xa;+ option_c : String&#xa;+ option_d : String&#xa;+ correct_option : Character" style="text;strokeColor=none;fillColor=#FFFFFF;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontSize=11;fontColor=#000000;" vertex="1" parent="cls_question">
+          <mxGeometry y="26" width="230" height="115" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_question_div" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=#B85450;" vertex="1" parent="cls_question">
+          <mxGeometry y="141" width="230" height="5" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_question_methods" value="+ checkAnswer(opt) : Boolean&#xa;+ getClientView() : Question" style="text;strokeColor=none;fillColor=#FFFFFF;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontSize=11;fontColor=#000000;" vertex="1" parent="cls_question">
+          <mxGeometry y="146" width="230" height="44" as="geometry" />
+        </mxCell>
+
+        <!-- ExamAnswer Class (Bảng exam_answers) -->
+        <mxCell id="cls_answer" value="&lt;b&gt;ExamAnswer&lt;/b&gt;" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;fillColor=#F8CECC;strokeColor=#B85450;fontColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="360" y="960" width="230" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_answer_attrs" value="+ id : Integer&#xa;+ session_id : Integer&#xa;+ question_id : Integer&#xa;+ selected_option : Character" style="text;strokeColor=none;fillColor=#FFFFFF;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontSize=11;fontColor=#000000;" vertex="1" parent="cls_answer">
+          <mxGeometry y="26" width="230" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_answer_div" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=#B85450;" vertex="1" parent="cls_answer">
+          <mxGeometry y="81" width="230" height="5" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_answer_methods" value="+ isCorrect() : Boolean&#xa;+ getSelected() : Character" style="text;strokeColor=none;fillColor=#FFFFFF;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontSize=11;fontColor=#000000;" vertex="1" parent="cls_answer">
+          <mxGeometry y="86" width="230" height="44" as="geometry" />
+        </mxCell>
+
+        <!-- ExamResult Class (Bảng exam_results) -->
+        <mxCell id="cls_result" value="&lt;b&gt;ExamResult&lt;/b&gt;" style="swimlane;fontStyle=0;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;fillColor=#F8CECC;strokeColor=#B85450;fontColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="720" y="950" width="230" height="150" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_result_attrs" value="+ id : Integer&#xa;+ user_id : Integer&#xa;+ exam_id : Integer&#xa;+ session_id : Integer&#xa;+ score : Float&#xa;+ time_spent : Integer&#xa;+ submitted_at : DateTime" style="text;strokeColor=none;fillColor=#FFFFFF;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontSize=11;fontColor=#000000;" vertex="1" parent="cls_result">
+          <mxGeometry y="26" width="230" height="75" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_result_div" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=#B85450;" vertex="1" parent="cls_result">
+          <mxGeometry y="101" width="230" height="5" as="geometry" />
+        </mxCell>
+        <mxCell id="cls_result_methods" value="+ isPassed() : Boolean&#xa;+ getReviewSummary() : Object" style="text;strokeColor=none;fillColor=#FFFFFF;align=left;verticalAlign=top;spacingLeft=6;spacingRight=6;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontSize=11;fontColor=#000000;" vertex="1" parent="cls_result">
+          <mxGeometry y="106" width="230" height="44" as="geometry" />
+        </mxCell>
+
+
+        <!-- ========================================================= -->
+        <!-- ORTHOGONAL CONNECTORS (Ánh xạ chính xác Foreign Keys)     -->
+        <!-- ========================================================= -->
+
+        <!-- 1. users.role_id -> roles.id (Đường ngang thẳng tắp tại Y=205) -->
+        <mxCell id="edge_user_role" value="role_id" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=open;endSize=8;strokeColor=#B85450;strokeWidth=1.5;labelBackgroundColor=none;align=center;verticalAlign=bottom;fontSize=12;fontStyle=1;exitX=0;exitY=0.5;entryX=1;entryY=0.5;" edge="1" parent="1" source="cls_user" target="cls_role">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="0" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lbl_user_role_src" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=top;resizable=0;points=[];labelBackgroundColor=none;fontSize=11;" vertex="1" connectable="0" parent="edge_user_role">
+          <mxGeometry x="-0.8" relative="1" as="geometry">
+            <mxPoint x="10" y="14" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lbl_user_role_tgt" value="1" style="edgeLabel;html=1;align=center;verticalAlign=top;resizable=0;points=[];labelBackgroundColor=none;fontSize=11;" vertex="1" connectable="0" parent="edge_user_role">
+          <mxGeometry x="0.8" relative="1" as="geometry">
+            <mxPoint x="-10" y="14" as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 2. role_permissions -> roles & permissions (Đường ngang thẳng tắp tại Y=205) -->
+        <mxCell id="edge_role_perm" value="hasPermission" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;startArrow=diamond;startFill=0;startSize=12;endArrow=open;endSize=8;strokeColor=#B85450;strokeWidth=1.5;labelBackgroundColor=none;align=center;verticalAlign=bottom;fontSize=12;fontStyle=1;exitX=0;exitY=0.5;entryX=1;entryY=0.5;" edge="1" parent="1" source="cls_role" target="cls_perm">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="0" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lbl_role_perm_src" value="1..*" style="edgeLabel;html=1;align=center;verticalAlign=top;resizable=0;points=[];labelBackgroundColor=none;fontSize=11;" vertex="1" connectable="0" parent="edge_role_perm">
+          <mxGeometry x="-0.8" relative="1" as="geometry">
+            <mxPoint x="10" y="14" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lbl_role_perm_tgt" value="1..*" style="edgeLabel;html=1;align=center;verticalAlign=top;resizable=0;points=[];labelBackgroundColor=none;fontSize=11;" vertex="1" connectable="0" parent="edge_role_perm">
+          <mxGeometry x="0.8" relative="1" as="geometry">
+            <mxPoint x="-10" y="14" as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 3. streak_logs.user_id -> users.id (Đường thẳng đứng 100% tại X=820) -->
+        <mxCell id="edge_user_streak" value="logs" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;startArrow=diamond;startFill=1;startSize=12;endArrow=open;endSize=8;strokeColor=#B85450;strokeWidth=1.5;labelBackgroundColor=none;align=left;verticalAlign=middle;fontSize=12;fontStyle=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="cls_user" target="cls_streak">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="15" y="0" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lbl_usr_strk_src" value="1" style="edgeLabel;html=1;align=right;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;fontSize=11;" vertex="1" connectable="0" parent="edge_user_streak">
+          <mxGeometry x="-0.75" relative="1" as="geometry">
+            <mxPoint x="-15" y="-15" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lbl_usr_strk_tgt" value="0..*" style="edgeLabel;html=1;align=right;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;fontSize=11;" vertex="1" connectable="0" parent="edge_user_streak">
+          <mxGeometry x="0.75" relative="1" as="geometry">
+            <mxPoint x="-15" y="15" as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 4. words & topics (Aggregation: Topic gom nhóm Words, đường ngang tại Y=195) -->
+        <mxCell id="edge_topic_word" value="categorizes" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;startArrow=diamond;startFill=0;startSize=12;endArrow=open;endSize=8;strokeColor=#B85450;strokeWidth=1.5;labelBackgroundColor=none;align=center;verticalAlign=bottom;fontSize=12;fontStyle=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="cls_topic" target="cls_word">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="0" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lbl_top_wrd_src" value="1" style="edgeLabel;html=1;align=center;verticalAlign=top;resizable=0;points=[];labelBackgroundColor=none;fontSize=11;" vertex="1" connectable="0" parent="edge_topic_word">
+          <mxGeometry x="-0.8" relative="1" as="geometry">
+            <mxPoint x="10" y="14" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lbl_top_wrd_tgt" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=top;resizable=0;points=[];labelBackgroundColor=none;fontSize=11;" vertex="1" connectable="0" parent="edge_topic_word">
+          <mxGeometry x="0.8" relative="1" as="geometry">
+            <mxPoint x="-10" y="14" as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 5. flashcards.word_id -> words.id (Đường thẳng đứng 100% tại X=1575) -->
+        <mxCell id="edge_word_flashcard" value="word_id" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=open;endSize=8;strokeColor=#B85450;strokeWidth=1.5;labelBackgroundColor=none;align=left;verticalAlign=middle;fontSize=12;fontStyle=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="cls_word" target="cls_flashcard">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="15" y="0" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lbl_wrd_flsh_src" value="1" style="edgeLabel;html=1;align=right;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;fontSize=11;" vertex="1" connectable="0" parent="edge_word_flashcard">
+          <mxGeometry x="-0.75" relative="1" as="geometry">
+            <mxPoint x="-15" y="-15" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lbl_wrd_flsh_tgt" value="0..*" style="edgeLabel;html=1;align=right;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;fontSize=11;" vertex="1" connectable="0" parent="edge_word_flashcard">
+          <mxGeometry x="0.75" relative="1" as="geometry">
+            <mxPoint x="-15" y="15" as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 6. lesson_attempts.topic_id -> topics.id (Đường thẳng đứng 100% tại X=1195) -->
+        <mxCell id="edge_topic_lesson" value="topic_id" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=open;endSize=8;strokeColor=#B85450;strokeWidth=1.5;labelBackgroundColor=none;align=left;verticalAlign=middle;fontSize=12;fontStyle=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="cls_topic" target="cls_lesson">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="15" y="0" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lbl_top_lsn_src" value="1" style="edgeLabel;html=1;align=right;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;fontSize=11;" vertex="1" connectable="0" parent="edge_topic_lesson">
+          <mxGeometry x="-0.75" relative="1" as="geometry">
+            <mxPoint x="-15" y="-15" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lbl_top_lsn_tgt" value="0..*" style="edgeLabel;html=1;align=right;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;fontSize=11;" vertex="1" connectable="0" parent="edge_topic_lesson">
+          <mxGeometry x="0.75" relative="1" as="geometry">
+            <mxPoint x="-15" y="15" as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 7. lesson_attempts.user_id -> users.id (Đường ngang tại Y=455) -->
+        <mxCell id="edge_user_lesson" value="user_id" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;startArrow=diamond;startFill=1;startSize=12;endArrow=open;endSize=8;strokeColor=#B85450;strokeWidth=1.5;labelBackgroundColor=none;align=center;verticalAlign=bottom;fontSize=12;fontStyle=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="cls_streak" target="cls_lesson">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="0" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lbl_usr_lsn_src" value="1" style="edgeLabel;html=1;align=center;verticalAlign=top;resizable=0;points=[];labelBackgroundColor=none;fontSize=11;" vertex="1" connectable="0" parent="edge_user_lesson">
+          <mxGeometry x="-0.85" relative="1" as="geometry">
+            <mxPoint x="15" y="14" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lbl_usr_lsn_tgt" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=top;resizable=0;points=[];labelBackgroundColor=none;fontSize=11;" vertex="1" connectable="0" parent="edge_user_lesson">
+          <mxGeometry x="0.85" relative="1" as="geometry">
+            <mxPoint x="-15" y="14" as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 8. exams.topic_id -> topics.id (Đường thẳng đứng 100% tại X=1195) -->
+        <mxCell id="edge_topic_exam" value="topic_id" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;startArrow=diamond;startFill=0;startSize=12;endArrow=open;endSize=8;strokeColor=#B85450;strokeWidth=1.5;labelBackgroundColor=none;align=left;verticalAlign=middle;fontSize=12;fontStyle=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="cls_lesson" target="cls_exam">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="15" y="0" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lbl_top_exm_src" value="0..1" style="edgeLabel;html=1;align=right;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;fontSize=11;" vertex="1" connectable="0" parent="edge_topic_exam">
+          <mxGeometry x="-0.75" relative="1" as="geometry">
+            <mxPoint x="-15" y="-15" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lbl_top_exm_tgt" value="0..*" style="edgeLabel;html=1;align=right;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;fontSize=11;" vertex="1" connectable="0" parent="edge_topic_exam">
+          <mxGeometry x="0.75" relative="1" as="geometry">
+            <mxPoint x="-15" y="15" as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 9. questions.exam_id -> exams.id (Composition chặt chẽ, đường ngang tại Y=770) -->
+        <mxCell id="edge_exam_question" value="contains" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;startArrow=diamond;startFill=1;startSize=12;endArrow=open;endSize=8;strokeColor=#B85450;strokeWidth=1.5;labelBackgroundColor=none;align=center;verticalAlign=bottom;fontSize=12;fontStyle=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="cls_exam" target="cls_question">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="0" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lbl_exm_q_src" value="1" style="edgeLabel;html=1;align=center;verticalAlign=top;resizable=0;points=[];labelBackgroundColor=none;fontSize=11;" vertex="1" connectable="0" parent="edge_exam_question">
+          <mxGeometry x="-0.8" relative="1" as="geometry">
+            <mxPoint x="10" y="14" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lbl_exm_q_tgt" value="1..*" style="edgeLabel;html=1;align=center;verticalAlign=top;resizable=0;points=[];labelBackgroundColor=none;fontSize=11;" vertex="1" connectable="0" parent="edge_exam_question">
+          <mxGeometry x="0.8" relative="1" as="geometry">
+            <mxPoint x="-10" y="14" as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 10. exam_sessions.exam_id -> exams.id (Đường ngang tại Y=770) -->
+        <mxCell id="edge_session_exam" value="exam_id" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=open;endSize=8;strokeColor=#B85450;strokeWidth=1.5;labelBackgroundColor=none;align=center;verticalAlign=bottom;fontSize=12;fontStyle=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" edge="1" parent="1" source="cls_session" target="cls_exam">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="0" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lbl_sess_exm_src" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=top;resizable=0;points=[];labelBackgroundColor=none;fontSize=11;" vertex="1" connectable="0" parent="edge_session_exam">
+          <mxGeometry x="-0.85" relative="1" as="geometry">
+            <mxPoint x="15" y="14" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lbl_sess_exm_tgt" value="1" style="edgeLabel;html=1;align=center;verticalAlign=top;resizable=0;points=[];labelBackgroundColor=none;fontSize=11;" vertex="1" connectable="0" parent="edge_session_exam">
+          <mxGeometry x="0.85" relative="1" as="geometry">
+            <mxPoint x="-15" y="14" as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 11. exam_sessions.user_id -> users.id (Đường góc vuông từ User xuống Session) -->
+        <mxCell id="edge_session_user" value="user_id" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=open;endSize=8;strokeColor=#B85450;strokeWidth=1.5;labelBackgroundColor=none;align=center;verticalAlign=bottom;fontSize=12;fontStyle=1;exitX=0;exitY=0.5;entryX=0.5;entryY=0;" edge="1" parent="1" source="cls_session" target="cls_user">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="280" y="770" />
+              <mxPoint x="280" y="340" />
+              <mxPoint x="780" y="340" />
+            </Array>
+            <mxPoint x="0" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lbl_sess_usr_src" value="0..*" style="edgeLabel;html=1;align=right;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;fontSize=11;" vertex="1" connectable="0" parent="edge_session_user">
+          <mxGeometry x="-0.8" relative="1" as="geometry">
+            <mxPoint x="-15" y="-15" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lbl_sess_usr_tgt" value="1" style="edgeLabel;html=1;align=right;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;fontSize=11;" vertex="1" connectable="0" parent="edge_session_user">
+          <mxGeometry x="0.8" relative="1" as="geometry">
+            <mxPoint x="-15" y="15" as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 12. exam_answers.session_id -> exam_sessions.id (Composition: Thẳng đứng tại X=475) -->
+        <mxCell id="edge_session_answer" value="records" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;startArrow=diamond;startFill=1;startSize=12;endArrow=open;endSize=8;strokeColor=#B85450;strokeWidth=1.5;labelBackgroundColor=none;align=left;verticalAlign=middle;fontSize=12;fontStyle=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="1" source="cls_session" target="cls_answer">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="15" y="0" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lbl_sess_ans_src" value="1" style="edgeLabel;html=1;align=right;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;fontSize=11;" vertex="1" connectable="0" parent="edge_session_answer">
+          <mxGeometry x="-0.75" relative="1" as="geometry">
+            <mxPoint x="-15" y="-15" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lbl_sess_ans_tgt" value="1..*" style="edgeLabel;html=1;align=right;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;fontSize=11;" vertex="1" connectable="0" parent="edge_session_answer">
+          <mxGeometry x="0.75" relative="1" as="geometry">
+            <mxPoint x="-15" y="15" as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 13. exam_results.session_id -> exam_sessions.id (Đường bẻ góc vuông tại Y=1025) -->
+        <mxCell id="edge_session_result" value="generates" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=open;endSize=8;strokeColor=#B85450;strokeWidth=1.5;labelBackgroundColor=none;align=center;verticalAlign=bottom;fontSize=12;fontStyle=1;exitX=1;exitY=0.75;entryX=0;entryY=0.5;" edge="1" parent="1" source="cls_session" target="cls_result">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="0" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lbl_sess_res_src" value="1" style="edgeLabel;html=1;align=center;verticalAlign=top;resizable=0;points=[];labelBackgroundColor=none;fontSize=11;" vertex="1" connectable="0" parent="edge_session_result">
+          <mxGeometry x="-0.8" relative="1" as="geometry">
+            <mxPoint x="10" y="14" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lbl_sess_res_tgt" value="0..1" style="edgeLabel;html=1;align=center;verticalAlign=top;resizable=0;points=[];labelBackgroundColor=none;fontSize=11;" vertex="1" connectable="0" parent="edge_session_result">
+          <mxGeometry x="0.8" relative="1" as="geometry">
+            <mxPoint x="-10" y="14" as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- 14. exam_answers.question_id -> questions.id (Rãnh dưới an toàn góc 90 độ) -->
+        <mxCell id="edge_answer_question" value="question_id" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=open;endSize=8;strokeColor=#B85450;strokeWidth=1.5;labelBackgroundColor=none;align=center;verticalAlign=bottom;fontSize=12;fontStyle=1;exitX=1;exitY=0.5;entryX=0.5;entryY=1;" edge="1" parent="1" source="cls_answer" target="cls_question">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="0" y="-12" as="offset" />
+            <Array as="points">
+              <mxPoint x="640" y="1025" />
+              <mxPoint x="640" y="1120" />
+              <mxPoint x="1575" y="1120" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lbl_ans_q_src" value="0..*" style="edgeLabel;html=1;align=center;verticalAlign=top;resizable=0;points=[];labelBackgroundColor=none;fontSize=11;" vertex="1" connectable="0" parent="edge_answer_question">
+          <mxGeometry x="-0.85" relative="1" as="geometry">
+            <mxPoint x="15" y="14" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lbl_ans_q_tgt" value="1" style="edgeLabel;html=1;align=right;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=none;fontSize=11;" vertex="1" connectable="0" parent="edge_answer_question">
+          <mxGeometry x="0.85" relative="1" as="geometry">
+            <mxPoint x="-15" y="15" as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

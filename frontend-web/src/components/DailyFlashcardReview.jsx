@@ -1,11 +1,52 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useDispatch } from "react-redux";
 import { setStreak, fetchStreakWeek } from "../store/slice/streakSlice";
 import { getBackendTimezoneOffset } from "../utils/timezone";
 import api from "../api/api";
 
+const TOPIC_ICONS = {
+  "Food & Drink": "🍔",
+  "Travel & Transport": "✈️",
+  "Family & Relationships": "👨‍👩‍👧",
+  "Sports & Entertainment": "⚽",
+  "Actions & States": "⚡",
+  "Shopping & Fashion": "🛍️",
+  "Home & Daily Life": "🏡",
+  "Time & Seasons": "⏳",
+  "Numbers & Measurement": "🔢",
+  "Colors & Shapes": "🎨",
+  "Feelings & Senses": "❤️",
+  "Weather & Atmosphere": "⛅",
+  "Business & Finance": "💼",
+  "Health & Medicine": "🩺",
+  "Education & Science": "🔬",
+  "Nature & Environment": "🌿",
+  "Emotions & Personality": "😊",
+  "Communication & Media": "📱",
+  "Arts & Literature": "🎭",
+  "History & Culture": "🏛️",
+  "Geography & Places": "🗺️",
+  "Work & Professions": "👷",
+  "Materials & Substances": "🧪",
+  "Buildings & Infrastructure": "🏗️",
+  "Technology & IT": "💻",
+  "Law & Society": "⚖️",
+  "Philosophy & Thinking": "🧠",
+  "Abstract Concepts": "🌌",
+  "Politics & Government": "🏛️",
+  "Military & Warfare": "⚔️",
+  "Agriculture & Farming": "🌾",
+  "Industry & Manufacturing": "🏭",
+  "Energy & Resources": "⚡",
+  "Religion & Spirituality": "🕊️",
+  "Crime & Justice": "🛡️",
+  "Disasters & Emergencies": "🚨",
+};
+
 export default function DailyFlashcardReview({
   endpoint = "/flashcards/daily",
+  topicName = "Bộ thẻ ôn tập",
+  returnTo,
   onBack,
 }) {
   const [cards, setCards] = useState(null);
@@ -39,41 +80,88 @@ export default function DailyFlashcardReview({
   const currentCard = cards && cards[currentIndex];
   const isSessionDone = cards !== null && currentIndex >= cards.length;
 
-  const handleFlip = () => setIsFlipped((prev) => !prev);
-
-  const handleAnswer = async (targetStatus) => {
-    if (!currentCard || isSubmitting) return;
-    setIsSubmitting(true);
-
+  const playAudio = useCallback((text) => {
+    if (!text || typeof window === "undefined" || !("speechSynthesis" in window)) return;
     try {
-      const response = await api.put(`/flashcards/${currentCard.id}`, {
-        status: targetStatus,
-        timezone_offset: getBackendTimezoneOffset(),
-      });
-
-      if (response.data?.result?.streak) {
-        dispatch(setStreak(response.data.result.streak));
-        dispatch(fetchStreakWeek()); 
-        setStreakInfo(response.data.result.streak);
-      }
-
-      setIsFlipped(false);
-      setCurrentIndex((prev) => prev + 1);
-    } catch (error) {
-      setLoadError(
-        error.response?.data?.message ||
-          "Không thể cập nhật tiến độ, vui lòng thử lại.",
-      );
-    } finally {
-      setIsSubmitting(false);
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = "en-US";
+      utterance.rate = 0.85;
+      window.speechSynthesis.speak(utterance);
+    } catch {
+      // SpeechSynthesis có thể không khả dụng
     }
-  };
+  }, []);
+
+  const handleFlip = useCallback(() => {
+    setIsFlipped((prev) => !prev);
+  }, []);
+
+  const handleAnswer = useCallback(
+    async (targetStatus) => {
+      if (!currentCard || isSubmitting) return;
+      setIsSubmitting(true);
+
+      try {
+        const response = await api.put(`/flashcards/${currentCard.id}`, {
+          status: targetStatus,
+          timezone_offset: getBackendTimezoneOffset(),
+        });
+
+        if (response.data?.result?.streak) {
+          dispatch(setStreak(response.data.result.streak));
+          dispatch(fetchStreakWeek());
+          setStreakInfo(response.data.result.streak);
+        }
+
+        setIsFlipped(false);
+        setCurrentIndex((prev) => prev + 1);
+      } catch (error) {
+        setLoadError(
+          error.response?.data?.message ||
+            "Không thể cập nhật tiến độ, vui lòng thử lại.",
+        );
+      } finally {
+        setIsSubmitting(false);
+      }
+    },
+    [currentCard, isSubmitting, dispatch],
+  );
+
+  // Phím tắt
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
+
+      if (e.code === "Space" || e.key === "Enter") {
+        e.preventDefault();
+        handleFlip();
+      } else if (isFlipped && (e.key === "1" || e.key === "ArrowLeft")) {
+        e.preventDefault();
+        handleAnswer("LEARNING");
+      } else if (isFlipped && (e.key === "2" || e.key === "ArrowRight")) {
+        e.preventDefault();
+        handleAnswer("MASTERED");
+      } else if (e.key === "a" || e.key === "A") {
+        if (currentCard?.word?.word) {
+          playAudio(currentCard.word.word);
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isFlipped, currentCard, handleFlip, handleAnswer, playAudio]);
+
+  const backLabel = returnTo === "/learn" ? "← Quay lại lộ trình" : "← Chọn chủ đề khác";
+  const topicIcon = TOPIC_ICONS[topicName] || "🎴";
 
   // 1. TRẠNG THÁI ĐANG TẢI
   if (cards === null) {
     return (
-      <div className="flex items-center justify-center py-20 text-gray-400 dark:text-gray-500 text-sm">
-        Đang tải bộ ôn tập hôm nay...
+      <div className="flex flex-col items-center justify-center py-24 text-gray-400 dark:text-gray-500 text-sm">
+        <div className="w-9 h-9 border-3 border-[#58cc02] border-t-transparent rounded-full animate-spin mb-3 inline-block" />
+        <p className="font-semibold">Đang chuẩn bị bộ thẻ ôn tập...</p>
       </div>
     );
   }
@@ -85,12 +173,14 @@ export default function DailyFlashcardReview({
         {onBack && (
           <button
             onClick={onBack}
-            className="mb-6 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 flex items-center gap-1 mx-auto"
+            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 shadow-2xs hover:border-[#58cc02] transition-all cursor-pointer mb-6"
           >
-            ← Chọn chủ đề khác
+            {backLabel}
           </button>
         )}
-        <p className="text-red-500 dark:text-red-400 text-sm">{loadError}</p>
+        <div className="p-6 rounded-3xl bg-rose-500/10 border-2 border-rose-500/20 text-rose-500 dark:text-rose-400 text-sm font-semibold">
+          {loadError}
+        </div>
       </div>
     );
   }
@@ -102,77 +192,134 @@ export default function DailyFlashcardReview({
         {onBack && (
           <button
             onClick={onBack}
-            className="mb-6 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 flex items-center gap-1 mx-auto"
+            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 shadow-2xs hover:border-[#58cc02] transition-all cursor-pointer mb-6"
           >
-            ← Chọn chủ đề khác
+            {backLabel}
           </button>
         )}
-        <p className="text-lg font-bold text-gray-900 dark:text-white mb-2">
-          Bạn đã học hết toàn bộ từ vựng hiện có!
-        </p>
-        <p className="text-sm text-gray-500 dark:text-gray-400">
-          Hãy quay lại sau khi có thêm chủ đề mới nhé.
-        </p>
+        <div className="p-8 rounded-3xl bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 shadow-sm text-center">
+          <div className="w-16 h-16 rounded-3xl bg-[#58cc02]/10 border-2 border-[#58cc02]/30 text-3xl flex items-center justify-center mx-auto mb-4">
+            🌟
+          </div>
+          <p className="text-xl font-black text-gray-900 dark:text-white mb-2">
+            Bạn đã ôn tập hết toàn bộ từ vựng hiện có!
+          </p>
+          <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 max-w-sm mx-auto">
+            Hãy tiếp tục học thêm các chủ đề mới trên lộ trình học để mở rộng vốn từ nhé.
+          </p>
+        </div>
       </div>
     );
   }
 
-  // 4. TRẠNG THÁI HỌC XONG
+  // 4. TRẠNG THÁI HOÀN THÀNH
   if (isSessionDone) {
     return (
-      <div className="w-full max-w-[560px] mx-auto text-center py-16">
+      <div className="w-full max-w-[560px] mx-auto text-center py-12 px-4">
         {onBack && (
-          <button
-            onClick={onBack}
-            className="mb-6 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 flex items-center gap-1 mx-auto"
-          >
-            ← Chọn chủ đề khác
-          </button>
+          <div className="text-left mb-6">
+            <button
+              onClick={onBack}
+              className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 shadow-2xs hover:border-[#58cc02] transition-all cursor-pointer group active:scale-95"
+            >
+              <span className="group-hover:-translate-x-1 transition-transform">←</span>
+              <span>{returnTo === "/learn" ? "Quay lại lộ trình" : "Chọn chủ đề khác"}</span>
+            </button>
+          </div>
         )}
-        <p className="text-lg font-bold text-gray-900 dark:text-white mb-2">
-          Hoàn thành bộ ôn tập hôm nay! 🎉
-        </p>
-        {streakInfo && (
-          <p className="text-sm text-[#58cc02] font-semibold">
-            Chuỗi ngày học của bạn đã được ghi nhận hôm nay!
+
+        <div className="p-8 rounded-3xl bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 shadow-sm text-center">
+          <div className="w-16 h-16 rounded-3xl bg-[#58cc02]/10 border-2 border-[#58cc02]/30 text-3xl flex items-center justify-center mx-auto mb-4">
+            🎉
+          </div>
+          <h2 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white mb-2">
+            Hoàn thành bộ ôn tập!
+          </h2>
+          <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-6 max-w-sm mx-auto leading-relaxed">
+            Bạn đã ôn tập xong {cards.length} từ vựng của chủ đề{" "}
+            <strong className="text-gray-900 dark:text-white font-black">{topicName}</strong>.
           </p>
-        )}
+
+          {streakInfo && (
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-orange-500/10 border-2 border-orange-500/20 text-orange-500 font-black text-sm mb-6">
+              <span>🔥</span>
+              <span>Chuỗi học tập: {streakInfo.current_streak} ngày liên tiếp!</span>
+            </div>
+          )}
+
+          <div className="flex gap-3 mt-4">
+            <button
+              onClick={() => {
+                setCurrentIndex(0);
+                setIsFlipped(false);
+              }}
+              className="flex-1 py-3.5 rounded-2xl text-sm font-bold border-2 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:border-[#58cc02] hover:text-[#58cc02] dark:hover:text-[#58cc02] bg-white dark:bg-gray-800 transition-all cursor-pointer active:scale-98 shadow-2xs"
+            >
+              🔄 Ôn lại bộ này
+            </button>
+            {onBack && (
+              <button
+                onClick={onBack}
+                className="flex-1 py-3.5 rounded-2xl text-sm font-black bg-[#58cc02] hover:bg-[#4cb001] text-white shadow-md shadow-[#58cc02]/25 transition-all cursor-pointer active:scale-98"
+              >
+                {returnTo === "/learn" ? "Về lộ trình học →" : "Chọn chủ đề khác →"}
+              </button>
+            )}
+          </div>
+        </div>
       </div>
     );
   }
 
-  // 5. TRẠNG THÁI ĐANG HỌC (MAIN)
+  // 5. TRẠNG THÁI ĐANG HỌC (MAIN FLASHCARD VIEW)
   const { word } = currentCard;
   const progressPercent = ((currentIndex + 1) / cards.length) * 100;
 
   return (
-    <div className="w-full max-w-[560px] mx-auto">
-      {onBack && (
-        <button
-          onClick={onBack}
-          className="mb-4 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 flex items-center gap-1 mr-auto"
-        >
-          ← Chọn chủ đề khác
-        </button>
-      )}
+    <div className="w-full max-w-[560px] mx-auto text-left">
+      {/* HEADER BAR: Back Button + Topic Badge */}
+      <div className="flex items-center justify-between gap-3 mb-4">
+        {onBack && (
+          <button
+            onClick={onBack}
+            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 shadow-2xs hover:border-[#58cc02] dark:hover:border-[#58cc02] transition-all cursor-pointer group active:scale-95"
+          >
+            <span className="group-hover:-translate-x-1 transition-transform">←</span>
+            <span>{backLabel}</span>
+          </button>
+        )}
+
+        <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-black uppercase tracking-wider bg-[#58cc02]/10 text-[#58cc02] border border-[#58cc02]/30 shrink-0">
+          <span>{topicIcon}</span>
+          <span className="truncate max-w-[180px] sm:max-w-none">{topicName}</span>
+        </div>
+      </div>
+
+      {/* PROGRESS BAR & STATUS BADGE */}
       <div className="mb-6">
-        <div className="flex justify-between items-center mb-2 text-sm">
-          <span className="text-gray-500 dark:text-gray-400 font-medium">
+        <div className="flex justify-between items-center mb-2 text-xs sm:text-sm">
+          <span className="font-extrabold text-gray-600 dark:text-gray-300">
             Thẻ {currentIndex + 1} / {cards.length}
           </span>
+
           <span
-            className={`text-xs font-bold px-2.5 py-1 rounded-full ${
+            className={`text-xs font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider border ${
               currentCard.status === "MASTERED"
-                ? "bg-[#58cc02]/10 text-[#58cc02]"
+                ? "bg-[#58cc02]/10 text-[#58cc02] border-[#58cc02]/30"
                 : currentCard.status === "LEARNING"
-                  ? "bg-orange-100 text-orange-500 dark:bg-orange-900/30"
-                  : "bg-blue-100 text-blue-500 dark:bg-blue-900/30"
+                  ? "bg-amber-500/10 text-amber-500 border-amber-500/30"
+                  : "bg-blue-500/10 text-blue-500 border-blue-500/30"
             }`}
           >
-            {currentCard.status}
+            {currentCard.status === "MASTERED"
+              ? "🏆 Đã thuộc"
+              : currentCard.status === "LEARNING"
+                ? "⚡ Đang học"
+                : "✨ Từ mới"}
           </span>
         </div>
-        <div className="w-full h-2 rounded-full bg-gray-100 dark:bg-gray-700 overflow-hidden">
+
+        <div className="w-full h-2.5 rounded-full bg-gray-100 dark:bg-gray-700 overflow-hidden">
           <div
             className="h-full bg-[#58cc02] transition-all duration-300 rounded-full"
             style={{ width: `${progressPercent}%` }}
@@ -180,81 +327,107 @@ export default function DailyFlashcardReview({
         </div>
       </div>
 
-      {/* Thẻ flip */}
+      {/* FLASHCARD (Duolingo Style 3D Interactive Card) */}
       <div
-        className="w-full [perspective:1200px] cursor-pointer select-none"
+        className="w-full cursor-pointer select-none group"
         onClick={handleFlip}
         role="button"
         tabIndex={0}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") {
-            e.preventDefault();
-            handleFlip();
-          }
-        }}
       >
-        <div
-          className="grid transition-transform duration-500 ease-out [transform-style:preserve-3d]"
-          style={{ transform: isFlipped ? "rotateY(180deg)" : "rotateY(0deg)" }}
-        >
-          {/* Mặt trước */}
-          <div
-            className="col-start-1 row-start-1 [backface-visibility:hidden] min-h-[280px]
-                       rounded-3xl border-2 border-gray-200 dark:border-gray-700
-                       bg-gradient-to-b from-white to-gray-50 dark:from-gray-800 dark:to-gray-800/60
-                       shadow-lg flex flex-col items-center justify-center gap-4 px-8 py-10"
-          >
-            <p className="text-4xl sm:text-5xl font-extrabold text-gray-900 dark:text-white text-center break-words">
-              {word.word}
-            </p>
-            {word.pronunciation && (
-              <p className="text-lg text-gray-500 dark:text-gray-400">
-                {word.pronunciation}
-              </p>
-            )}
-            <p className="text-xs text-gray-400 dark:text-gray-500 mt-6 tracking-wide">
-              Chạm để xem nghĩa
-            </p>
+        <div className="w-full min-h-[340px] sm:min-h-[380px] rounded-3xl border-2 border-gray-200 dark:border-gray-700 hover:border-[#58cc02] dark:hover:border-[#58cc02] bg-white dark:bg-gray-800 shadow-sm hover:shadow-lg transition-all flex flex-col justify-between p-7 sm:p-9 relative active:scale-[0.99]">
+          {/* Header trong thẻ */}
+          <div className="flex items-center justify-between w-full">
+            <span className="text-xs font-extrabold uppercase tracking-wider px-3 py-1 rounded-xl bg-gray-100 dark:bg-gray-900/60 border border-gray-200/80 dark:border-gray-700 text-gray-600 dark:text-gray-300">
+              {word.part_of_speech || (isFlipped ? "Nghĩa tiếng Việt" : "Từ vựng tiếng Anh")}
+            </span>
+
+            {/* Nút phát âm */}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                playAudio(word.word);
+              }}
+              className="w-11 h-11 rounded-2xl bg-gray-100 dark:bg-gray-700/80 hover:bg-[#58cc02] text-gray-600 dark:text-gray-300 hover:text-white flex items-center justify-center text-lg active:scale-90 transition-all shadow-2xs cursor-pointer group-hover:bg-[#58cc02]/10 group-hover:text-[#58cc02]"
+              title="Phát âm (Phím A)"
+            >
+              🔊
+            </button>
           </div>
 
-          {/* Mặt sau */}
-          <div
-            className="col-start-1 row-start-1 [backface-visibility:hidden] min-h-[280px]
-                       rounded-3xl border-2 border-gray-200 dark:border-gray-700
-                       bg-gradient-to-b from-white to-gray-50 dark:from-gray-800 dark:to-gray-800/60
-                       shadow-lg flex flex-col items-center justify-center gap-4 px-8 py-10 text-center"
-            style={{ transform: "rotateY(180deg)" }}
-          >
-            {word.part_of_speech && (
-              <p className="text-sm italic text-gray-400 dark:text-gray-500">
-                {word.part_of_speech}
-              </p>
+          {/* Nội dung trung tâm của thẻ */}
+          <div className="my-auto py-6 text-center">
+            {!isFlipped ? (
+              <div>
+                <p className="text-4xl sm:text-5xl font-black text-gray-900 dark:text-white tracking-tight break-words mb-3">
+                  {word.word}
+                </p>
+                {word.pronunciation && (
+                  <div className="inline-block px-3.5 py-1 rounded-xl bg-[#58cc02]/10 border border-[#58cc02]/20 text-[#58cc02] font-mono font-bold text-base sm:text-lg">
+                    {word.pronunciation}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div>
+                <span className="text-xs font-extrabold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-2 flex items-center justify-center gap-1.5">
+                  <span>🇻🇳</span> Ý nghĩa tiếng Việt
+                </span>
+                <p className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white leading-relaxed mb-4 max-w-md mx-auto">
+                  {word.meaning_vi}
+                </p>
+                <div className="inline-block px-3 py-1 rounded-xl bg-gray-100/80 dark:bg-gray-900/60 border border-gray-200/80 dark:border-gray-700 text-xs sm:text-sm font-semibold text-gray-500 dark:text-gray-400">
+                  <strong className="text-gray-900 dark:text-white font-bold">{word.word}</strong>
+                  {word.pronunciation ? ` · ${word.pronunciation}` : ""}
+                </div>
+              </div>
             )}
-            <p className="text-2xl sm:text-3xl font-semibold text-gray-900 dark:text-white leading-relaxed">
-              {word.meaning_vi}
-            </p>
+          </div>
+
+          {/* Gợi ý bấm dưới đáy thẻ */}
+          <div className="text-center pt-2 border-t border-gray-100 dark:border-gray-700/50">
+            <span className="text-xs font-bold text-gray-400 dark:text-gray-500 inline-flex items-center gap-1.5">
+              <span>💡</span>
+              <span>{!isFlipped ? "Chạm thẻ hoặc phím Space để xem nghĩa" : "Chạm thẻ để lật lại từ vựng"}</span>
+            </span>
           </div>
         </div>
       </div>
 
+      {/* CÁC NÚT ĐÁNH GIÁ (KHI THẺ ĐÃ LẬT) */}
       {isFlipped && (
-        <div className="flex gap-3 mt-6">
-          <button
-            onClick={() => handleAnswer("LEARNING")}
-            disabled={isSubmitting}
-            className="flex-1 py-4 rounded-2xl font-bold text-base border-2 border-orange-300 text-orange-500
-                       hover:bg-orange-50 dark:hover:bg-orange-900/20 disabled:opacity-50 transition-colors"
-          >
-            Cần ôn thêm
-          </button>
-          <button
-            onClick={() => handleAnswer("MASTERED")}
-            disabled={isSubmitting}
-            className="flex-1 py-4 rounded-2xl font-bold text-base bg-[#58cc02] text-white
-                       hover:bg-[#4cb001] disabled:opacity-50 transition-colors shadow-md shadow-[#58cc02]/30"
-          >
-            Đã thuộc
-          </button>
+        <div className="mt-6 animate-fadeIn">
+          <div className="flex gap-3">
+            <button
+              onClick={() => handleAnswer("LEARNING")}
+              disabled={isSubmitting}
+              className="flex-1 py-4 rounded-2xl font-black text-sm sm:text-base border-2 border-orange-400/80 dark:border-orange-500 text-orange-500 dark:text-orange-400 bg-orange-500/10 hover:bg-orange-500/20 active:scale-98 transition-all cursor-pointer shadow-xs flex items-center justify-center gap-2"
+            >
+              <span>⚡</span>
+              <span>Cần ôn thêm (Phím 1)</span>
+            </button>
+            <button
+              onClick={() => handleAnswer("MASTERED")}
+              disabled={isSubmitting}
+              className="flex-1 py-4 rounded-2xl font-black text-sm sm:text-base bg-[#58cc02] hover:bg-[#4cb001] text-white active:scale-98 transition-all shadow-md shadow-[#58cc02]/25 cursor-pointer flex items-center justify-center gap-2"
+            >
+              <span>✓</span>
+              <span>Đã thuộc (Phím 2)</span>
+            </button>
+          </div>
+
+          <div className="flex items-center justify-center gap-3 mt-3 text-[11px] font-bold text-gray-400 dark:text-gray-500">
+            <span>Phím tắt:</span>
+            <span className="px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 font-mono">
+              Space
+            </span>
+            <span>lật thẻ</span>
+            <span>·</span>
+            <span className="px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 font-mono">
+              A
+            </span>
+            <span>phát âm</span>
+          </div>
         </div>
       )}
 

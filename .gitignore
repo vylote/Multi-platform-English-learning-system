@@ -127,5 +127,7 @@ pgdata_new/
 *.log
 
 backend/src/data/stardict_en_vi.txt
+.venv/
+venv/
 
 backend/borderline_review.csv

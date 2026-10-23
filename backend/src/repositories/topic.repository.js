@@ -2,7 +2,7 @@ const db = require("../config/db");
 
 class TopicRepository {
   async findAll() {
-    const sql = `SELECT id, title, description FROM topics ORDER BY title ASC;`;
+    const sql = `SELECT id, title, description, difficulty, order_index FROM topics ORDER BY order_index ASC NULLS LAST, id ASC;`;
     const { rows } = await db.query(sql);
     return rows;
   }

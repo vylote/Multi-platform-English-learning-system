@@ -1,6 +1,8 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 export default function LeftSidebar() {
+  const location = useLocation();
+
   const navItems = [
     { name: "Học", icon: "https://d35aaqx5ub95lt.cloudfront.net/vendor/784035717e2ff1d448c0f6cc4efc89fb.svg", path: "/learn" },
     { name: "Luyện đề", icon: "https://d35aaqx5ub95lt.cloudfront.net/vendor/5187f6694476a769d4a4e28149867e3e.svg", path: "/exams" },
@@ -20,17 +22,25 @@ export default function LeftSidebar() {
         />
       </div>
 
-      <nav className="flex flex-col gap-1">
-        {navItems.map((item, index) => (
-          <Link
-            key={index}
-            to={item.path}
-            className="flex items-center gap-4 p-3 rounded-xl font-bold text-gray-500 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-          >
-            <img src={item.icon} alt={item.name} className="w-8 h-8 object-contain" />
-            <span className="text-[15px] uppercase tracking-wide">{item.name}</span>
-          </Link>
-        ))}
+      <nav className="flex flex-col gap-1.5">
+        {navItems.map((item, index) => {
+          const isActive = item.path !== "#" && location.pathname.startsWith(item.path);
+
+          return (
+            <Link
+              key={index}
+              to={item.path}
+              className={`flex items-center gap-4 px-4 py-3 rounded-2xl font-extrabold text-[15px] uppercase tracking-wide transition-all ${
+                isActive
+                  ? "bg-[#58cc02]/15 text-[#58cc02] dark:text-[#58cc02] border-2 border-[#58cc02]/40 shadow-xs hover:bg-[#58cc02]/25"
+                  : "text-gray-500 dark:text-gray-400 hover:text-[#58cc02] dark:hover:text-[#58cc02] hover:bg-gray-100/80 dark:hover:bg-gray-800"
+              }`}
+            >
+              <img src={item.icon} alt={item.name} className="w-7 h-7 object-contain" />
+              <span>{item.name}</span>
+            </Link>
+          );
+        })}
       </nav>
     </aside>
   );

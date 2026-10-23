@@ -1,9 +1,13 @@
 const fs = require("fs");
 const readline = require("readline");
+const path = require("path");
 require("dotenv").config();
 const db = require("../config/db");
 
-const FILE_PATH = process.argv[2] || "./data/stardict_en_vi.txt";
+const defaultPath = fs.existsSync(path.join(__dirname, "../data/stardict_en_vi.txt"))
+  ? path.join(__dirname, "../data/stardict_en_vi.txt")
+  : "./data/stardict_en_vi.txt";
+const FILE_PATH = process.argv[2] || defaultPath;
 const BATCH_SIZE = 500;
 
 const POS_MAP = {

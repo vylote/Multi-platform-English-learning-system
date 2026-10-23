@@ -5,7 +5,11 @@
   "main": "index.js",
   "scripts": {
     "start": "node src/index.js",
-    "dev": "nodemon src/index.js"
+    "dev": "nodemon src/index.js",
+    "seed:topics": "node src/scripts/seed-topics.js",
+    "import:dict": "node src/scripts/import-dictionary.js",
+    "seed:placement": "node src/scripts/seed-placement-exam.js",
+    "gen:exams": "node src/scripts/gen_exam.js --topics=1-36 --count=10 --duration=15"
   },
   "keywords": [],
   "author": "",
