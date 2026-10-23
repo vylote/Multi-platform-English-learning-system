@@ -3,7 +3,7 @@ import { store } from "../store/index";
 import { logout } from "../store/slice/authSlice";
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
+  baseURL: import.meta.env.VITE_API_URL || "http://localhost:5000/api/v1",
   // Bắt buộc để trình duyệt tự gửi kèm cookie chứa Access Token lên BE
   withCredentials: true,
 });

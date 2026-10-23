@@ -28,6 +28,10 @@ from dotenv import load_dotenv
 from sentence_transformers import SentenceTransformer, util
 from wordfreq import word_frequency
 
+# Lấy đường dẫn tuyệt đối của thư mục chứa script hiện tại
+script_dir = os.path.dirname(os.path.abspath(__file__))
+env_path = os.path.join(script_dir, "..", "..", ".env")
+load_dotenv(env_path)
 load_dotenv()
 
 MIN_WORD_FREQUENCY = 1e-6  # ngưỡng tần suất tối thiểu
@@ -35,8 +39,6 @@ MIN_WORD_FREQUENCY = 1e-6  # ngưỡng tần suất tối thiểu
 # ==========================================================================
 # ĐỌC CHỦ ĐỀ TỪ FILE JSON
 # ==========================================================================
-# Lấy đường dẫn tuyệt đối của thư mục chứa script hiện tại
-script_dir = os.path.dirname(__file__)
 json_path = os.path.join(script_dir, 'topic_config.json')
 
 # Đọc và nạp dữ liệu vào biến TOPIC_SEEDS
@@ -50,36 +52,36 @@ except FileNotFoundError:
 
 def fetch_candidate_words(conn, limit, last_id):
     """Sử dụng con trỏ last_id để trượt qua các từ đã xử lý (tránh lặp vô tận)"""
-    sql = """
-        SELECT id, word, meaning_vi
-        FROM words
-        WHERE topic_id IS NULL
-          AND id > %s
-          AND word ~ '^[A-Za-z]+$'
-          AND length(word) BETWEEN 3 AND 15
-        ORDER BY id
-        LIMIT 20000; -- Lấy dư ra một chút để bù cho lượng bị lọc bởi wordfreq
-    """
-    with conn.cursor() as cur:
-        cur.execute(sql, (last_id,))
-        all_rows = cur.fetchall()
-
-    if not all_rows:
-        return [], last_id
-
     filtered = []
-    highest_id = last_id
-    
-    for row in all_rows:
-        highest_id = max(highest_id, row[0])
-        if word_frequency(row[1].lower(), "en") >= MIN_WORD_FREQUENCY:
-            filtered.append(row)
-            if len(filtered) == limit:
-                # Đã gom đủ 5000 từ phổ biến, chốt mức ID tại đây để mẻ sau lấy tiếp
-                highest_id = row[0]
-                break
+    current_last_id = last_id
 
-    return filtered, highest_id
+    while len(filtered) < limit:
+        sql = """
+            SELECT id, word, meaning_vi
+            FROM words
+            WHERE topic_id IS NULL
+              AND id > %s
+              AND word ~ '^[A-Za-z]+$'
+              AND length(word) BETWEEN 3 AND 15
+            ORDER BY id
+            LIMIT 10000;
+        """
+        with conn.cursor() as cur:
+            cur.execute(sql, (current_last_id,))
+            rows = cur.fetchall()
+
+        if not rows:
+            break
+
+        for row in rows:
+            current_last_id = row[0]
+            if word_frequency(row[1].lower(), "en") >= MIN_WORD_FREQUENCY:
+                filtered.append(row)
+                if len(filtered) == limit:
+                    break
+
+    return filtered, current_last_id
+
 
 
 def get_or_create_topic_ids(conn, topic_seeds_dict):

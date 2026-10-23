@@ -10,7 +10,8 @@ WHERE title IN (
   'Communication & Media',
   'Feelings & Senses',
   'Health & Medicine'
-);
+)
+ON CONFLICT (goal, topic_id) DO NOTHING;
 
 -- =========================================================
 -- CAREER: công việc & sự nghiệp
@@ -24,7 +25,8 @@ WHERE title IN (
   'Technology & IT',
   'Education & Science',
   'Industry & Manufacturing'
-);
+)
+ON CONFLICT (goal, topic_id) DO NOTHING;
 
 -- =========================================================
 -- TRAVEL: du lịch
@@ -38,7 +40,8 @@ WHERE title IN (
   'Weather & Atmosphere',
   'Shopping & Fashion',
   'Buildings & Infrastructure'
-);
+)
+ON CONFLICT (goal, topic_id) DO NOTHING;
 
 -- =========================================================
 -- HOBBY: sở thích cá nhân
@@ -52,4 +55,5 @@ WHERE title IN (
   'History & Culture',
   'Colors & Shapes',
   'Philosophy & Thinking'
-);
+)
+ON CONFLICT (goal, topic_id) DO NOTHING;

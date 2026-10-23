@@ -28,13 +28,12 @@ const GROQ_URL = isXai
   : "https://api.groq.com/openai/v1/chat/completions";
 const ACTIVE_MODEL = isXai ? process.env.GROQ_MODEL || "grok-4-fast" : GROQ_MODEL;
 
-if (isXai) {
-  console.log("⚠️  Phát hiện key xAI (xai-...) — script sẽ gọi api.x.ai thay vì api.groq.com.");
-}
-
-if (!GROQ_API_KEY) {
-  console.error("❌ Thiếu GROQ_API_KEY. Lấy free tại https://console.groq.com/keys rồi thêm vào .env");
-  process.exit(1);
+if (GROQ_API_KEY) {
+  if (isXai) {
+    console.log("⚠️  Phát hiện key xAI (xai-...) — script sẽ gọi api.x.ai thay vì api.groq.com.");
+  }
+} else {
+  console.log("ℹ️  Không phát hiện GROQ_API_KEY. Tự động chuyển sang chế độ sinh đề thi trắc nghiệm từ kho từ vựng chuẩn (8,403 từ) trong Database.");
 }
 
 // ---------------------------------------------------------------------------
@@ -278,6 +277,94 @@ async function runPlacementGeneration({ count, duration, force }) {
 }
 
 // ---------------------------------------------------------------------------
+// Sinh câu hỏi trắc nghiệm từ kho từ vựng DB khi không có Groq API Key
+// ---------------------------------------------------------------------------
+async function generateQuestionsFromDb(topic, count) {
+  const { rows: topicWords } = await db.query(
+    "SELECT id, word, pronunciation, part_of_speech, meaning_vi FROM words WHERE topic_id = $1",
+    [topic.id]
+  );
+
+  if (topicWords.length < 4) {
+    throw new Error(`Chủ đề "${topic.title}" không đủ từ vựng để tạo 4 lựa chọn (cần ít nhất 4 từ).`);
+  }
+
+  const { rows: otherWords } = await db.query(
+    "SELECT id, word, meaning_vi FROM words WHERE topic_id != $1 AND topic_id IS NOT NULL ORDER BY RANDOM() LIMIT 100",
+    [topic.id]
+  );
+
+  const cleanMeaning = (str) => {
+    if (!str) return "";
+    const parts = str.split(",").map((s) => s.trim()).filter(Boolean);
+    return parts.slice(0, 2).join(", ");
+  };
+
+  const shuffledTopicWords = [...topicWords].sort(() => 0.5 - Math.random());
+  const selectedWords = shuffledTopicWords.slice(0, Math.min(count, topicWords.length));
+  const rawQuestions = [];
+
+  for (let i = 0; i < selectedWords.length; i++) {
+    const target = selectedWords[i];
+    const isMeaningQuestion = i % 2 === 0;
+
+    let question_text = "";
+    let correctText = "";
+    let distractorPool = [];
+
+    if (isMeaningQuestion) {
+      question_text = `Nghĩa tiếng Việt chính xác của từ "${target.word}" là gì?`;
+      correctText = cleanMeaning(target.meaning_vi);
+
+      const otherMeanings = shuffledTopicWords
+        .filter((w) => w.id !== target.id)
+        .map((w) => cleanMeaning(w.meaning_vi))
+        .filter((m) => m && m.toLowerCase() !== correctText.toLowerCase());
+
+      const fallbackMeanings = otherWords
+        .map((w) => cleanMeaning(w.meaning_vi))
+        .filter((m) => m && m.toLowerCase() !== correctText.toLowerCase());
+
+      distractorPool = [...new Set([...otherMeanings, ...fallbackMeanings])];
+    } else {
+      const targetMeaning = cleanMeaning(target.meaning_vi);
+      question_text = `Từ tiếng Anh nào sau đây có nghĩa là: "${targetMeaning}"?`;
+      correctText = target.word;
+
+      const otherEnglishWords = shuffledTopicWords
+        .filter((w) => w.id !== target.id)
+        .map((w) => w.word)
+        .filter((w) => w.toLowerCase() !== correctText.toLowerCase());
+
+      const fallbackWords = otherWords
+        .map((w) => w.word)
+        .filter((w) => w.toLowerCase() !== correctText.toLowerCase());
+
+      distractorPool = [...new Set([...otherEnglishWords, ...fallbackWords])];
+    }
+
+    distractorPool.sort(() => 0.5 - Math.random());
+    const distractors = distractorPool.slice(0, 3);
+    if (distractors.length < 3) continue;
+
+    const allOptions = [correctText, ...distractors].sort(() => 0.5 - Math.random());
+    const optLetters = ["A", "B", "C", "D"];
+    const correctIndex = allOptions.indexOf(correctText);
+
+    rawQuestions.push({
+      question_text,
+      option_a: allOptions[0],
+      option_b: allOptions[1],
+      option_c: allOptions[2],
+      option_d: allOptions[3],
+      correct_option: optLetters[correctIndex],
+    });
+  }
+
+  return validateQuestions({ questions: rawQuestions });
+}
+
+// ---------------------------------------------------------------------------
 // Topic flow
 // ---------------------------------------------------------------------------
 async function runTopicGeneration({ topicIds, count, duration, force }) {
@@ -299,11 +386,17 @@ async function runTopicGeneration({ topicIds, count, duration, force }) {
       }
     }
 
-    console.log(`[Topic ${topicId}] "${topic.title}": đang gọi Groq...`);
     try {
-      const prompt = buildTopicPrompt(topic, count);
-      const parsed = await callGroq(prompt);
-      const questions = validateQuestions(parsed);
+      let questions;
+      if (GROQ_API_KEY) {
+        console.log(`[Topic ${topicId}] "${topic.title}": đang gọi Groq...`);
+        const prompt = buildTopicPrompt(topic, count);
+        const parsed = await callGroq(prompt);
+        questions = validateQuestions(parsed);
+      } else {
+        console.log(`[Topic ${topicId}] "${topic.title}": đang sinh câu hỏi từ kho từ vựng DB...`);
+        questions = await generateQuestionsFromDb(topic, count);
+      }
 
       const examId = await saveExam({
         topicId: topic.id,
@@ -320,11 +413,14 @@ async function runTopicGeneration({ topicIds, count, duration, force }) {
       failCount++;
     }
 
-    await sleep(2500);
+    if (GROQ_API_KEY) {
+      await sleep(2500);
+    }
   }
 
   console.log(`\nHoàn tất. Thành công: ${okCount}, thất bại: ${failCount}.`);
 }
+
 
 // ---------------------------------------------------------------------------
 // Main

@@ -21,7 +21,7 @@ class FlashcardRepository {
 
   async findByUser(userId) {
     const sql = `
-      SELECT f.id, f.user_id, f.word_id, f.topic_id, f.status, f.last_reviewed, f.created_at,
+      SELECT f.id, f.user_id, f.word_id, f.topic_id, f.status, f.last_reviewed,
              w.word, w.pronunciation, w.part_of_speech, w.meaning_vi
       FROM flashcards f
       JOIN words w ON w.id = f.word_id
@@ -36,7 +36,7 @@ class FlashcardRepository {
   //idx uq_flashcards_user_topic
   async findByUserAndTopic(userId, topicId) {
     const sql = `
-    SELECT f.id, f.user_id, f.word_id, f.topic_id, f.status, f.last_reviewed, f.created_at,
+    SELECT f.id, f.user_id, f.word_id, f.topic_id, f.status, f.last_reviewed,
            w.word, w.pronunciation, w.part_of_speech, w.meaning_vi
     FROM flashcards f
     JOIN words w ON w.id = f.word_id
@@ -53,7 +53,7 @@ class FlashcardRepository {
   // bulkInsertNew cho 1 topic hoàn toàn mới -> chắc chắn mọi thẻ đều NEW, không cần lọc)
   async findAllByUserAndTopic(userId, topicId) {
     const sql = `
-    SELECT f.id, f.user_id, f.word_id, f.topic_id, f.status, f.last_reviewed, f.created_at,
+    SELECT f.id, f.user_id, f.word_id, f.topic_id, f.status, f.last_reviewed,
            w.word, w.pronunciation, w.part_of_speech, w.meaning_vi
     FROM flashcards f
     JOIN words w ON w.id = f.word_id
@@ -69,7 +69,7 @@ class FlashcardRepository {
       UPDATE flashcards
       SET status = $1, last_reviewed = CURRENT_TIMESTAMP
       WHERE id = $2 AND user_id = $3
-      RETURNING id, user_id, word_id, topic_id, status, last_reviewed, created_at;
+      RETURNING id, user_id, word_id, topic_id, status, last_reviewed;
     `;
     const { rows } = await db.query(sql, [status, id, userId]);
     return rows[0] ? new Flashcard(rows[0]) : null;

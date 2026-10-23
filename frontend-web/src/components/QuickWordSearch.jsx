@@ -143,25 +143,61 @@ export default function QuickWordSearch() {
               <div
                 key={item.id ?? item.word}
                 className="px-4 py-3 border-b last:border-b-0 border-gray-100 dark:border-gray-700
-                           hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                           hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors flex items-start justify-between gap-3"
               >
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="font-bold text-gray-900 dark:text-white">{item.word}</span>
-                  {item.pronunciation && (
-                    <span className="text-sm text-gray-500 dark:text-gray-400">{item.pronunciation}</span>
-                  )}
-                  {item.part_of_speech && (
-                    <span className="text-xs italic text-gray-400 dark:text-gray-500">{item.part_of_speech}</span>
-                  )}
-                  {item.isExternal && (
-                    <span className="text-[11px] font-semibold text-[#58cc02] bg-[#58cc02]/10 px-2 py-0.5 rounded-full">
-                      Từ điển online
-                    </span>
-                  )}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="font-bold text-gray-900 dark:text-white">{item.word}</span>
+                    {item.pronunciation && (
+                      <span className="text-xs font-mono text-[#58cc02] font-semibold bg-[#58cc02]/10 px-2 py-0.5 rounded">
+                        {item.pronunciation}
+                      </span>
+                    )}
+                    {item.part_of_speech && (
+                      <span className="text-xs italic text-gray-400 dark:text-gray-500">
+                        {item.part_of_speech}
+                      </span>
+                    )}
+                    {item.isExternal && (
+                      <span className="text-[10px] font-semibold text-blue-500 bg-blue-500/10 px-2 py-0.5 rounded-full">
+                        Online
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">{item.meaning_vi}</p>
                 </div>
-                <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">{item.meaning_vi}</p>
+
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (typeof window !== "undefined" && "speechSynthesis" in window) {
+                      window.speechSynthesis.cancel();
+                      const utterance = new SpeechSynthesisUtterance(item.word);
+                      utterance.lang = "en-US";
+                      utterance.rate = 0.85;
+                      window.speechSynthesis.speak(utterance);
+                    }
+                  }}
+                  className="w-8 h-8 rounded-xl bg-gray-100 dark:bg-gray-700 hover:bg-[#58cc02] text-gray-500 dark:text-gray-400 hover:text-white flex items-center justify-center text-sm shrink-0 transition-colors cursor-pointer"
+                  title="Nghe phát âm"
+                >
+                  🔊
+                </button>
               </div>
             ))}
+
+          {hasResponse && results.length > 0 && (
+            <div className="p-2.5 bg-gray-50 dark:bg-gray-900/40 border-t border-gray-100 dark:border-gray-700 text-center">
+              <a
+                href="/dictionary"
+                className="text-xs font-bold text-[#58cc02] hover:underline inline-flex items-center gap-1"
+              >
+                <span>Xem chi tiết trong Từ điển đầy đủ</span>
+                <span>→</span>
+              </a>
+            </div>
+          )}
         </div>
       )}
     </div>
