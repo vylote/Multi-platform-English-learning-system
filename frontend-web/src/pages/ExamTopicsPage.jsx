@@ -122,9 +122,6 @@ export default function ExamTopicsPage() {
       <div className="py-6 sm:py-8 max-w-[1300px] mx-auto text-left">
         {/* CLEAN HEADER MATCHING REVIEW THEME */}
         <div className="mb-8 text-center max-w-2xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#58cc02]/10 border border-[#58cc02]/30 text-[#58cc02] text-xs font-extrabold uppercase tracking-wider mb-3">
-            <span>🎯</span> Luyện thi ELS
-          </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-white mb-2">
             Luyện thi trắc nghiệm theo chủ đề
           </h1>

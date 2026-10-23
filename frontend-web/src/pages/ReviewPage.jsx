@@ -55,14 +55,11 @@ export default function ReviewPage() {
 
   return (
     <MainLayout>
-      <div className="w-full flex flex-col items-center py-6 px-4">
+      <div className="w-full flex flex-col items-center py-2 sm:py-4">
         {!selection && (
-          <div className="w-full max-w-[900px] mx-auto py-6 sm:py-8 px-4 text-center">
+          <div className="w-full mx-auto text-center">
             {/* CLEAN HEADER FOR TOPIC SELECTION */}
             <div className="mb-8 text-center">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#58cc02]/10 border border-[#58cc02]/30 text-[#58cc02] text-xs font-extrabold uppercase tracking-wider mb-3">
-                <span>🎴</span> Ôn tập thông minh
-              </div>
               <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-white mb-2">
                 Luyện từ vựng qua Flashcards
               </h1>

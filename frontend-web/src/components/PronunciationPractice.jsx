@@ -80,10 +80,6 @@ export default function PronunciationPractice({ targetWord, pronunciation, onRes
 
   return (
     <div className="max-w-[480px] mx-auto p-6 sm:p-8 rounded-3xl bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 text-center shadow-sm">
-      <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider bg-[#58cc02]/10 text-[#58cc02] border border-[#58cc02]/30 mb-4">
-        <span>🎙️</span> Luyện phát âm AI
-      </div>
-
       <p className="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white mb-2 tracking-tight">
         {targetWord}
       </p>

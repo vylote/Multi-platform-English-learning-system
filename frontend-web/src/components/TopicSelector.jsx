@@ -143,23 +143,23 @@ export default function TopicSelector({ onSelectTopic, onSelectRandom }) {
             <button
               key={topic.id}
               onClick={() => onSelectTopic(topic)}
-              className="p-4 rounded-2xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-[#58cc02] dark:hover:border-[#58cc02] shadow-xs hover:shadow-md hover:-translate-y-0.5 active:scale-[0.98] transition-all cursor-pointer flex items-center justify-between gap-3 group text-left"
+              className="p-4 rounded-2xl border-2 border-[#d5cdbd] dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-[#58cc02] dark:hover:border-[#58cc02] shadow-xs hover:shadow-md hover:-translate-y-0.5 active:scale-[0.98] transition-all cursor-pointer flex items-center justify-between gap-3 group text-left"
             >
               <div className="flex items-center gap-3 min-w-0">
-                <div className="w-11 h-11 rounded-2xl bg-gray-100 dark:bg-gray-700/80 group-hover:bg-[#58cc02]/10 text-gray-700 dark:text-gray-200 group-hover:text-[#58cc02] flex items-center justify-center text-xl shrink-0 group-hover:scale-110 transition-transform">
+                <div className="w-11 h-11 rounded-2xl bg-[#efebe2] dark:bg-gray-700/80 group-hover:bg-[#58cc02]/15 text-gray-900 dark:text-gray-200 group-hover:text-[#1c7400] dark:group-hover:text-[#58cc02] flex items-center justify-center text-xl shrink-0 group-hover:scale-110 transition-transform">
                   {icon}
                 </div>
                 <div className="min-w-0">
-                  <h4 className="font-bold text-sm text-gray-900 dark:text-white group-hover:text-[#58cc02] dark:group-hover:text-[#58cc02] transition-colors truncate">
+                  <h4 className="font-black text-sm text-gray-950 dark:text-white group-hover:text-[#1c7400] dark:group-hover:text-[#58cc02] transition-colors truncate">
                     {topic.title}
                   </h4>
-                  <span className="text-[11px] text-gray-400 dark:text-gray-500 flex items-center gap-1">
+                  <span className="text-[11px] text-gray-600 dark:text-gray-400 font-bold flex items-center gap-1">
                     <span>10 từ mỗi lượt</span>
                   </span>
                 </div>
               </div>
 
-              <span className="text-gray-300 dark:text-gray-600 group-hover:text-[#58cc02] group-hover:translate-x-1 transition-all text-sm font-bold">
+              <span className="text-gray-400 dark:text-gray-600 group-hover:text-[#1c7400] dark:group-hover:text-[#58cc02] group-hover:translate-x-1 transition-all text-sm font-bold">
                 →
               </span>
             </button>

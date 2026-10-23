@@ -72,7 +72,7 @@ function TopicNode({ topic, tierColor, isCurrent, isOpen, onClick }) {
       {isCurrent && (
         <span
           className="absolute top-0 px-3.5 py-1.5 rounded-full text-xs font-black uppercase tracking-wider
-                     bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 shadow-md animate-bounce"
+                     bg-white dark:bg-gray-800 border-2 border-[#d5cdbd] dark:border-gray-700 shadow-md animate-bounce"
           style={{ color: tierColor }}
         >
           Học tiếp
@@ -153,7 +153,7 @@ function TopicCard({ topic, prevTopic, tierColor }) {
   }
 
   return (
-    <div className="mt-4 w-[340px] max-w-full rounded-3xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5 sm:p-6 shadow-xl text-left animate-fadeIn relative">
+    <div className="mt-4 w-[340px] max-w-full rounded-3xl border-2 border-[#d5cdbd] dark:border-gray-700 bg-white dark:bg-gray-800 p-5 sm:p-6 shadow-xl text-left animate-fadeIn relative">
       {/* Top accent line matching tierColor */}
       <div
         className="absolute top-0 left-6 right-6 h-1 rounded-b-full"
@@ -234,13 +234,13 @@ function TopicCard({ topic, prevTopic, tierColor }) {
         <div className="flex gap-2">
           <Link
             to={withReturnTo(`/review?topicId=${topic.id}&topicTitle=${encodeURIComponent(topic.title)}`, "/learn")}
-            className="flex-1 text-center py-2.5 rounded-2xl border-2 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/60 hover:border-[#58cc02] dark:hover:border-[#58cc02] text-gray-700 dark:text-gray-200 hover:text-[#58cc02] dark:hover:text-[#58cc02] text-xs font-extrabold uppercase transition-all shadow-2xs active:scale-[0.98]"
+            className="flex-1 text-center py-2.5 rounded-2xl border-2 border-[#d5cdbd] dark:border-gray-700 bg-gray-50 dark:bg-gray-900/60 hover:border-[#58cc02] dark:hover:border-[#58cc02] text-gray-700 dark:text-gray-200 hover:text-[#58cc02] dark:hover:text-[#58cc02] text-xs font-extrabold uppercase transition-all shadow-2xs active:scale-[0.98]"
           >
             🎴 Ôn từ vựng
           </Link>
           <Link
             to={withReturnTo(`/exams/topics/${topic.id}`, "/learn")}
-            className="flex-1 text-center py-2.5 rounded-2xl border-2 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/60 hover:border-[#58cc02] dark:hover:border-[#58cc02] text-gray-700 dark:text-gray-200 hover:text-[#58cc02] dark:hover:text-[#58cc02] text-xs font-extrabold uppercase transition-all shadow-2xs active:scale-[0.98]"
+            className="flex-1 text-center py-2.5 rounded-2xl border-2 border-[#d5cdbd] dark:border-gray-700 bg-gray-50 dark:bg-gray-900/60 hover:border-[#58cc02] dark:hover:border-[#58cc02] text-gray-700 dark:text-gray-200 hover:text-[#58cc02] dark:hover:text-[#58cc02] text-xs font-extrabold uppercase transition-all shadow-2xs active:scale-[0.98]"
           >
             📝 Làm bài thi
           </Link>
@@ -339,9 +339,6 @@ export default function LearningPathPage() {
       <div ref={containerRef} className="max-w-[560px] mx-auto pb-16 px-4 relative">
         {/* HEADER */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#58cc02]/10 border border-[#58cc02]/30 text-[#58cc02] text-xs font-extrabold uppercase tracking-wider mb-3">
-            <span>🗺️</span> Lộ trình học tập
-          </div>
           <h1 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white mb-2">
             Lộ trình của bạn
           </h1>
@@ -430,7 +427,7 @@ export default function LearningPathPage() {
             <button
               type="button"
               onClick={scrollToCurrentTopic}
-              className="pointer-events-auto inline-flex items-center gap-2.5 px-4 py-2.5 rounded-2xl bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 shadow-xl text-xs sm:text-sm font-black text-gray-800 dark:text-gray-100 hover:border-[#58cc02] hover:text-[#58cc02] dark:hover:text-[#58cc02] transition-all cursor-pointer group active:scale-95 animate-fadeIn"
+              className="pointer-events-auto inline-flex items-center gap-2.5 px-4 py-2.5 rounded-2xl bg-white dark:bg-gray-800 border-2 border-[#d5cdbd] dark:border-gray-700 shadow-xl text-xs sm:text-sm font-black text-gray-800 dark:text-gray-100 hover:border-[#58cc02] hover:text-[#58cc02] dark:hover:text-[#58cc02] transition-all cursor-pointer group active:scale-95 animate-fadeIn"
               title={currentId ? "Cuộn về chủ đề đang học" : "Cuộn lên đầu trang"}
             >
               <span className="w-6 h-6 rounded-lg bg-[#58cc02]/15 text-[#58cc02] flex items-center justify-center font-black text-sm group-hover:-translate-y-0.5 transition-transform">
