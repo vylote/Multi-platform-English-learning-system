@@ -63,9 +63,9 @@ export default function AdminLayout({ children }) {
   ];
 
   return (
-    <div className="min-h-screen w-full flex bg-[#ede8dc] dark:bg-[#121318] text-gray-900 dark:text-gray-100 transition-colors duration-200 select-none">
-      {/* 1. ADMIN SIDEBAR (Thanh điều hướng bên trái) */}
-      <aside className="shrink-0 h-screen sticky top-0 flex flex-col justify-between p-3 sm:p-4 w-[68px] sm:w-[76px] lg:w-[250px] xl:w-[270px] border-r-2 border-[#d5cdbd] dark:border-gray-800 bg-[#f4efe4] dark:bg-gray-900 transition-all duration-200 z-30">
+    <div className="h-screen w-full flex bg-[#ede8dc] dark:bg-[#121318] text-gray-900 dark:text-gray-100 transition-colors duration-200 select-none overflow-hidden">
+      {/* 1. ADMIN SIDEBAR: Luôn cố định 100% chiều cao màn hình, không bao giờ bị cuộn mất */}
+      <aside className="shrink-0 h-full flex flex-col justify-between p-3 sm:p-4 w-[68px] sm:w-[76px] lg:w-[250px] xl:w-[270px] border-r-2 border-[#d5cdbd] dark:border-gray-800 bg-[#f4efe4] dark:bg-gray-900 transition-all duration-200 z-30 overflow-y-auto">
         {/* PHẦN TRÊN: LOGO + DANH SÁCH MENU DỌC */}
         <div className="flex flex-col">
           {/* BRAND LOGO: ANHLINGO ADMIN */}
@@ -197,8 +197,8 @@ export default function AdminLayout({ children }) {
         </div>
       </aside>
 
-      {/* 2. MAIN CONTENT AREA (Khu vực nội dung chính bên phải) */}
-      <div className="flex-1 min-h-screen flex flex-col min-w-0 overflow-x-hidden">
+      {/* 2. MAIN CONTENT AREA: Vùng nội dung cuộn độc lập */}
+      <div className="flex-1 min-w-0 h-full overflow-y-auto flex flex-col">
         <main className="flex-1 w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
           {children}
         </main>
