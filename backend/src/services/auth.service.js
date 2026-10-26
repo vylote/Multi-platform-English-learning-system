@@ -51,7 +51,10 @@ class AuthService {
   }
 
   async loginUser({ username, password }) {
-    const user = await userRepository.findByUsername(username);
+    let user = await userRepository.findByUsername(username);
+    if (!user) {
+      user = await userRepository.findByEmail(username);
+    }
     if (!user) {
       throw new AppException(
         ErrorCode.UNAUTHENTICATED,

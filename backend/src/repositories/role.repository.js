@@ -31,9 +31,57 @@ class RoleRepository {
   }
 
   async findAll() {
-    const query = `SELECT id, code, name FROM roles ORDER BY id`;
+    const query = `SELECT id, code, name, description FROM roles ORDER BY id`;
     const result = await db.query(query);
     return result.rows.map((row) => new Role(row));
+  }
+
+  // Lấy toàn bộ danh sách permissions có trong hệ thống
+  async getAllPermissions() {
+    const query = `SELECT id, code, name, description FROM permissions ORDER BY id`;
+    const result = await db.query(query);
+    return result.rows;
+  }
+
+  // Lấy toàn bộ bảng phân quyền N-N giữa roles và permissions
+  async getRolePermissionsMatrix() {
+    const query = `
+      SELECT rp.role_id, rp.permission_id, p.code AS permission_code, r.code AS role_code
+      FROM role_permissions rp
+      JOIN roles r ON r.id = rp.role_id
+      JOIN permissions p ON p.id = rp.permission_id
+    `;
+    const result = await db.query(query);
+    return result.rows;
+  }
+
+  // Cập nhật toàn bộ permissions cho 1 role trong 1 transaction an toàn
+  async updateRolePermissions(roleId, permissionIds) {
+    const client = await db.pool.connect();
+    try {
+      await client.query("BEGIN");
+
+      // Xóa các quyền cũ của role
+      await client.query("DELETE FROM role_permissions WHERE role_id = $1", [roleId]);
+
+      // Gán danh sách quyền mới
+      if (Array.isArray(permissionIds) && permissionIds.length > 0) {
+        for (const permId of permissionIds) {
+          await client.query(
+            "INSERT INTO role_permissions (role_id, permission_id) VALUES ($1, $2) ON CONFLICT DO NOTHING",
+            [roleId, parseInt(permId, 10)],
+          );
+        }
+      }
+
+      await client.query("COMMIT");
+      return true;
+    } catch (err) {
+      await client.query("ROLLBACK");
+      throw err;
+    } finally {
+      client.release();
+    }
   }
 }
 

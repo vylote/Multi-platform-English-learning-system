@@ -15,6 +15,11 @@ import OnboardingPage from "../pages/OnboardingPage";
 import PlacementTestPage from "../pages/PlacementTestPage";
 import LearningPathPage from "../pages/LearningPathPage";
 import TopicLessonPage from "../pages/TopicLessonPage";
+import AdminLoginPage from "../pages/AdminLoginPage";
+import AdminUsersPage from "../pages/AdminUsersPage";
+import AdminPermissionsPage from "../pages/AdminPermissionsPage";
+import AdminExamsPage from "../pages/AdminExamsPage";
+import AdminExamGeneratePage from "../pages/AdminExamGeneratePage";
 
 // 1. Đưa ProtectedRoute ra ngoài AppRoutes
 const ProtectedRoute = ({ children }) => {
@@ -23,6 +28,20 @@ const ProtectedRoute = ({ children }) => {
 
   if (!user) return <Navigate to="/login" replace />;
   if (needsOnboarding) return <Navigate to="/onboarding" replace />;
+
+  return children;
+};
+
+// Route bảo vệ dành riêng cho Quản trị viên
+const AdminRoute = ({ children }) => {
+  const { user } = useSelector((state) => state.auth);
+
+  if (!user) {
+    return <Navigate to="/admin/login" replace />;
+  }
+  if (user.role !== "ADMIN") {
+    return <Navigate to="/learn" replace />;
+  }
 
   return children;
 };
@@ -141,6 +160,56 @@ export const AppRoutes = () => {
           <ProtectedRoute>
             <ProfilePage />
           </ProtectedRoute>
+        }
+      />
+
+      {/* --- CỔNG QUẢN TRỊ VIÊN (ADMIN PORTAL) --- */}
+      <Route
+        path="/admin/login"
+        element={
+          !user ? (
+            <AdminLoginPage />
+          ) : user.role === "ADMIN" ? (
+            <Navigate to="/admin/users" replace />
+          ) : (
+            <Navigate to="/learn" replace />
+          )
+        }
+      />
+      <Route
+        path="/admin"
+        element={<Navigate to="/admin/users" replace />}
+      />
+      <Route
+        path="/admin/users"
+        element={
+          <AdminRoute>
+            <AdminUsersPage />
+          </AdminRoute>
+        }
+      />
+      <Route
+        path="/admin/permissions"
+        element={
+          <AdminRoute>
+            <AdminPermissionsPage />
+          </AdminRoute>
+        }
+      />
+      <Route
+        path="/admin/exams"
+        element={
+          <AdminRoute>
+            <AdminExamsPage />
+          </AdminRoute>
+        }
+      />
+      <Route
+        path="/admin/exams/generate"
+        element={
+          <AdminRoute>
+            <AdminExamGeneratePage />
+          </AdminRoute>
         }
       />
 

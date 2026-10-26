@@ -81,6 +81,110 @@ class UserRepository {
     const result = await db.query(query, [tier, userId]);
     return result.rows[0];
   }
+
+  // Admin: Lấy danh sách người dùng kèm phân trang, tìm kiếm và bộ lọc
+  async findUsers({ search = "", role = "ALL", tier = "ALL", page = 1, limit = 10 }) {
+    const offset = (page - 1) * limit;
+    const conditions = [];
+    const params = [];
+    let paramIndex = 1;
+
+    if (search && search.trim()) {
+      conditions.push(`(u.username ILIKE $${paramIndex} OR u.email ILIKE $${paramIndex})`);
+      params.push(`%${search.trim()}%`);
+      paramIndex++;
+    }
+
+    if (role && role !== "ALL") {
+      conditions.push(`r.code = $${paramIndex}`);
+      params.push(role);
+      paramIndex++;
+    }
+
+    if (tier && tier !== "ALL") {
+      conditions.push(`u.tier = $${paramIndex}`);
+      params.push(tier);
+      paramIndex++;
+    }
+
+    const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
+
+    // Query đếm tổng số bản ghi
+    const countQuery = `
+      SELECT COUNT(*) AS total
+      FROM users u
+      JOIN roles r ON u.role_id = r.id
+      ${whereClause}
+    `;
+    const countResult = await db.query(countQuery, params);
+    const total = parseInt(countResult.rows[0]?.total || 0, 10);
+
+    // Query lấy dữ liệu người dùng
+    const dataQuery = `
+      SELECT 
+        u.id, 
+        u.username, 
+        u.email, 
+        u.tier, 
+        u.experience_level, 
+        u.learning_purpose, 
+        u.created_at,
+        r.id AS role_id,
+        r.code AS role_code,
+        r.name AS role_name
+      FROM users u
+      JOIN roles r ON u.role_id = r.id
+      ${whereClause}
+      ORDER BY u.id DESC
+      LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
+    `;
+    const dataParams = [...params, limit, offset];
+    const dataResult = await db.query(dataQuery, dataParams);
+
+    return {
+      users: dataResult.rows,
+      pagination: {
+        total,
+        page: Number(page),
+        limit: Number(limit),
+        totalPages: Math.ceil(total / limit) || 1,
+      },
+    };
+  }
+
+  // Admin: Cập nhật vai trò (Role) cho người dùng
+  async updateUserRole(userId, roleId) {
+    const query = `
+      UPDATE users
+      SET role_id = $1
+      WHERE id = $2
+      RETURNING id, username, email, role_id
+    `;
+    const result = await db.query(query, [roleId, userId]);
+    if (result.rows.length === 0) return null;
+    return this.findById(userId);
+  }
+
+  // Admin: Thống kê số lượng người dùng theo vai trò và tổng quát
+  async getUserStats() {
+    const query = `
+      SELECT 
+        COUNT(*) AS total_users,
+        COUNT(*) FILTER (WHERE r.code = 'STUDENT') AS total_students,
+        COUNT(*) FILTER (WHERE r.code = 'ADMIN') AS total_admins,
+        COUNT(*) FILTER (WHERE u.created_at >= NOW() - INTERVAL '7 days') AS new_users_week
+      FROM users u
+      JOIN roles r ON u.role_id = r.id
+    `;
+    const result = await db.query(query);
+    const row = result.rows[0] || {};
+    return {
+      totalUsers: parseInt(row.total_users || 0, 10),
+      totalStudents: parseInt(row.total_students || 0, 10),
+      totalAdmins: parseInt(row.total_admins || 0, 10),
+      newUsersWeek: parseInt(row.new_users_week || 0, 10),
+    };
+  }
 }
 
 module.exports = new UserRepository();
