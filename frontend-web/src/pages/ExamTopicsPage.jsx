@@ -2,45 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../api/api";
 import MainLayout from "../layouts/MainLayout";
-
-const TOPIC_ICONS = {
-  "Food & Drink": "🍔",
-  "Travel & Transport": "✈️",
-  "Family & Relationships": "👨‍👩‍👧",
-  "Sports & Entertainment": "⚽",
-  "Actions & States": "⚡",
-  "Shopping & Fashion": "🛍️",
-  "Home & Daily Life": "🏡",
-  "Time & Seasons": "⏳",
-  "Numbers & Measurement": "🔢",
-  "Colors & Shapes": "🎨",
-  "Feelings & Senses": "❤️",
-  "Weather & Atmosphere": "⛅",
-  "Business & Finance": "💼",
-  "Health & Medicine": "🩺",
-  "Education & Science": "🔬",
-  "Nature & Environment": "🌿",
-  "Emotions & Personality": "😊",
-  "Communication & Media": "📱",
-  "Arts & Literature": "🎭",
-  "History & Culture": "🏛️",
-  "Geography & Places": "🗺️",
-  "Work & Professions": "👷",
-  "Materials & Substances": "🧪",
-  "Buildings & Infrastructure": "🏗️",
-  "Technology & IT": "💻",
-  "Law & Society": "⚖️",
-  "Philosophy & Thinking": "🧠",
-  "Abstract Concepts": "🌌",
-  "Politics & Government": "🏛️",
-  "Military & Warfare": "⚔️",
-  "Agriculture & Farming": "🌾",
-  "Industry & Manufacturing": "🏭",
-  "Energy & Resources": "⚡",
-  "Religion & Spirituality": "🕊️",
-  "Crime & Justice": "🛡️",
-  "Disasters & Emergencies": "🚨",
-};
+import { TopicIcon } from "../utils/topicIcons";
 
 const DIFFICULTY_CONFIG = {
   BEGINNER: {
@@ -211,7 +173,6 @@ export default function ExamTopicsPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {filteredTopics.map((topic) => {
               const diffConfig = DIFFICULTY_CONFIG[topic.difficulty] || DIFFICULTY_CONFIG.BEGINNER;
-              const icon = TOPIC_ICONS[topic.title] || "📚";
 
               return (
                 <div
@@ -222,8 +183,8 @@ export default function ExamTopicsPage() {
                   <div>
                     {/* Header: Icon + Difficulty Badge */}
                     <div className="flex items-start justify-between gap-3 mb-4">
-                      <div className="w-13 h-13 rounded-2xl bg-gray-100 dark:bg-gray-700/80 group-hover:bg-[#58cc02]/10 text-gray-700 dark:text-gray-200 group-hover:text-[#58cc02] flex items-center justify-center text-3xl shadow-2xs group-hover:scale-110 transition-transform">
-                        {icon}
+                      <div className="w-13 h-13 rounded-2xl bg-gray-100 dark:bg-gray-700/80 group-hover:bg-[#58cc02]/10 flex items-center justify-center p-2.5 shadow-2xs group-hover:scale-110 transition-transform">
+                        <TopicIcon topicName={topic.title} className="w-8 h-8 object-contain" />
                       </div>
                       <span
                         className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-[11px] font-bold border ${diffConfig.badgeBg}`}

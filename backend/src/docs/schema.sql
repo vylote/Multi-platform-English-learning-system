@@ -145,6 +145,10 @@ CREATE TABLE IF NOT EXISTS exam_sessions (
     status VARCHAR(20) DEFAULT 'IN_PROGRESS' CHECK (status IN ('IN_PROGRESS', 'SUBMITTED'))
 );
 CREATE INDEX IF NOT EXISTS idx_exam_sessions_user_id ON exam_sessions (user_id);
+-- Đảm bảo chỉ có tối đa 1 phiên IN_PROGRESS cho mỗi user và đề thi (chống race condition khi mở nhiều tab)
+CREATE UNIQUE INDEX IF NOT EXISTS uq_active_exam_session
+  ON exam_sessions (user_id, exam_id)
+  WHERE status = 'IN_PROGRESS';
 
 -- Đáp án học viên đã chọn cho từng câu, dùng để chấm điểm + hiển thị review chi tiết
 CREATE TABLE IF NOT EXISTS exam_answers (

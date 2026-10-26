@@ -1,6 +1,16 @@
 const db = require("../config/db");
 const { Exam, ExamQuestionSafe } = require("../models/exam.model");
 
+// Đảm bảo chỉ có tối đa 1 session IN_PROGRESS cho mỗi cặp (user_id, exam_id)
+// Chống race condition khi mở nhiều tab hoặc double click
+db.query(`
+  CREATE UNIQUE INDEX IF NOT EXISTS uq_active_exam_session
+  ON exam_sessions (user_id, exam_id)
+  WHERE status = 'IN_PROGRESS';
+`).catch((err) => {
+  console.error("Lỗi khởi tạo index uq_active_exam_session:", err.message);
+});
+
 class ExamRepository {
   async search({ topicId, title, duration, page, pageSize }) {
     const conditions = [];
@@ -97,21 +107,16 @@ class ExamRepository {
     return rows;
   }
 
-  async findQuestionsByIds(questionIds) {
-    if (questionIds.length === 0) return [];
-    const sql = `
-    SELECT id, question_text, option_a, option_b, option_c, option_d, correct_option
-    FROM questions
-    WHERE id = ANY($1::int[]);
-  `;
-    const { rows } = await db.query(sql, [questionIds]);
-    return rows;
+  async getClient() {
+    return db.pool.connect();
   }
 
   async createSession(userId, examId) {
     const sql = `
       INSERT INTO exam_sessions (exam_id, user_id, status)
       VALUES ($1, $2, 'IN_PROGRESS')
+      ON CONFLICT (user_id, exam_id) WHERE status = 'IN_PROGRESS'
+      DO UPDATE SET exam_id = EXCLUDED.exam_id
       RETURNING id, exam_id, user_id, started_at, status;
     `;
     const { rows } = await db.query(sql, [examId, userId]);
@@ -253,6 +258,19 @@ class ExamRepository {
     WHERE id = ANY($1::int[]);
   `;
     const { rows } = await db.query(sql, [questionIds]);
+    return rows;
+  }
+
+  // Xác thực các câu hỏi phải thuộc đúng bài thi của topic chỉ định
+  async findQuestionsByIdsAndTopic(questionIds, topicId) {
+    if (!questionIds || questionIds.length === 0) return [];
+    const sql = `
+      SELECT q.id, q.question_text, q.option_a, q.option_b, q.option_c, q.option_d, q.correct_option
+      FROM questions q
+      JOIN exams e ON e.id = q.exam_id
+      WHERE q.id = ANY($1::int[]) AND e.topic_id = $2 AND e.exam_type = 'TOPIC';
+    `;
+    const { rows } = await db.query(sql, [questionIds, topicId]);
     return rows;
   }
 }

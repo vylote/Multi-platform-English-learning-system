@@ -1,8 +1,11 @@
 import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
 import api from "../api/api";
 import MainLayout from "../layouts/MainLayout";
 import PronunciationPractice from "../components/PronunciationPractice";
+import { getBackendTimezoneOffset } from "../utils/timezone";
+import { fetchStreakStatus } from "../store/slice/streakSlice";
 
 const PHASES = [
   { key: "learn", label: "Học từ vựng" },
@@ -73,6 +76,7 @@ function ProgressBar({ current, total }) {
 export default function TopicLessonPage() {
   const { topicId } = useParams();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const [attempt, setAttempt] = useState(0); // đổi giá trị -> tải bộ từ/câu hỏi mới khi "Làm lại"
   const [lesson, setLesson] = useState(null);
@@ -115,8 +119,10 @@ export default function TopicLessonPage() {
             word,
             isCorrect: !!finalPronResults[word],
           })),
+          timezone_offset: getBackendTimezoneOffset(),
         });
         setResult(res.data?.result);
+        dispatch(fetchStreakStatus());
       } catch (error) {
         setSubmitError(
           error.response?.data?.message ||
@@ -126,7 +132,7 @@ export default function TopicLessonPage() {
         setSubmitting(false);
       }
     },
-    [lesson, quizAnswers, topicId],
+    [lesson, quizAnswers, topicId, dispatch],
   );
 
   const handleRetry = () => {

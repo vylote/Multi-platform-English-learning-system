@@ -115,3 +115,13 @@ code {
 html, body {
   overflow-x: hidden;
 }
+
+.zigzag-path-container {
+  --zigzag-scale: 1;
+}
+
+@media (max-width: 480px) {
+  .zigzag-path-container {
+    --zigzag-scale: 0.62;
+  }
+}

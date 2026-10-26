@@ -6,19 +6,19 @@ const redisClient = createClient({
 });
 
 redisClient.on('connect', () => {
-    console.log('✅ KẾT NỐI REDIS THÀNH CÔNG!');
+    console.log('KẾT NỐI REDIS THÀNH CÔNG!');
 });
 
 redisClient.on('error', (err) => {
-    console.error('❌ LỖI KẾT NỐI REDIS:', err);
+    console.error('LỖI KẾT NỐI REDIS:', err);
 });
 
 redisClient.on('ready', () => {
-    console.log('🚀 Redis Client đã sẵn sàng nhận lệnh!');
+    console.log('Redis Client đã sẵn sàng nhận lệnh!');
 });
 
 redisClient.on('end', () => {
-    console.log('⚠️ Redis Client đã ngắt kết nối!');
+    console.log('Redis Client đã ngắt kết nối!');
 });
 
 // Tự động kích hoạt kết nối (Sử dụng IIFE để dùng async/await)
@@ -26,7 +26,7 @@ redisClient.on('end', () => {
     try {
         await redisClient.connect();
     } catch (error) {
-        console.error('❌ Không thể khởi động Redis:', error);
+        console.error('Không thể khởi động Redis:', error);
     }
 })();
 

@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 36" rx="4">
+  <rect width="48" height="36" rx="4" fill="#B22234"/>
+  <rect y="2.77" width="48" height="2.77" fill="#FFFFFF"/>
+  <rect y="8.31" width="48" height="2.77" fill="#FFFFFF"/>
+  <rect y="13.85" width="48" height="2.77" fill="#FFFFFF"/>
+  <rect y="19.38" width="48" height="2.77" fill="#FFFFFF"/>
+  <rect y="24.92" width="48" height="2.77" fill="#FFFFFF"/>
+  <rect y="30.46" width="48" height="2.77" fill="#FFFFFF"/>
+  <rect width="20" height="19.38" rx="2" fill="#3C3B6E"/>
+  <!-- Stars pattern -->
+  <circle cx="4" cy="4" r="1" fill="#FFFFFF"/>
+  <circle cx="10" cy="4" r="1" fill="#FFFFFF"/>
+  <circle cx="16" cy="4" r="1" fill="#FFFFFF"/>
+  <circle cx="7" cy="7" r="1" fill="#FFFFFF"/>
+  <circle cx="13" cy="7" r="1" fill="#FFFFFF"/>
+  <circle cx="4" cy="10" r="1" fill="#FFFFFF"/>
+  <circle cx="10" cy="10" r="1" fill="#FFFFFF"/>
+  <circle cx="16" cy="10" r="1" fill="#FFFFFF"/>
+  <circle cx="7" cy="13" r="1" fill="#FFFFFF"/>
+  <circle cx="13" cy="13" r="1" fill="#FFFFFF"/>
+  <circle cx="4" cy="16" r="1" fill="#FFFFFF"/>
+  <circle cx="10" cy="16" r="1" fill="#FFFFFF"/>
+  <circle cx="16" cy="16" r="1" fill="#FFFFFF"/>
+</svg>

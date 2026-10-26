@@ -6,11 +6,11 @@ const pool = new Pool({
 });
 
 pool.on('connect', () => {
-  console.log('✅ Đã kết nối thành công tới cơ sở dữ liệu PostgreSQL!');
+  console.log('Đã kết nối thành công tới cơ sở dữ liệu PostgreSQL!');
 });
 
 pool.on('error', (err) => {
-  console.error('❌ Lỗi kết nối PostgreSQL:', err);
+  console.error('Lỗi kết nối PostgreSQL:', err);
   process.exit(-1);
 });
 
