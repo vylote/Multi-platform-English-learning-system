@@ -14,6 +14,7 @@ import {
   Mic,
   Sparkles,
   ChevronRight,
+  ShieldCheck,
 } from "lucide-react";
 import { logout } from "../store/slice/authSlice";
 import { useTheme } from "../context/ThemeContext";
@@ -140,10 +141,33 @@ export default function LeftSidebar() {
         </div>
       ),
     },
+    ...(user?.role === "ADMIN"
+      ? [
+          {
+            name: "Quản trị",
+            path: "/admin/users",
+            color: "#9333ea",
+            activeBg: "bg-purple-500/20 dark:bg-purple-500/20",
+            activeBorder: "border-purple-500",
+            activeText: "text-purple-700 dark:text-purple-400",
+            icon: (isActive) => (
+              <div
+                className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all ${
+                  isActive
+                    ? "bg-purple-600 text-white shadow-sm shadow-purple-500/40"
+                    : "text-purple-600 dark:text-purple-400 bg-purple-500/15 group-hover:scale-110"
+                }`}
+              >
+                <ShieldCheck className="w-5 h-5 stroke-[2.5]" />
+              </div>
+            ),
+          },
+        ]
+      : []),
   ];
 
   return (
-    <aside className="shrink-0 h-screen sticky top-0 hidden md:flex flex-col justify-between p-3 sm:p-4 md:w-[76px] lg:w-[220px] xl:w-[256px] border-r-2 border-[#d5cdbd] dark:border-gray-800 bg-[#f4efe4] dark:bg-gray-900 transition-all duration-200 select-none z-30">
+    <aside className="shrink-0 h-screen sticky top-0 hidden md:flex flex-col justify-between p-3 sm:p-4 md:w-[76px] lg:w-[240px] xl:w-[280px] 2xl:w-[300px] border-r-2 border-[#d5cdbd] dark:border-gray-800 bg-[#f4efe4] dark:bg-gray-900 transition-all duration-200 select-none z-30">
       {/* TOP: BRAND LOGO + NAVIGATION */}
       <div className="flex flex-col">
         {/* BRAND LOGO: ANHLINGO */}
@@ -257,6 +281,18 @@ export default function LeftSidebar() {
                   <Mic className="w-4 h-4 text-rose-500" />
                   <span>Luyện phát âm AI</span>
                 </Link>
+
+                {/* Cổng Quản Trị cho Admin */}
+                {user?.role === "ADMIN" && (
+                  <Link
+                    to="/admin/users"
+                    onClick={() => setShowMoreMenu(false)}
+                    className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-bold text-purple-700 dark:text-purple-300 hover:bg-purple-500/10 transition-colors"
+                  >
+                    <ShieldCheck className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                    <span>Cổng Quản Trị</span>
+                  </Link>
+                )}
 
                 <div className="my-1 border-t border-[#d5cdbd]/60 dark:border-gray-700/60" />
 

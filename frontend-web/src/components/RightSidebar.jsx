@@ -37,7 +37,7 @@ export default function RightSidebar() {
   const isAtRisk = currentStreak > 0 && !completedToday;
 
   return (
-    <aside className="w-[320px] xl:w-[340px] shrink-0 h-screen sticky top-0 hidden xl:flex flex-col p-4 sm:p-5 border-l-2 border-[#d5cdbd] dark:border-gray-800 bg-[#f4efe4] dark:bg-gray-900 overflow-y-auto scrollbar-thin transition-colors duration-300 select-none z-20">
+    <aside className="w-[280px] 2xl:w-[300px] shrink-0 h-screen sticky top-0 hidden xl:flex flex-col p-4 border-l-2 border-[#d5cdbd] dark:border-gray-800 bg-[#f4efe4] dark:bg-gray-900 overflow-y-auto scrollbar-thin transition-colors duration-300 select-none z-20">
       {/* 1. TOP STATS BAR (EVENLY BALANCED ROW WITH THEME TOGGLE) */}
       <div className="shrink-0 flex items-center justify-between gap-1.5 mb-5">
         {/* STREAK PILL */}

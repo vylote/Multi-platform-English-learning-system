@@ -99,7 +99,7 @@ function TopicModal({ topic, prevTopic, tierColor, onClose }) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-fadeIn"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-fadeIn md:pl-[76px] lg:pl-[240px] xl:pl-0"
       onClick={onClose}
     >
       <div
@@ -137,12 +137,6 @@ function TopicModal({ topic, prevTopic, tierColor, onClose }) {
             >
               ✕
             </button>
-
-            {/* Top accent line matching tierColor */}
-            <div
-              className="absolute top-0 left-6 right-6 h-1 rounded-b-full"
-              style={{ backgroundColor: tierColor }}
-            />
 
             {/* Header with Icon and Mastery Badge */}
             <div className="flex items-center justify-between gap-3 mb-3 pr-8">
