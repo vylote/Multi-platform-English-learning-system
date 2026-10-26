@@ -1,6 +1,7 @@
 const wordRepository = require("../repositories/word.repository");
 const examRepository = require("../repositories/exam.repository");
 const lessonRepository = require("../repositories/lesson.repository");
+const streakService = require("./streak.service");
 const AppException = require("../exceptions/app.exception");
 const { ErrorCode } = require("../common/error-code");
 
@@ -63,15 +64,38 @@ class TopicLessonService {
       : 0;
   }
 
+  async _recordStreakSafely(userId, timezoneOffsetMinutes) {
+    if (!Number.isInteger(timezoneOffsetMinutes)) return;
+    try {
+      await streakService.recordActivity(userId, timezoneOffsetMinutes);
+    } catch (err) {
+      console.error("Lỗi ghi nhận streak sau khi hoàn thành bài học:", err);
+    }
+  }
+
   async completeLesson({
     userId,
     topicId,
     questionIds,
     quizAnswers,
     pronunciationResults,
+    timezoneOffsetMinutes,
   }) {
+    // Note 2: Xác thực câu hỏi trắc nghiệm phải thuộc đúng chủ đề bài học
     const questionsWithAnswer =
-      await examRepository.findQuestionsByIds(questionIds);
+      await examRepository.findQuestionsByIdsAndTopic(questionIds, topicId);
+
+    if (
+      !questionsWithAnswer ||
+      questionsWithAnswer.length === 0 ||
+      questionsWithAnswer.length !== questionIds.length
+    ) {
+      throw new AppException(
+        ErrorCode.INVALID_DATA,
+        "Danh sách câu hỏi không hợp lệ hoặc không thuộc chủ đề bài học này.",
+      );
+    }
+
     const quizScore = this.gradeQuiz(questionsWithAnswer, quizAnswers);
 
     const totalPronounced = pronunciationResults.length;
@@ -87,6 +111,9 @@ class TopicLessonService {
       quizScore: Math.round(quizScore * 100) / 100,
       pronunciationScore: Math.round(pronunciationScore * 100) / 100,
     });
+
+    // Tự động ghi nhận chuỗi ngày học streak khi hoàn thành bài học
+    await this._recordStreakSafely(userId, timezoneOffsetMinutes);
 
     return {
       quizScore,

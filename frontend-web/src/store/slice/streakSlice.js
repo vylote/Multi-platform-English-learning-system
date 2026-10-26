@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import api from "../../api/api";
 import { getBackendTimezoneOffset } from "../../utils/timezone";
+import { logout } from "./authSlice";
 
 export const fetchStreakStatus = createAsyncThunk(
   "streak/fetchStatus",
@@ -36,6 +37,12 @@ const streakSlice = createSlice({
       state.completedToday = action.payload.completedToday;
       state.loaded = true;
     },
+    resetStreak: (state) => {
+      state.currentStreak = 0;
+      state.completedToday = false;
+      state.week = [];
+      state.loaded = false;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -48,9 +55,15 @@ const streakSlice = createSlice({
       })
       .addCase(fetchStreakWeek.fulfilled, (state, action) => {
         state.week = action.payload || [];
+      })
+      .addCase(logout, (state) => {
+        state.currentStreak = 0;
+        state.completedToday = false;
+        state.week = [];
+        state.loaded = false;
       });
   },
 });
 
-export const { setStreak } = streakSlice.actions;
+export const { setStreak, resetStreak } = streakSlice.actions;
 export default streakSlice.reducer;

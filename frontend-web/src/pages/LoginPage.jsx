@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import toast from "react-hot-toast";
+import { Eye, EyeOff, AlertCircle } from "lucide-react";
 
 import AuthLayout from "../layouts/AuthLayout";
 import SocialButtons from "../components/SocialButtons";
@@ -16,7 +17,6 @@ export default function LoginPage() {
   const [form, setForm] = useState({ username: "", password: "" });
   const [errorMsg, setErrorMsg] = useState("");
   const [submitting, setSubmitting] = useState(false);
-
   const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (e) => {
@@ -36,7 +36,7 @@ export default function LoginPage() {
       navigate("/");
     } catch (err) {
       const message =
-        err.response?.data?.message || "Đăng nhập thất bại, vui lòng thử lại.";
+        err.response?.data?.message || "Đăng nhập thất bại, vui lòng kiểm tra lại tài khoản.";
       setErrorMsg(message);
     } finally {
       setSubmitting(false);
@@ -44,95 +44,77 @@ export default function LoginPage() {
   };
 
   return (
-    <AuthLayout onClose={() => navigate("/")}>
-      <h1 className="text-2xl font-bold text-center mb-4 text-gray-900 dark:text-white">
+    <AuthLayout onClose={() => navigate("/")} mode="login">
+      <h1 className="text-2xl sm:text-3xl font-black text-center mb-6 text-gray-900 dark:text-white tracking-tight">
         Đăng nhập
       </h1>
 
-      <form onSubmit={handleSubmit} noValidate>
-        <input
-          type="text"
-          name="username"
-          placeholder="Tên đăng nhập"
-          value={form.username}
-          onChange={handleChange}
-          required
-          className="w-full px-3 py-2.5 border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-300 rounded-md mb-2.5 outline-none focus:border-[#58cc02] dark:focus:border-[#58cc02] focus:ring-2 focus:ring-[#58cc02]/20 transition-shadow"
-        />
+      <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-3">
+        {/* Username Input */}
+        <div>
+          <input
+            type="text"
+            name="username"
+            placeholder="Tên đăng nhập hoặc Email"
+            value={form.username}
+            onChange={handleChange}
+            autoComplete="username"
+            required
+            className="w-full px-4 py-3 rounded-2xl border-2 border-[#d5cdbd] dark:border-gray-700 bg-[#ede8dc]/30 dark:bg-gray-800/80 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 font-bold text-sm sm:text-base outline-none focus:border-[#58cc02] dark:focus:border-[#58cc02] focus:bg-white dark:focus:bg-gray-800 transition-all shadow-2xs"
+          />
+        </div>
 
-        <div className="relative mb-2.5">
+        {/* Password Input */}
+        <div className="relative">
           <input
             type={showPassword ? "text" : "password"}
             name="password"
             placeholder="Mật khẩu"
             value={form.password}
             onChange={handleChange}
+            autoComplete="current-password"
             required
-            className="w-full px-3 py-2.5 pr-10 border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-300 rounded-md outline-none focus:border-[#58cc02] dark:focus:border-[#58cc02] focus:ring-2 focus:ring-[#58cc02]/20 transition-shadow"
+            className="w-full px-4 py-3 pr-12 rounded-2xl border-2 border-[#d5cdbd] dark:border-gray-700 bg-[#ede8dc]/30 dark:bg-gray-800/80 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 font-bold text-sm sm:text-base outline-none focus:border-[#58cc02] dark:focus:border-[#58cc02] focus:bg-white dark:focus:bg-gray-800 transition-all shadow-2xs"
           />
 
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
             tabIndex={-1}
-            className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors outline-none"
+            aria-label={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+            className="absolute inset-y-0 right-0 flex items-center pr-3.5 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors cursor-pointer"
           >
             {showPassword ? (
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-                className="w-5 h-5"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"
-                />
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                />
-              </svg>
+              <EyeOff className="w-5 h-5 stroke-[2]" />
             ) : (
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-                className="w-5 h-5"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88"
-                />
-              </svg>
+              <Eye className="w-5 h-5 stroke-[2]" />
             )}
           </button>
         </div>
 
+        {/* Error Alert */}
         {errorMsg && (
-          <p className="text-sm text-red-500 -mt-1 mb-2">{errorMsg}</p>
+          <div className="flex items-center gap-2 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-xs font-bold animate-in fade-in">
+            <AlertCircle className="w-4 h-4 shrink-0" />
+            <span>{errorMsg}</span>
+          </div>
         )}
 
-        <div className="text-right text-xs -mt-1 mb-1">
+        {/* Forgot password */}
+        <div className="text-right -mt-1">
           <a
             href="/forgot-password"
-            className="text-[#0073e6] dark:text-[#4da3ff] hover:underline"
+            className="text-xs font-black text-[#1cb0f6] dark:text-[#38bdf8] hover:underline"
           >
-            Quên mật khẩu?
+            QUÊN MẬT KHẨU?
           </a>
         </div>
 
+        {/* 3D Submit Button */}
         <button
           type="submit"
           disabled={submitting || !form.username || !form.password}
-          className="w-full py-2.5 mt-2 rounded-md text-white font-bold text-base bg-[#58cc02] hover:bg-[#4cb001] disabled:bg-gray-300 dark:disabled:bg-gray-600 disabled:cursor-not-allowed transition-colors"
+          className="w-full py-3.5 mt-1 rounded-2xl text-white font-black text-[15px] uppercase tracking-wider bg-[#58cc02] hover:bg-[#4fb802] border-b-4 border-[#3b8702] active:translate-y-1 active:border-b-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:translate-y-0 disabled:border-b-4 transition-all shadow-sm cursor-pointer"
         >
           {submitting ? "Đang đăng nhập..." : "Đăng nhập"}
         </button>
@@ -141,15 +123,16 @@ export default function LoginPage() {
         <PolicyFooter mode="login" />
       </form>
 
-      <p className="text-center text-sm text-gray-600 dark:text-gray-400 mt-4">
+      {/* Switch to Register */}
+      <div className="text-center text-xs sm:text-sm font-semibold text-gray-600 dark:text-gray-400 mt-5 pt-4 border-t-2 border-[#d5cdbd]/60 dark:border-gray-700/60">
         Chưa có tài khoản?{" "}
-        <a
-          href="/register"
-          className="text-[#58cc02] font-bold hover:underline"
+        <Link
+          to="/register"
+          className="text-[#58cc02] font-black uppercase tracking-wider hover:underline ml-1"
         >
-          Đăng ký
-        </a>
-      </p>
+          Đăng ký ngay
+        </Link>
+      </div>
     </AuthLayout>
   );
 }

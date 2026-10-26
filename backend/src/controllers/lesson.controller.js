@@ -24,11 +24,13 @@ class LessonController {
     try {
       const userId = req.user.id;
       const { topicId } = req.params;
-      const { question_ids, quiz_answers, pronunciation_results } = req.body || {};
+      const { question_ids, quiz_answers, pronunciation_results, timezone_offset } = req.body || {};
 
       if (!Array.isArray(question_ids) || !Array.isArray(quiz_answers) || !Array.isArray(pronunciation_results)) {
         throw new AppException(ErrorCode.INVALID_DATA, "Thiếu dữ liệu hoàn thành bài luyện tập");
       }
+
+      const timezoneOffsetMinutes = Number.isInteger(timezone_offset) ? timezone_offset : null;
 
       const result = await topicLessonService.completeLesson({
         userId,
@@ -36,6 +38,7 @@ class LessonController {
         questionIds: question_ids,
         quizAnswers: quiz_answers,
         pronunciationResults: pronunciation_results,
+        timezoneOffsetMinutes,
       });
 
       return res.status(ErrorCode.SUCCESS.statusCode).json(
