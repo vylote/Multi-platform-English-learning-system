@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none">
+  <defs>
+    <linearGradient id="fireOuter" x1="24" y1="4" x2="24" y2="44" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stopColor="#FF7A00"/>
+      <stop offset="100%" stopColor="#FF2A00"/>
+    </linearGradient>
+    <linearGradient id="fireInner" x1="24" y1="16" x2="24" y2="44" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stopColor="#FFE600"/>
+      <stop offset="100%" stopColor="#FF9900"/>
+    </linearGradient>
+    <linearGradient id="fireCore" x1="24" y1="26" x2="24" y2="43" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stopColor="#FFFFFF"/>
+      <stop offset="100%" stopColor="#FFF099"/>
+    </linearGradient>
+    <filter id="flameGlow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" floodColor="#FF4400" floodOpacity="0.4"/>
+    </filter>
+  </defs>
+  <!-- Base Shadow -->
+  <ellipse cx="24" cy="44" rx="14" ry="3" fill="#000000" fill-opacity="0.15"/>
+  <!-- Outer Flame -->
+  <path d="M24 4C26.5 12 36 17 38 27C39.8 35.8 33.2 43 24 43C14.8 43 8.2 35.8 10 27C12 17 21.5 12 24 4Z" fill="url(#fireOuter)" filter="url(#flameGlow)"/>
+  <!-- Secondary Tongue -->
+  <path d="M19 18C21 21 22 25 21 28C20 31 17 33 16 36C18 38 21 39 24 39C29 39 33 35 32 30C31 24 25 20 24 16C23 17 20 16 19 18Z" fill="#FFA500"/>
+  <!-- Inner Flame -->
+  <path d="M24 16C25.8 21 32 25 31 32C30 38 26.5 40 24 40C21.5 40 18 38 17 32C16 25 22.2 21 24 16Z" fill="url(#fireInner)"/>
+  <!-- Core White-Hot Flame -->
+  <path d="M24 26C25.2 29 27.5 32 27 36C26.5 39 25 40 24 40C23 40 21.5 39 21 36C20.5 32 22.8 29 24 26Z" fill="url(#fireCore)"/>
+</svg>

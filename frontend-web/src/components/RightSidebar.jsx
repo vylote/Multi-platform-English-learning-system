@@ -51,11 +51,15 @@ export default function RightSidebar() {
             }`}
           >
             <span
-              className={`text-base transition-transform group-hover:scale-125 ${
-                isLit ? "animate-pulse" : "grayscale opacity-60"
+              className={`transition-transform group-hover:scale-125 shrink-0 ${
+                isLit ? "animate-pulse" : "grayscale opacity-50"
               }`}
             >
-              🔥
+              <img
+                src="/assets/icons/streak-fire.svg"
+                alt="Streak fire"
+                className="w-5 h-5 object-contain"
+              />
             </span>
             <span className="font-black text-gray-950 dark:text-white">
               {loaded ? currentStreak : "–"}
@@ -95,7 +99,15 @@ export default function RightSidebar() {
                         : "bg-[#dcd5c5] dark:bg-gray-800 text-gray-600 dark:text-gray-500"
                     }`}
                   >
-                    {day.completed ? "🔥" : "·"}
+                    {day.completed ? (
+                      <img
+                        src="/assets/icons/streak-fire.svg"
+                        alt="Active day"
+                        className="w-4 h-4 object-contain"
+                      />
+                    ) : (
+                      "·"
+                    )}
                   </div>
                 </div>
               ))}
@@ -109,7 +121,13 @@ export default function RightSidebar() {
             type="button"
             className="w-full flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-2xl font-black text-sm bg-sky-500/15 border-2 border-sky-500/40 text-sky-900 dark:text-sky-400 hover:bg-sky-500/25 shadow-xs transition-all cursor-pointer active:scale-95 group"
           >
-            <span className="text-base group-hover:scale-125 transition-transform">💎</span>
+            <span className="group-hover:scale-125 transition-transform shrink-0">
+              <img
+                src="/assets/icons/gem.svg"
+                alt="Gems"
+                className="w-5 h-5 object-contain"
+              />
+            </span>
             <span className="font-black text-sky-950 dark:text-sky-300">500</span>
           </button>
         </div>
@@ -120,8 +138,12 @@ export default function RightSidebar() {
             type="button"
             className="w-full flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-2xl font-black text-sm bg-rose-500/15 border-2 border-rose-500/40 text-rose-900 dark:text-rose-400 hover:bg-rose-500/25 shadow-xs transition-all cursor-pointer active:scale-95 group"
           >
-            <span className="text-base group-hover:scale-125 transition-transform animate-pulse">
-              ❤️
+            <span className="group-hover:scale-125 transition-transform shrink-0">
+              <img
+                src="/assets/icons/heart.svg"
+                alt="Hearts"
+                className="w-5 h-5 object-contain animate-pulse"
+              />
             </span>
             <span className="font-black text-rose-950 dark:text-rose-300">5</span>
           </button>

@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none">
+  <defs>
+    <linearGradient id="heartGrad" x1="24" y1="6" x2="24" y2="42" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stopColor="#FF4B4B"/>
+      <stop offset="100%" stopColor="#D41313"/>
+    </linearGradient>
+    <linearGradient id="heartShade" x1="24" y1="20" x2="24" y2="42" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stopColor="#D41313" stop-opacity="0"/>
+      <stop offset="100%" stopColor="#8A0000" stop-opacity="0.8"/>
+    </linearGradient>
+    <filter id="heartGlow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" floodColor="#FF2A2A" floodOpacity="0.35"/>
+    </filter>
+  </defs>
+  <!-- Base Shadow -->
+  <ellipse cx="24" cy="44" rx="14" ry="3" fill="#000000" fill-opacity="0.15"/>
+  <!-- Main Heart Shape -->
+  <path d="M24 13.5C21 -1 5 1 5 16C5 28 20 37 24 41C28 37 43 28 43 16C43 1 27 -1 24 13.5Z" fill="url(#heartGrad)" filter="url(#heartGlow)"/>
+  <!-- Bottom Depth Shade -->
+  <path d="M24 13.5C21 -1 5 1 5 16C5 28 20 37 24 41C28 37 43 28 43 16C43 1 27 -1 24 13.5Z" fill="url(#heartShade)"/>
+  <!-- Specular Reflection Highlight -->
+  <path d="M12 9C9 12 8 16 9 20C10 15 13 11 18 10C16 9 13.5 8.5 12 9Z" fill="#FFFFFF" fill-opacity="0.5"/>
+</svg>

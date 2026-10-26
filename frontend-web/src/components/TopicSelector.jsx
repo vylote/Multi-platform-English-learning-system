@@ -1,44 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import api from "../api/api";
-
-const TOPIC_ICONS = {
-  "Food & Drink": "🍔",
-  "Travel & Transport": "✈️",
-  "Family & Relationships": "👨‍👩‍👧",
-  "Sports & Entertainment": "⚽",
-  "Actions & States": "⚡",
-  "Shopping & Fashion": "🛍️",
-  "Home & Daily Life": "🏡",
-  "Time & Seasons": "⏳",
-  "Numbers & Measurement": "🔢",
-  "Colors & Shapes": "🎨",
-  "Feelings & Senses": "❤️",
-  "Weather & Atmosphere": "⛅",
-  "Business & Finance": "💼",
-  "Health & Medicine": "🩺",
-  "Education & Science": "🔬",
-  "Nature & Environment": "🌿",
-  "Emotions & Personality": "😊",
-  "Communication & Media": "📱",
-  "Arts & Literature": "🎭",
-  "History & Culture": "🏛️",
-  "Geography & Places": "🗺️",
-  "Work & Professions": "👷",
-  "Materials & Substances": "🧪",
-  "Buildings & Infrastructure": "🏗️",
-  "Technology & IT": "💻",
-  "Law & Society": "⚖️",
-  "Philosophy & Thinking": "🧠",
-  "Abstract Concepts": "🌌",
-  "Politics & Government": "🏛️",
-  "Military & Warfare": "⚔️",
-  "Agriculture & Farming": "🌾",
-  "Industry & Manufacturing": "🏭",
-  "Energy & Resources": "⚡",
-  "Religion & Spirituality": "🕊️",
-  "Crime & Justice": "🛡️",
-  "Disasters & Emergencies": "🚨",
-};
+import { TopicIcon } from "../utils/topicIcons";
 
 export default function TopicSelector({ onSelectTopic, onSelectRandom }) {
   const [topics, setTopics] = useState(null);
@@ -137,8 +99,6 @@ export default function TopicSelector({ onSelectTopic, onSelectRandom }) {
       {/* TOPICS GRID */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3.5">
         {filteredTopics.map((topic) => {
-          const icon = TOPIC_ICONS[topic.title] || "📚";
-
           return (
             <button
               key={topic.id}
@@ -146,8 +106,8 @@ export default function TopicSelector({ onSelectTopic, onSelectRandom }) {
               className="p-4 rounded-2xl border-2 border-[#d5cdbd] dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-[#58cc02] dark:hover:border-[#58cc02] shadow-xs hover:shadow-md hover:-translate-y-0.5 active:scale-[0.98] transition-all cursor-pointer flex items-center justify-between gap-3 group text-left"
             >
               <div className="flex items-center gap-3 min-w-0">
-                <div className="w-11 h-11 rounded-2xl bg-[#efebe2] dark:bg-gray-700/80 group-hover:bg-[#58cc02]/15 text-gray-900 dark:text-gray-200 group-hover:text-[#1c7400] dark:group-hover:text-[#58cc02] flex items-center justify-center text-xl shrink-0 group-hover:scale-110 transition-transform">
-                  {icon}
+                <div className="w-11 h-11 rounded-2xl bg-[#efebe2] dark:bg-gray-700/80 group-hover:bg-[#58cc02]/15 flex items-center justify-center p-2 shrink-0 group-hover:scale-110 transition-transform">
+                  <TopicIcon topicName={topic.title} className="w-7 h-7 object-contain" />
                 </div>
                 <div className="min-w-0">
                   <h4 className="font-black text-sm text-gray-950 dark:text-white group-hover:text-[#1c7400] dark:group-hover:text-[#58cc02] transition-colors truncate">

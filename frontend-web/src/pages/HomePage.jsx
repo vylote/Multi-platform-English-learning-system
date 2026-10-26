@@ -10,19 +10,19 @@ export default function HomePage() {
   const tickerRef = useRef(null);
 
   const languages = [
-    { code: "vi", label: "Tiếng Việt", flag: "🇻🇳" },
-    { code: "en", label: "English", flag: "🇬🇧" },
+    { code: "vi", label: "Tiếng Việt", flag: "/assets/flags/vn.svg" },
+    { code: "en", label: "English", flag: "/assets/flags/uk.svg" },
   ];
 
   const features = [
-    { flag: "🇺🇸", label: "Tiếng Anh Giao Tiếp" },
-    { flag: "🎯", label: "Luyện Thi THPT & TOEIC" },
-    { flag: "🎙️", label: "AI Chấm Điểm Phát Âm" },
-    { flag: "🎴", label: "36 Chủ Đề Flashcard" },
-    { flag: "📖", label: "Tra Từ Điển Anh - Việt" },
-    { flag: "🏆", label: "Đua Top Bảng Vàng" },
-    { flag: "🗺️", label: "Lộ Trình Từng Bước" },
-    { flag: "⚡", label: "Duy Trì Chuỗi Streak" },
+    { icon: "/assets/flags/us.svg", label: "Tiếng Anh Giao Tiếp" },
+    { icon: "/assets/icons/check.svg", label: "Luyện Thi THPT & TOEIC" },
+    { icon: "/assets/topics/technology-it.svg", label: "AI Chấm Điểm Phát Âm" },
+    { icon: "/assets/topics/food-drink.svg", label: "36 Chủ Đề Flashcard" },
+    { icon: "/assets/topics/education-science.svg", label: "Tra Từ Điển Anh - Việt" },
+    { icon: "/assets/icons/trophy.svg", label: "Đua Top Bảng Vàng" },
+    { icon: "/assets/icons/mascot.svg", label: "Lộ Trình Từng Bước" },
+    { icon: "/assets/icons/streak-fire.svg", label: "Duy Trì Chuỗi Streak" },
   ];
 
   const scrollTicker = (direction) => {
@@ -98,7 +98,7 @@ export default function HomePage() {
                         className="w-full flex items-center justify-between px-3.5 py-2 text-sm font-bold text-gray-800 dark:text-gray-200 hover:bg-[#e4ded0] dark:hover:bg-gray-700/70 transition-colors cursor-pointer"
                       >
                         <span className="flex items-center gap-2">
-                          <span>{l.flag}</span>
+                          <img src={l.flag} alt={l.label} className="w-5 h-3.5 object-cover rounded shadow-2xs" />
                           <span>{l.label}</span>
                         </span>
                         {selectedLang === l.code && (
@@ -329,7 +329,11 @@ export default function HomePage() {
                 key={idx}
                 className="group flex items-center gap-2.5 shrink-0 cursor-pointer text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors"
               >
-                <span className="text-xl group-hover:scale-125 transition-transform">{item.flag}</span>
+                <img
+                  src={item.icon}
+                  alt={item.label}
+                  className="w-5 h-5 object-contain group-hover:scale-125 transition-transform"
+                />
                 <span className="font-extrabold text-[13px] uppercase tracking-wider whitespace-nowrap">
                   {item.label}
                 </span>

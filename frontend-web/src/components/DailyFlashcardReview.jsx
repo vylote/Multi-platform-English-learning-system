@@ -3,45 +3,7 @@ import { useDispatch } from "react-redux";
 import { setStreak, fetchStreakWeek } from "../store/slice/streakSlice";
 import { getBackendTimezoneOffset } from "../utils/timezone";
 import api from "../api/api";
-
-const TOPIC_ICONS = {
-  "Food & Drink": "🍔",
-  "Travel & Transport": "✈️",
-  "Family & Relationships": "👨‍👩‍👧",
-  "Sports & Entertainment": "⚽",
-  "Actions & States": "⚡",
-  "Shopping & Fashion": "🛍️",
-  "Home & Daily Life": "🏡",
-  "Time & Seasons": "⏳",
-  "Numbers & Measurement": "🔢",
-  "Colors & Shapes": "🎨",
-  "Feelings & Senses": "❤️",
-  "Weather & Atmosphere": "⛅",
-  "Business & Finance": "💼",
-  "Health & Medicine": "🩺",
-  "Education & Science": "🔬",
-  "Nature & Environment": "🌿",
-  "Emotions & Personality": "😊",
-  "Communication & Media": "📱",
-  "Arts & Literature": "🎭",
-  "History & Culture": "🏛️",
-  "Geography & Places": "🗺️",
-  "Work & Professions": "👷",
-  "Materials & Substances": "🧪",
-  "Buildings & Infrastructure": "🏗️",
-  "Technology & IT": "💻",
-  "Law & Society": "⚖️",
-  "Philosophy & Thinking": "🧠",
-  "Abstract Concepts": "🌌",
-  "Politics & Government": "🏛️",
-  "Military & Warfare": "⚔️",
-  "Agriculture & Farming": "🌾",
-  "Industry & Manufacturing": "🏭",
-  "Energy & Resources": "⚡",
-  "Religion & Spirituality": "🕊️",
-  "Crime & Justice": "🛡️",
-  "Disasters & Emergencies": "🚨",
-};
+import { TopicIcon } from "../utils/topicIcons";
 
 export default function DailyFlashcardReview({
   endpoint = "/flashcards/daily",
@@ -154,7 +116,6 @@ export default function DailyFlashcardReview({
   }, [isFlipped, currentCard, handleFlip, handleAnswer, playAudio]);
 
   const backLabel = returnTo === "/learn" ? "Quay lại lộ trình" : "Chọn chủ đề khác";
-  const topicIcon = TOPIC_ICONS[topicName] || "🎴";
 
   // 1. TRẠNG THÁI ĐANG TẢI
   if (cards === null) {
@@ -200,8 +161,8 @@ export default function DailyFlashcardReview({
           </button>
         )}
         <div className="p-8 rounded-3xl bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 shadow-sm text-center">
-          <div className="w-16 h-16 rounded-3xl bg-[#58cc02]/10 border-2 border-[#58cc02]/30 text-3xl flex items-center justify-center mx-auto mb-4">
-            🌟
+          <div className="w-16 h-16 rounded-3xl bg-[#58cc02]/10 border-2 border-[#58cc02]/30 flex items-center justify-center mx-auto mb-4 p-3">
+            <img src="/assets/icons/mascot.svg" alt="Finished" className="w-10 h-10 object-contain" />
           </div>
           <p className="text-xl font-black text-gray-900 dark:text-white mb-2">
             Bạn đã ôn tập hết toàn bộ từ vựng hiện có!
@@ -231,8 +192,8 @@ export default function DailyFlashcardReview({
         )}
 
         <div className="p-8 rounded-3xl bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 shadow-sm text-center">
-          <div className="w-16 h-16 rounded-3xl bg-[#58cc02]/10 border-2 border-[#58cc02]/30 text-3xl flex items-center justify-center mx-auto mb-4">
-            🎉
+          <div className="w-16 h-16 rounded-3xl bg-[#58cc02]/10 border-2 border-[#58cc02]/30 flex items-center justify-center mx-auto mb-4 p-3">
+            <img src="/assets/icons/trophy.svg" alt="Trophy" className="w-10 h-10 object-contain" />
           </div>
           <h2 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white mb-2">
             Hoàn thành bộ ôn tập!
@@ -244,7 +205,7 @@ export default function DailyFlashcardReview({
 
           {streakInfo && (
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-orange-500/10 border-2 border-orange-500/20 text-orange-500 font-black text-sm mb-6">
-              <span>🔥</span>
+              <img src="/assets/icons/streak-fire.svg" alt="Streak" className="w-5 h-5 object-contain" />
               <span>Chuỗi học tập: {streakInfo.current_streak} ngày liên tiếp!</span>
             </div>
           )}
@@ -291,8 +252,8 @@ export default function DailyFlashcardReview({
           </button>
         )}
 
-        <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-black uppercase tracking-wider bg-[#58cc02]/10 text-[#58cc02] border border-[#58cc02]/30 shrink-0">
-          <span>{topicIcon}</span>
+        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-black uppercase tracking-wider bg-[#58cc02]/10 text-[#58cc02] border border-[#58cc02]/30 shrink-0">
+          <TopicIcon topicName={topicName} className="w-4 h-4 object-contain inline-block" />
           <span className="truncate max-w-[180px] sm:max-w-none">{topicName}</span>
         </div>
       </div>

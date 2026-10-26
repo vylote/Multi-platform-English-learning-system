@@ -4,45 +4,7 @@ import api from "../api/api";
 import MainLayout from "../layouts/MainLayout";
 import Pagination from "../components/Pagination";
 import { getReturnTo, withReturnTo } from "../utils/navigation";
-
-const TOPIC_ICONS = {
-  "Food & Drink": "🍔",
-  "Travel & Transport": "✈️",
-  "Family & Relationships": "👨‍👩‍👧",
-  "Sports & Entertainment": "⚽",
-  "Actions & States": "⚡",
-  "Shopping & Fashion": "🛍️",
-  "Home & Daily Life": "🏡",
-  "Time & Seasons": "⏳",
-  "Numbers & Measurement": "🔢",
-  "Colors & Shapes": "🎨",
-  "Feelings & Senses": "❤️",
-  "Weather & Atmosphere": "⛅",
-  "Business & Finance": "💼",
-  "Health & Medicine": "🩺",
-  "Education & Science": "🔬",
-  "Nature & Environment": "🌿",
-  "Emotions & Personality": "😊",
-  "Communication & Media": "📱",
-  "Arts & Literature": "🎭",
-  "History & Culture": "🏛️",
-  "Geography & Places": "🗺️",
-  "Work & Professions": "👷",
-  "Materials & Substances": "🧪",
-  "Buildings & Infrastructure": "🏗️",
-  "Technology & IT": "💻",
-  "Law & Society": "⚖️",
-  "Philosophy & Thinking": "🧠",
-  "Abstract Concepts": "🌌",
-  "Politics & Government": "🏛️",
-  "Military & Warfare": "⚔️",
-  "Agriculture & Farming": "🌾",
-  "Industry & Manufacturing": "🏭",
-  "Energy & Resources": "⚡",
-  "Religion & Spirituality": "🕊️",
-  "Crime & Justice": "🛡️",
-  "Disasters & Emergencies": "🚨",
-};
+import { TopicIcon } from "../utils/topicIcons";
 
 export default function ExamListPage() {
   const { topicId } = useParams();
@@ -115,7 +77,6 @@ export default function ExamListPage() {
     .trim();
 
   const topicTitle = topic?.title || fallbackTopicTitle || `Chủ đề #${topicId}`;
-  const icon = TOPIC_ICONS[topicTitle] || TOPIC_ICONS[topic?.title] || "📚";
 
   return (
     <MainLayout>
@@ -143,8 +104,8 @@ export default function ExamListPage() {
         <div className="bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-3xl p-6 sm:p-8 mb-8 shadow-xs relative overflow-hidden">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
             <div className="flex items-center gap-4 sm:gap-5 min-w-0">
-              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-3xl bg-[#58cc02]/10 border-2 border-[#58cc02]/30 text-3xl sm:text-4xl flex items-center justify-center shrink-0 shadow-2xs">
-                {icon}
+              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-3xl bg-[#58cc02]/10 border-2 border-[#58cc02]/30 flex items-center justify-center p-3.5 shrink-0 shadow-2xs">
+                <TopicIcon topicName={topicTitle} className="w-10 h-10 sm:w-12 sm:h-12 object-contain" />
               </div>
 
               <div className="min-w-0">
