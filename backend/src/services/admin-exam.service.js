@@ -1,6 +1,7 @@
 require("dotenv").config();
 const db = require("../config/db");
 const topicRepository = require("../repositories/topic.repository");
+const systemSettingService = require("./system-setting.service");
 const AppException = require("../exceptions/app.exception");
 const { ErrorCode } = require("../common/error-code");
 
@@ -218,8 +219,17 @@ class AdminExamService {
     let questions = [];
     let generationSource = "DATABASE";
 
-    // 1. Nếu chọn AI hoặc AUTO và có GROQ_API_KEY
-    if ((method === "AI" || method === "AUTO") && GROQ_API_KEY) {
+    const aiEnabled = await systemSettingService.get("ai.enable_generation", true);
+
+    if (method === "AI" && !aiEnabled) {
+      throw new AppException(
+        ErrorCode.SYSTEM_ERROR,
+        "Tính năng sinh đề bằng AI đang tạm thời bị Quản trị viên vô hiệu hóa trong Cấu hình Hệ thống.",
+      );
+    }
+
+    // 1. Nếu chọn AI hoặc AUTO và có GROQ_API_KEY và được bật AI
+    if ((method === "AI" || method === "AUTO") && GROQ_API_KEY && aiEnabled) {
       try {
         let prompt;
         if (examType === "PLACEMENT") {

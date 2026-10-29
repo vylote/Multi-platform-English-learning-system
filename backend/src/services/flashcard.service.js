@@ -1,13 +1,21 @@
 const flashcardRepository = require("../repositories/flashcard.repository");
 const wordRepository = require("../repositories/word.repository");
 const topicRepository = require("../repositories/topic.repository");
+const systemSettingService = require("./system-setting.service");
 const { ErrorCode } = require("../common/error-code");
 const AppException = require("../exceptions/app.exception");
 
-const DAILY_TARGET = 10;
+const DEFAULT_DAILY_TARGET = 10;
 const VALID_STATUSES = ["NEW", "LEARNING", "MASTERED"];
 
 class FlashcardService {
+  async _getDailyTarget() {
+    return await systemSettingService.get(
+      "learning.flashcard_daily_target",
+      DEFAULT_DAILY_TARGET,
+    );
+  }
+
   async getFlashcardsByUser(userId) {
     return flashcardRepository.findByUser(userId);
   }
@@ -34,10 +42,11 @@ class FlashcardService {
       return []; //TODO: user học hết từ của toàn bộ hệ thống
     }
 
+    const dailyTarget = await this._getDailyTarget();
     const newWords = await wordRepository.findRandomByTopicExcludingOwned(
       freshTopic.id,
       userId,
-      DAILY_TARGET,
+      dailyTarget,
     );
     if (newWords.length > 0) {
       await flashcardRepository.bulkInsertNew(userId, freshTopic.id, newWords);
@@ -52,11 +61,13 @@ class FlashcardService {
       topic.id,
     );
 
-    if (current.length >= DAILY_TARGET) {
-      return current.slice(0, DAILY_TARGET);
+    const dailyTarget = await this._getDailyTarget();
+
+    if (current.length >= dailyTarget) {
+      return current.slice(0, dailyTarget);
     }
 
-    const needed = DAILY_TARGET - current.length;
+    const needed = dailyTarget - current.length;
     const candidateWords = await wordRepository.findRandomByTopicExcludingOwned(
       topic.id,
       userId,
@@ -114,11 +125,12 @@ class FlashcardService {
   }
 
   async checkDailyCompletion(userId, timezoneOffsetMinutes) {
+    const dailyTarget = await this._getDailyTarget();
     const masteredCount = await flashcardRepository.countTodayMastered(
       userId,
       timezoneOffsetMinutes,
     );
-    return masteredCount >= DAILY_TARGET;
+    return masteredCount >= dailyTarget;
   }
 }
 

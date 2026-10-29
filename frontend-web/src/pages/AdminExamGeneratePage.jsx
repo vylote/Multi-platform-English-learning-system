@@ -100,12 +100,9 @@ export default function AdminExamGeneratePage() {
         {/* HEADER: TITLE + NÚT "XEM DANH SÁCH ĐỀ THI" */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-purple-500/15 text-purple-700 dark:text-purple-400 border border-purple-500/30 mb-2">
-              <Cpu className="w-3.5 h-3.5" />
-              <span>Exam Generator Engine</span>
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-black text-gray-950 dark:text-white tracking-tight">
-              Khởi tạo đề thi trắc nghiệm mới
+            <h1 className="text-2xl sm:text-3xl font-black text-gray-950 dark:text-white tracking-tight flex items-center gap-2.5">
+              <Sparkles className="w-8 h-8 text-purple-600 dark:text-purple-400" />
+              <span>Khởi tạo đề thi trắc nghiệm mới</span>
             </h1>
             <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-1">
               Nhập các thông số mong muốn và chọn động cơ sinh câu hỏi (AI Groq hoặc kho từ vựng Database).

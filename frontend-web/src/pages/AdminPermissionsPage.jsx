@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import {
   KeyRound,
-  ShieldCheck,
+  Crown,
+  Users,
   Check,
   RotateCw,
   AlertTriangle,
@@ -182,12 +183,9 @@ export default function AdminPermissionsPage() {
         {/* HEADER */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-purple-500/15 text-purple-700 dark:text-purple-400 border border-purple-500/30 mb-2">
-              <KeyRound className="w-3.5 h-3.5" />
-              <span>RBAC • Role-Based Access Control</span>
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-black text-gray-950 dark:text-white tracking-tight">
-              Quản lý Phân quyền Vai trò
+            <h1 className="text-2xl sm:text-3xl font-black text-gray-950 dark:text-white tracking-tight flex items-center gap-2.5">
+              <KeyRound className="w-8 h-8 text-purple-600 dark:text-purple-400" />
+              <span>Quản lý Phân quyền Vai trò</span>
             </h1>
             <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-1">
               Cấu hình quyền hạn chi tiết (Role Permissions) cho từng vai trò trong hệ thống. Thay đổi tự động xóa cache Redis và có hiệu lực ngay lập tức.
@@ -268,7 +266,13 @@ export default function AdminPermissionsPage() {
                         : "bg-white dark:bg-gray-800 text-purple-600 border border-[#d5cdbd] dark:border-gray-700"
                     }`}
                   >
-                    <ShieldCheck className="w-5 h-5" />
+                    {role.code === "ADMIN" ? (
+                      <Crown className={`w-5 h-5 ${isSelected ? "text-amber-300" : "text-amber-500"}`} />
+                    ) : role.code === "STUDENT" ? (
+                      <GraduationCap className={`w-5 h-5 ${isSelected ? "text-emerald-200" : "text-emerald-500"}`} />
+                    ) : (
+                      <Users className="w-5 h-5" />
+                    )}
                   </div>
                   <div>
                     <h3 className="text-sm font-black text-gray-950 dark:text-white">

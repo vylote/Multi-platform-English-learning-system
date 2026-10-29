@@ -6,10 +6,10 @@ import {
   ExternalLink,
   Sun,
   Moon,
-  ShieldCheck,
   Sparkles,
   BookOpen,
   KeyRound,
+  SlidersHorizontal,
 } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -60,6 +60,12 @@ export default function AdminLayout({ children }) {
       icon: <Sparkles className="w-5 h-5 stroke-[2.3]" />,
       checkActive: (p) => p.startsWith("/admin/exams/generate"),
     },
+    {
+      name: "Cấu hình",
+      path: "/admin/settings",
+      icon: <SlidersHorizontal className="w-5 h-5 stroke-[2.3]" />,
+      checkActive: (p) => p.startsWith("/admin/settings"),
+    },
   ];
 
   return (
@@ -73,8 +79,18 @@ export default function AdminLayout({ children }) {
             to="/admin/users"
             className="group flex items-center justify-center lg:justify-start gap-3 px-1.5 py-3 mb-5 rounded-2xl hover:bg-[#e4ded0] dark:hover:bg-gray-800/80 transition-all cursor-pointer"
           >
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-b from-purple-600 to-purple-800 p-1 flex items-center justify-center shadow-md shadow-purple-600/25 border-b-3 border-purple-900 group-hover:scale-105 transition-transform shrink-0">
-              <ShieldCheck className="w-5 h-5 text-white" />
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-b from-[#7e22ce] to-[#6b21a8] p-1.5 flex items-center justify-center shadow-md shadow-purple-600/25 border-b-3 border-purple-900 group-hover:scale-105 transition-transform shrink-0">
+              <svg viewBox="0 0 36 36" fill="none" className="w-full h-full drop-shadow-xs">
+                <rect x="3" y="4" width="30" height="28" rx="14" fill="#9333ea" />
+                <ellipse cx="18" cy="24" rx="9" ry="7" fill="#c084fc" />
+                <circle cx="12" cy="14" r="5.5" fill="white" />
+                <circle cx="24" cy="14" r="5.5" fill="white" />
+                <circle cx="13" cy="14" r="3" fill="#0f172a" />
+                <circle cx="25" cy="14" r="3" fill="#0f172a" />
+                <circle cx="14" cy="13" r="1.2" fill="white" />
+                <circle cx="26" cy="13" r="1.2" fill="white" />
+                <polygon points="18,17 15,22 21,22" fill="#ff9600" />
+              </svg>
             </div>
 
             <div className="hidden lg:flex flex-col text-left">

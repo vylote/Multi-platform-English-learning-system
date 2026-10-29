@@ -201,3 +201,15 @@ CREATE TABLE IF NOT EXISTS topic_goal_priority (
 
 ALTER TABLE users ADD COLUMN IF NOT EXISTS learning_goal VARCHAR(30)
   CHECK (learning_goal IN ('DAILY_COMMUNICATION', 'CAREER', 'TRAVEL', 'HOBBY'));
+
+CREATE TABLE IF NOT EXISTS system_settings (
+    key VARCHAR(100) PRIMARY KEY,
+    value TEXT NOT NULL,
+    data_type VARCHAR(20) NOT NULL DEFAULT 'string'
+      CHECK (data_type IN ('string', 'number', 'boolean', 'json')),
+    group_name VARCHAR(50) NOT NULL,
+    label VARCHAR(255) NOT NULL,
+    description TEXT,
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+);

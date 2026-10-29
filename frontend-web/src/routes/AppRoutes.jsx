@@ -20,11 +20,12 @@ import AdminUsersPage from "../pages/AdminUsersPage";
 import AdminPermissionsPage from "../pages/AdminPermissionsPage";
 import AdminExamsPage from "../pages/AdminExamsPage";
 import AdminExamGeneratePage from "../pages/AdminExamGeneratePage";
+import AdminSettingsPage from "../pages/AdminSettingsPage";
 
 // 1. Đưa ProtectedRoute ra ngoài AppRoutes
 const ProtectedRoute = ({ children }) => {
   const { user } = useSelector((state) => state.auth);
-  const needsOnboarding = user && !user.tier;
+  const needsOnboarding = user && user.role !== "ADMIN" && !user.tier;
 
   if (!user) return <Navigate to="/login" replace />;
   if (needsOnboarding) return <Navigate to="/onboarding" replace />;
@@ -48,23 +49,47 @@ const AdminRoute = ({ children }) => {
 
 export const AppRoutes = () => {
   const { user } = useSelector((state) => state.auth);
-  const needsOnboarding = user && !user.tier;
+  const needsOnboarding = user && user.role !== "ADMIN" && !user.tier;
 
   return (
     <Routes>
-      {/* Trang Landing Page: Chưa đăng nhập thì xem, có user rồi thì vào /learn */}
+      {/* Trang Landing Page: Chưa đăng nhập thì xem, có user rồi thì vào /learn (ADMIN vào /admin/users) */}
       <Route
         path="/"
-        element={!user ? <HomePage /> : <Navigate to="/learn" />}
+        element={
+          !user ? (
+            <HomePage />
+          ) : user.role === "ADMIN" ? (
+            <Navigate to="/admin/users" replace />
+          ) : (
+            <Navigate to="/learn" replace />
+          )
+        }
       />
 
       <Route
         path="/login"
-        element={!user ? <LoginPage /> : <Navigate to="/learn" />}
+        element={
+          !user ? (
+            <LoginPage />
+          ) : user.role === "ADMIN" ? (
+            <Navigate to="/admin/users" replace />
+          ) : (
+            <Navigate to="/learn" replace />
+          )
+        }
       />
       <Route
         path="/register"
-        element={!user ? <RegisterPage /> : <Navigate to="/learn" />}
+        element={
+          !user ? (
+            <RegisterPage />
+          ) : user.role === "ADMIN" ? (
+            <Navigate to="/admin/users" replace />
+          ) : (
+            <Navigate to="/learn" replace />
+          )
+        }
       />
 
       <Route
@@ -72,6 +97,8 @@ export const AppRoutes = () => {
         element={
           !user ? (
             <Navigate to="/login" replace />
+          ) : user.role === "ADMIN" ? (
+            <Navigate to="/admin/users" replace />
           ) : !needsOnboarding ? (
             <Navigate to="/learn" replace />
           ) : (
@@ -84,6 +111,8 @@ export const AppRoutes = () => {
         element={
           !user ? (
             <Navigate to="/login" replace />
+          ) : user.role === "ADMIN" ? (
+            <Navigate to="/learn" replace />
           ) : !needsOnboarding ? (
             <Navigate to="/learn" replace />
           ) : (
@@ -209,6 +238,14 @@ export const AppRoutes = () => {
         element={
           <AdminRoute>
             <AdminExamGeneratePage />
+          </AdminRoute>
+        }
+      />
+      <Route
+        path="/admin/settings"
+        element={
+          <AdminRoute>
+            <AdminSettingsPage />
           </AdminRoute>
         }
       />

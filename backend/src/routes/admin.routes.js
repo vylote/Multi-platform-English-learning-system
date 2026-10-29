@@ -4,6 +4,7 @@ const router = express.Router();
 const adminUserController = require("../controllers/admin-user.controller");
 const adminExamController = require("../controllers/admin-exam.controller");
 const adminPermissionController = require("../controllers/admin-permission.controller");
+const adminSettingController = require("../controllers/admin-setting.controller");
 const authMiddleware = require("../middlewares/auth.middleware");
 const AppException = require("../exceptions/app.exception");
 const { ErrorCode } = require("../common/error-code");
@@ -36,11 +37,16 @@ router.put("/users/:id/role", adminUserController.updateUserRole);
 router.get("/role-permissions", adminPermissionController.getRolePermissionsData);
 router.put("/role-permissions/:roleId", adminPermissionController.updateRolePermissions);
 
-// 3. Quản lý & Sinh đề thi theo chủ đề
+// 4. Quản lý & Sinh đề thi theo chủ đề
 router.get("/topics", adminExamController.getTopics);
 router.get("/exams", adminExamController.getExams);
 router.get("/exams/:id", adminExamController.getExamDetail);
 router.post("/exams/generate", adminExamController.generateExam);
 router.delete("/exams/:id", adminExamController.deleteExam);
+
+// 5. Cấu hình hệ thống (System Settings)
+router.get("/settings", adminSettingController.getSettings);
+router.put("/settings", adminSettingController.updateSettings);
+router.post("/settings/reset", adminSettingController.resetDefaults);
 
 module.exports = router;

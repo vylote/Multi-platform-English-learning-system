@@ -12,7 +12,7 @@ export default function SocialButtons() {
       <div className="flex flex-col gap-2.5">
         <button
           type="button"
-          className="w-full flex items-center justify-center gap-3 border-2 border-[#d5cdbd] dark:border-gray-700 border-b-4 rounded-2xl py-2.5 px-4 font-black text-sm uppercase tracking-wider text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-[#ede8dc]/50 dark:hover:bg-gray-750 active:translate-y-0.5 active:border-b-2 transition-all cursor-pointer shadow-xs"
+          className="w-full flex items-center justify-center gap-2.5 sm:gap-3 border-2 border-[#d5cdbd] dark:border-gray-700 border-b-4 rounded-2xl py-2.5 px-3 sm:px-4 font-black text-xs sm:text-sm uppercase tracking-wider text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-[#ede8dc]/50 dark:hover:bg-gray-750 active:translate-y-0.5 active:border-b-2 transition-all cursor-pointer shadow-xs"
         >
           <svg className="w-5 h-5 shrink-0" viewBox="0 0 48 48">
             <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.9 32.6 29.4 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l5.7-5.7C34.7 6.1 29.6 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.7-.4-3.5z"/>
@@ -25,7 +25,7 @@ export default function SocialButtons() {
 
         <button
           type="button"
-          className="w-full flex items-center justify-center gap-3 border-2 border-[#d5cdbd] dark:border-gray-700 border-b-4 rounded-2xl py-2.5 px-4 font-black text-sm uppercase tracking-wider text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-[#ede8dc]/50 dark:hover:bg-gray-750 active:translate-y-0.5 active:border-b-2 transition-all cursor-pointer shadow-xs"
+          className="w-full flex items-center justify-center gap-2.5 sm:gap-3 border-2 border-[#d5cdbd] dark:border-gray-700 border-b-4 rounded-2xl py-2.5 px-3 sm:px-4 font-black text-xs sm:text-sm uppercase tracking-wider text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-[#ede8dc]/50 dark:hover:bg-gray-750 active:translate-y-0.5 active:border-b-2 transition-all cursor-pointer shadow-xs"
         >
           <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="#1877F2">
             <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />

@@ -1,6 +1,7 @@
 const examRepository = require("../repositories/exam.repository");
 const userRepository = require("../repositories/user.repository");
 const streakService = require("./streak.service");
+const systemSettingService = require("./system-setting.service");
 const { ExamReviewItem, ExamResultDetail } = require("../models/exam.model");
 const { ErrorCode } = require("../common/error-code");
 const AppException = require("../exceptions/app.exception");
@@ -8,7 +9,7 @@ const PageResponse = require("../models/page-response.model");
 const { classifyTier } = require("../utils/tier-classifier");
 
 //TODO: Khoảng đệm bù độ trễ mạng khi nộp bài
-const NETWORK_BUFFER_SECONDS = 15;
+const DEFAULT_NETWORK_BUFFER_SECONDS = 15;
 const DEFAULT_PAGE_SIZE = 10;
 
 class ExamService {
@@ -69,7 +70,11 @@ class ExamService {
       const elapsedSeconds = Math.floor(
         (Date.now() - startedAt.getTime()) / 1000,
       );
-      const maxAllowedSeconds = exam.duration * 60 + NETWORK_BUFFER_SECONDS;
+      const networkBuffer = await systemSettingService.get(
+        "exam.network_buffer_seconds",
+        DEFAULT_NETWORK_BUFFER_SECONDS,
+      );
+      const maxAllowedSeconds = exam.duration * 60 + networkBuffer;
 
       if (elapsedSeconds > maxAllowedSeconds) {
         await examRepository.cancelSession(session.id, userId);
@@ -174,7 +179,11 @@ class ExamService {
       (now.getTime() - startedAt.getTime()) / 1000,
     );
 
-    const maxAllowedSeconds = exam.duration * 60 + NETWORK_BUFFER_SECONDS;
+    const networkBuffer = await systemSettingService.get(
+      "exam.network_buffer_seconds",
+      DEFAULT_NETWORK_BUFFER_SECONDS,
+    );
+    const maxAllowedSeconds = exam.duration * 60 + networkBuffer;
     if (timeSpentSeconds > maxAllowedSeconds) {
       throw new AppException(
         ErrorCode.EXAM_EXPIRED,
@@ -274,7 +283,11 @@ class ExamService {
 
     let assignedTier = null;
     if (exam.exam_type === "PLACEMENT") {
-      assignedTier = classifyTier(score);
+      const [beginnerMax, intermediateMax] = await Promise.all([
+        systemSettingService.get("placement.beginner_max", 5.0),
+        systemSettingService.get("placement.intermediate_max", 8.0),
+      ]);
+      assignedTier = classifyTier(score, { beginnerMax, intermediateMax });
       await userRepository.updateTier(userId, assignedTier);
     }
     // -------------------------------------------------------------

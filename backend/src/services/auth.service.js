@@ -5,6 +5,7 @@ const crypto = require("crypto");
 const userRepository = require("../repositories/user.repository");
 const roleRepository = require("../repositories/role.repository");
 const redisClient = require("../config/redis");
+const systemSettingService = require("./system-setting.service");
 const { ErrorCode } = require("../common/error-code");
 const AppException = require("../exceptions/app.exception");
 
@@ -13,6 +14,16 @@ const SESSION_KEY_PREFIX = process.env.SESSION_KEY_PREFIX;
 
 class AuthService {
   async registerUser({ username, email, password }) {
+    const allowRegistration = await systemSettingService.get(
+      "system.allow_registration",
+      true,
+    );
+    if (!allowRegistration) {
+      throw new AppException(
+        ErrorCode.UNAUTHORIZED,
+        "Hệ thống đang tạm khóa tính năng đăng ký thành viên mới. Vui lòng quay lại sau.",
+      );
+    }
     const existingUser = await userRepository.findByUsername(username);
     if (existingUser) {
       throw new AppException(
@@ -67,6 +78,18 @@ class AuthService {
       throw new AppException(
         ErrorCode.UNAUTHENTICATED,
         "Tên đăng nhập hoặc mật khẩu không chính xác",
+      );
+    }
+
+    // Kiểm tra chế độ bảo trì hệ thống
+    const maintenanceMode = await systemSettingService.get(
+      "system.maintenance_mode",
+      false,
+    );
+    if (maintenanceMode && user.role !== "ADMIN") {
+      throw new AppException(
+        ErrorCode.SYSTEM_ERROR,
+        "Hệ thống đang trong chế độ bảo trì nâng cấp. Chỉ Quản trị viên mới có thể truy cập.",
       );
     }
 

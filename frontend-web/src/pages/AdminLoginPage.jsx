@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import toast from "react-hot-toast";
-import { ShieldCheck, Eye, EyeOff, Lock, User, ArrowLeft, Sun, Moon } from "lucide-react";
+import { Eye, EyeOff, Lock, User, ArrowLeft, Sun, Moon } from "lucide-react";
 
 import api from "../api/api";
 import { loginSuccess, logout } from "../store/slice/authSlice";
@@ -93,8 +93,18 @@ export default function AdminLoginPage() {
         <div className="rounded-3xl border-2 border-[#d5cdbd] dark:border-gray-700 bg-white dark:bg-[#18232c] p-6 sm:p-8 shadow-xl text-left transition-colors">
           {/* BADGE ADMIN ICON */}
           <div className="flex flex-col items-center text-center mb-6">
-            <div className="w-16 h-16 rounded-3xl bg-gradient-to-b from-[#7e22ce] to-[#581c87] text-white flex items-center justify-center shadow-lg shadow-purple-500/25 border-b-4 border-purple-900 mb-3">
-              <ShieldCheck className="w-9 h-9" />
+            <div className="w-16 h-16 rounded-3xl bg-gradient-to-b from-[#7e22ce] to-[#581c87] p-2 flex items-center justify-center shadow-lg shadow-purple-500/25 border-b-4 border-purple-900 mb-3">
+              <svg viewBox="0 0 36 36" fill="none" className="w-full h-full drop-shadow-sm">
+                <rect x="3" y="4" width="30" height="28" rx="14" fill="#9333ea" />
+                <ellipse cx="18" cy="24" rx="9" ry="7" fill="#c084fc" />
+                <circle cx="12" cy="14" r="5.5" fill="white" />
+                <circle cx="24" cy="14" r="5.5" fill="white" />
+                <circle cx="13" cy="14" r="3" fill="#0f172a" />
+                <circle cx="25" cy="14" r="3" fill="#0f172a" />
+                <circle cx="14" cy="13" r="1.2" fill="white" />
+                <circle cx="26" cy="13" r="1.2" fill="white" />
+                <polygon points="18,17 15,22 21,22" fill="#ff9600" />
+              </svg>
             </div>
 
             <span className="px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-purple-500/15 text-purple-700 dark:text-purple-400 border border-purple-500/30 mb-1.5">
