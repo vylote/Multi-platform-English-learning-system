@@ -41,6 +41,24 @@ module.exports = async (req, res, next) => {
     }
 
     req.user = decoded;
+
+    // Kiểm tra chế độ bảo trì hệ thống cho người dùng thường
+    if (decoded.role !== "ADMIN") {
+      const systemSettingService = require("../services/system-setting.service");
+      const maintenanceMode = await systemSettingService.get(
+        "system.maintenance_mode",
+        false,
+      );
+      if (maintenanceMode) {
+        return next(
+          new AppException(
+            ErrorCode.SYSTEM_ERROR,
+            "Hệ thống đang trong chế độ bảo trì nâng cấp. Vui lòng quay lại sau.",
+          ),
+        );
+      }
+    }
+
     next();
   } catch (err) {
     // err.name = 'JsonWebTokenError' hoặc 'TokenExpiredError'

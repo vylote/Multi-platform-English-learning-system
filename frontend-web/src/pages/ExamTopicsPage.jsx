@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import { FileText, Clock, CheckCircle2, ArrowRight } from "lucide-react";
 import api from "../api/api";
 import MainLayout from "../layouts/MainLayout";
 import { TopicIcon } from "../utils/topicIcons";
@@ -8,17 +9,20 @@ const DIFFICULTY_CONFIG = {
   BEGINNER: {
     label: "Cơ bản",
     sublabel: "Beginner",
-    badgeBg: "bg-[#58cc02]/10 text-[#58cc02] border-[#58cc02]/30",
+    badgeBg: "bg-emerald-500/15 text-emerald-800 dark:text-emerald-400 border-emerald-500/30",
+    btnBg: "bg-[#58cc02] hover:bg-[#4cb001] border-[#3b8702]",
   },
   INTERMEDIATE: {
     label: "Trung cấp",
     sublabel: "Intermediate",
-    badgeBg: "bg-[#1cb0f6]/10 text-[#1cb0f6] border-[#1cb0f6]/30",
+    badgeBg: "bg-sky-500/15 text-sky-800 dark:text-sky-400 border-sky-500/30",
+    btnBg: "bg-[#1cb0f6] hover:bg-[#1899d6] border-[#1899d6]",
   },
   ADVANCED: {
     label: "Nâng cao",
     sublabel: "Advanced",
-    badgeBg: "bg-[#ce82ff]/10 text-[#ce82ff] border-[#ce82ff]/30",
+    badgeBg: "bg-purple-500/15 text-purple-800 dark:text-purple-400 border-purple-500/30",
+    btnBg: "bg-[#a855f7] hover:bg-[#9333ea] border-[#7e22ce]",
   },
 };
 
@@ -82,15 +86,11 @@ export default function ExamTopicsPage() {
   return (
     <MainLayout>
       <div className="py-6 sm:py-8 max-w-[1300px] mx-auto text-left">
-        {/* CLEAN HEADER MATCHING REVIEW THEME */}
-        <div className="mb-8 text-center max-w-2xl mx-auto">
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-white mb-2">
-            Luyện thi trắc nghiệm theo chủ đề
+        {/* CLEAN HEADER MATCHING REVIEW & DICTIONARY THEME */}
+        <div className="mb-6 sm:mb-8 text-center">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">
+            Luyện thi theo chủ đề
           </h1>
-          <p className="text-gray-500 dark:text-gray-400 text-xs sm:text-sm leading-relaxed">
-            Hệ thống 36 chủ đề được phân cấp từ Cơ bản đến Nâng cao. Mỗi đề thi gồm 10 câu trắc nghiệm
-            chuẩn ngữ pháp và từ vựng, có tính giờ và chấm điểm tự động.
-          </p>
         </div>
 
         {/* SEARCH & FILTERS BAR */}
@@ -178,58 +178,67 @@ export default function ExamTopicsPage() {
                 <div
                   key={topic.id}
                   onClick={() => navigate(`/exams/topics/${topic.id}`)}
-                  className="group relative bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-3xl p-6 flex flex-col justify-between hover:border-[#58cc02] dark:hover:border-[#58cc02] shadow-xs hover:shadow-md hover:-translate-y-1 transition-all duration-200 cursor-pointer overflow-hidden"
+                  className="group relative bg-white dark:bg-[#18232c] border-2 border-[#d5cdbd] dark:border-gray-700 border-b-4 hover:border-b-4 hover:border-[#58cc02] dark:hover:border-[#58cc02] rounded-3xl p-5 sm:p-6 flex flex-col justify-between shadow-2xs hover:shadow-lg hover:-translate-y-1 transition-all duration-200 cursor-pointer overflow-hidden text-left"
                 >
                   <div>
                     {/* Header: Icon + Difficulty Badge */}
                     <div className="flex items-start justify-between gap-3 mb-4">
-                      <div className="w-13 h-13 rounded-2xl bg-gray-100 dark:bg-gray-700/80 group-hover:bg-[#58cc02]/10 flex items-center justify-center p-2.5 shadow-2xs group-hover:scale-110 transition-transform">
-                        <TopicIcon topicName={topic.title} className="w-8 h-8 object-contain" />
+                      <div className="w-14 h-14 rounded-2xl bg-[#faf7f0] dark:bg-gray-800 border-2 border-[#e4ded0] dark:border-gray-700 group-hover:border-[#58cc02]/50 flex items-center justify-center p-2.5 shadow-2xs group-hover:scale-105 transition-all shrink-0">
+                        <TopicIcon topicName={topic.title} className="w-9 h-9 object-contain" />
                       </div>
                       <span
-                        className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-[11px] font-bold border ${diffConfig.badgeBg}`}
+                        className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wider border-2 ${diffConfig.badgeBg}`}
                       >
                         {diffConfig.label}
                       </span>
                     </div>
 
                     {/* Topic Title */}
-                    <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2 group-hover:text-[#58cc02] dark:group-hover:text-[#58cc02] transition-colors line-clamp-1">
+                    <h3 className="text-lg sm:text-xl font-black text-gray-950 dark:text-white mb-1.5 group-hover:text-[#58cc02] dark:group-hover:text-[#58cc02] transition-colors line-clamp-1 tracking-tight">
                       {topic.title}
                     </h3>
 
                     {/* Description */}
-                    <p className="text-gray-500 dark:text-gray-400 text-xs sm:text-sm line-clamp-2 mb-4 leading-relaxed">
+                    <p className="text-gray-600 dark:text-gray-400 text-xs sm:text-sm font-medium line-clamp-2 mb-4 leading-relaxed min-h-[38px]">
                       {topic.description || "Luyện tập các câu hỏi kiểm tra từ vựng và ngữ cảnh thuộc chủ đề này."}
                     </p>
                   </div>
 
                   {/* Footer metadata & CTA */}
                   <div>
-                    <div className="flex items-center gap-3 pt-3 border-t border-gray-100 dark:border-gray-700 text-xs text-gray-500 dark:text-gray-400 mb-4">
-                      <span className="flex items-center gap-1">
-                        <span>📝</span> 10 câu hỏi
-                      </span>
-                      <span>·</span>
-                      <span className="flex items-center gap-1">
-                        <span>⏱</span> 15 phút
-                      </span>
-                      <span>·</span>
-                      <span className="flex items-center gap-1">
-                        <span>🎯</span> 4 đáp án
-                      </span>
+                    {/* Compact 3-box stats row - no awkward wrapping */}
+                    <div className="grid grid-cols-3 gap-1 py-2 px-2.5 rounded-2xl bg-[#faf7f0] dark:bg-gray-800/80 border border-[#e4ded0] dark:border-gray-700/70 mb-4 text-center">
+                      <div className="flex items-center justify-center gap-1.5 py-0.5">
+                        <FileText className="w-3.5 h-3.5 text-blue-500 shrink-0" />
+                        <span className="text-xs font-black text-gray-800 dark:text-gray-200 whitespace-nowrap">
+                          10 câu
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-center gap-1.5 py-0.5 border-x border-[#e4ded0] dark:border-gray-700/60">
+                        <Clock className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                        <span className="text-xs font-black text-gray-800 dark:text-gray-200 whitespace-nowrap">
+                          15 phút
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-center gap-1.5 py-0.5">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                        <span className="text-xs font-black text-gray-800 dark:text-gray-200 whitespace-nowrap">
+                          4 đáp án
+                        </span>
+                      </div>
                     </div>
 
+                    {/* 3D Duolingo Button */}
                     <button
                       type="button"
                       onClick={(e) => {
                         e.stopPropagation();
                         navigate(`/exams/topics/${topic.id}`);
                       }}
-                      className="w-full py-2.5 px-4 rounded-xl font-bold text-xs sm:text-sm bg-gray-100 dark:bg-gray-700/80 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-600 group-hover:bg-[#58cc02] group-hover:text-white group-hover:border-[#58cc02] transition-all flex items-center justify-center gap-1.5 shadow-2xs"
+                      className={`w-full py-2.5 sm:py-3 px-4 rounded-2xl font-black text-xs sm:text-sm uppercase tracking-wider text-white border-b-4 active:translate-y-0.5 active:border-b-2 shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer group/btn ${diffConfig.btnBg}`}
                     >
                       <span>Vào luyện đề ngay</span>
-                      <span className="group-hover:translate-x-1 transition-transform">→</span>
+                      <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
                     </button>
                   </div>
                 </div>

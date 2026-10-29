@@ -14,7 +14,7 @@ import {
   Mic,
   Sparkles,
   ChevronRight,
-  ShieldCheck,
+  LayoutDashboard,
 } from "lucide-react";
 import { logout } from "../store/slice/authSlice";
 import { useTheme } from "../context/ThemeContext";
@@ -158,7 +158,7 @@ export default function LeftSidebar() {
                     : "text-purple-600 dark:text-purple-400 bg-purple-500/15 group-hover:scale-110"
                 }`}
               >
-                <ShieldCheck className="w-5 h-5 stroke-[2.5]" />
+                <LayoutDashboard className="w-5 h-5 stroke-[2.5]" />
               </div>
             ),
           },
@@ -289,7 +289,7 @@ export default function LeftSidebar() {
                     onClick={() => setShowMoreMenu(false)}
                     className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-bold text-purple-700 dark:text-purple-300 hover:bg-purple-500/10 transition-colors"
                   >
-                    <ShieldCheck className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                    <LayoutDashboard className="w-4 h-4 text-purple-600 dark:text-purple-400" />
                     <span>Cổng Quản Trị</span>
                   </Link>
                 )}

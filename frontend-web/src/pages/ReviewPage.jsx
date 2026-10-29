@@ -59,13 +59,10 @@ export default function ReviewPage() {
         {!selection && (
           <div className="w-full mx-auto text-center">
             {/* CLEAN HEADER FOR TOPIC SELECTION */}
-            <div className="mb-8 text-center">
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-white mb-2">
+            <div className="mb-6 sm:mb-8 text-center">
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">
                 Luyện từ vựng qua Flashcards
               </h1>
-              <p className="text-gray-500 dark:text-gray-400 text-xs sm:text-sm max-w-lg mx-auto leading-relaxed">
-                Ghi nhớ từ vựng hiệu quả bằng phương pháp Lặp lại ngắt quãng (Spaced Repetition). Chọn một chủ đề để bắt đầu 10 từ hôm nay!
-              </p>
             </div>
 
             <TopicSelector

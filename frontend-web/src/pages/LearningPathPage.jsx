@@ -409,16 +409,18 @@ export default function LearningPathPage() {
               <div key={section.tierKey} className="relative">
                 {/* TIER BANNER */}
                 <div
-                  className="rounded-2xl px-5 py-3.5 mb-10 text-white flex items-center justify-between shadow-md"
+                  className="rounded-2xl px-5 py-4 mb-10 text-white flex items-center justify-between shadow-md"
                   style={{ backgroundColor: section.meta.color }}
                 >
-                  <div>
-                    <span className="font-black uppercase tracking-wider text-[11px] opacity-90 block">
-                      Phần {sIndex + 1}
-                    </span>
-                    <span className="text-base font-extrabold">{section.meta.label}</span>
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-lg sm:text-xl font-black tracking-tight text-white flex items-center gap-2">
+                      <span className="opacity-90 font-extrabold text-sm sm:text-base uppercase tracking-wider">
+                        Phần {sIndex + 1}:
+                      </span>
+                      <span>{section.meta.label}</span>
+                    </h2>
                   </div>
-                  <span className="text-xs font-bold px-3 py-1 rounded-full bg-black/20 backdrop-blur-xs">
+                  <span className="text-xs sm:text-sm font-black px-3.5 py-1.5 rounded-full bg-black/20 backdrop-blur-xs shrink-0">
                     {completedInTier}/{section.topics.length} chủ đề
                   </span>
                 </div>

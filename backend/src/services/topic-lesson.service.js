@@ -2,17 +2,20 @@ const wordRepository = require("../repositories/word.repository");
 const examRepository = require("../repositories/exam.repository");
 const lessonRepository = require("../repositories/lesson.repository");
 const streakService = require("./streak.service");
+const systemSettingService = require("./system-setting.service");
 const AppException = require("../exceptions/app.exception");
 const { ErrorCode } = require("../common/error-code");
 
-const WORDS_PER_LESSON = 5;
-const QUESTIONS_PER_LESSON = 5;
-
 class TopicLessonService {
   async getLesson(topicId) {
+    const [wordsPerLesson, questionsPerLesson] = await Promise.all([
+      systemSettingService.get("learning.words_per_lesson", 5),
+      systemSettingService.get("learning.questions_per_lesson", 5),
+    ]);
+
     const [words, questions] = await Promise.all([
-      wordRepository.findRandomByTopic(topicId, WORDS_PER_LESSON),
-      examRepository.findQuestionsForTopicLesson(topicId, QUESTIONS_PER_LESSON),
+      wordRepository.findRandomByTopic(topicId, wordsPerLesson),
+      examRepository.findQuestionsForTopicLesson(topicId, questionsPerLesson),
     ]);
 
     if (words.length === 0) {

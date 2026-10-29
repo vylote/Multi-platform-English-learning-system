@@ -4,8 +4,10 @@ import toast from "react-hot-toast";
 import {
   Users,
   Search,
-  ShieldCheck,
   UserCheck,
+  UserCog,
+  Crown,
+  GraduationCap,
   Calendar,
   Filter,
   RefreshCw,
@@ -206,7 +208,7 @@ export default function AdminUsersPage() {
           {/* Card 3: Quản trị viên */}
           <div className="p-4 sm:p-5 rounded-3xl bg-white dark:bg-[#18232c] border-2 border-[#d5cdbd] dark:border-gray-700 shadow-2xs">
             <div className="w-10 h-10 rounded-2xl bg-purple-500/15 text-purple-600 dark:text-purple-400 flex items-center justify-center mb-2 font-black">
-              <ShieldCheck className="w-5 h-5" />
+              <Crown className="w-5 h-5 text-amber-500" />
             </div>
             <p className="text-2xl sm:text-3xl font-black text-purple-600 dark:text-purple-400">
               {stats.totalAdmins}
@@ -367,9 +369,9 @@ export default function AdminUsersPage() {
                             }`}
                           >
                             {isAdmin ? (
-                              <ShieldCheck className="w-3.5 h-3.5" />
+                              <Crown className="w-3.5 h-3.5 text-amber-500" />
                             ) : (
-                              <UserCheck className="w-3.5 h-3.5" />
+                              <GraduationCap className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                             )}
                             <span>{u.role_name || u.role_code}</span>
                           </span>
@@ -404,14 +406,14 @@ export default function AdminUsersPage() {
                             : "–"}
                         </td>
 
-                        {/* Hành động: Phân quyền */}
+                        {/* Hành động: Phân quyền / Đổi vai trò */}
                         <td className="py-3.5 px-4 sm:px-6 text-right whitespace-nowrap">
                           <button
                             type="button"
                             onClick={() => handleOpenRoleModal(u)}
                             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-black text-xs uppercase tracking-wider bg-gray-100 hover:bg-purple-600 dark:bg-gray-800 dark:hover:bg-purple-600 text-gray-700 hover:text-white dark:text-gray-200 dark:hover:text-white border border-[#d5cdbd] dark:border-gray-700 hover:border-purple-600 transition-all cursor-pointer shadow-2xs active:scale-95"
                           >
-                            <ShieldCheck className="w-3.5 h-3.5" />
+                            <UserCog className="w-3.5 h-3.5" />
                             <span>Đổi vai trò</span>
                           </button>
                         </td>
@@ -474,7 +476,7 @@ export default function AdminUsersPage() {
               {/* Modal Header */}
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-12 h-12 rounded-2xl bg-purple-500/15 text-purple-700 dark:text-purple-400 flex items-center justify-center shrink-0">
-                  <ShieldCheck className="w-6 h-6" />
+                  <UserCog className="w-6 h-6" />
                 </div>
                 <div>
                   <h3 className="text-lg font-black text-gray-900 dark:text-white leading-tight">

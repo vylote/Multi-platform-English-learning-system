@@ -13,6 +13,8 @@ import {
   CheckCircle2,
   BookOpen,
   ArrowRight,
+  Crown,
+  GraduationCap,
 } from "lucide-react";
 
 import api from "../api/api";
@@ -123,7 +125,11 @@ export default function ProfilePage() {
 
                 <div className="flex items-center justify-center sm:justify-start gap-2 flex-wrap">
                   <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-[#58cc02]/10 text-[#58cc02] border border-[#58cc02]/30">
-                    <ShieldCheck className="w-3.5 h-3.5" />
+                    {user?.role === "ADMIN" ? (
+                      <Crown className="w-3.5 h-3.5 text-amber-500" />
+                    ) : (
+                      <GraduationCap className="w-3.5 h-3.5" />
+                    )}
                     <span>{user?.role === "ADMIN" ? "Quản trị viên" : "Học viên"}</span>
                   </span>
 

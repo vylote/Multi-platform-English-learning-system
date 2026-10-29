@@ -1,0 +1,117 @@
+\documentclass[11pt,letterpaper]{article}
+\usepackage[letterpaper,margin=0.5in]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage{mdwlist}
+\usepackage[default]{lato}
+\usepackage[T1]{fontenc}
+\usepackage{textcomp}
+\usepackage{fontawesome5}
+\usepackage{enumitem}
+\DeclareFontFamily{U}{fontawesomeOne}{}
+\DeclareFontShape{U}{fontawesomeOne}{m}{n}
+{<-> FontAwesome--fontawesomeone}{}
+\DeclareRobustCommand\FAone{\fontencoding{U}\fontfamily{fontawesomeOne}\selectfont}
+\usepackage[hidelinks]{hyperref} % load last
+\pagestyle{empty}
+\setlength{\tabcolsep}{0em}
+\newenvironment{indentsection}[1]%
+{\begin{list}{}%
+  {\setlength{\leftmargin}{#1}}%
+    \item[]
+  }
+  {\end{list}}
+  \newenvironment{unindentsection}[1]%
+  {\begin{list}{}%
+    {\setlength{\leftmargin}{-0.5#1}}%
+      \item[]%
+    }
+    {\end{list}}
+    \newcommand{\headerrow}[2]
+    {\begin{tabular*}{\linewidth}{l@{\extracolsep{\fill}}r}
+      #1 &
+      #2 \\
+    \end{tabular*}}
+    \newcommand{\CPP}
+    {C\nolinebreak[4]\hspace{-.05em}\raisebox{.22ex}{\footnotesize\bf ++}}
+    \begin{document}
+      \begin{center}
+        {\LARGE \textbf{Le Thanh Vy}}\\
+        Hanoi, Vietnam
+        \vspace{0.05cm}
+        \\
+        \raisebox{-0.2\height} {\Large \faPhoneSquare} \ \  (+84) 343-238-074 \hfill
+        \raisebox{-0.2\height}{\Large \faEnvelopeSquare} \ \ \href{mailto:antran064969@gmail.com}{antran064969@gmail.com} \hfill
+        \raisebox{-0.2\height}{\Large \faGithubSquare} \ \ \href{https://github.com/vylote}{github.com/vylote}
+      \end{center}
+      \hrule
+      \vspace{-1em}
+      \subsection*{\Large Experience}
+      \renewcommand\labelitemi{}
+      \renewcommand\labelitemii{$\bullet$}
+      \begin{itemize}[leftmargin=1em]
+        \parskip=0.1em
+        \item
+        \headerrow
+        {\textbf{Softdreams Technology Investment and Trading Joint Stock Company}}
+        {\textbf{Hanoi, Vietnam}}
+        \headerrow
+        {\emph{Backend Java Developer Intern}}
+        {\emph{August 2026 -- Present}}
+        \begin{itemize*}
+          \item Contributed to \textbf{Data Validate Authority (DVA)}, an enterprise digital preservation platform built on \textbf{JHipster (Spring Boot \& Angular)}.
+          \item Automated timestamp lifecycle management with scheduled background jobs to keep data valid before certificate expiration; built an \textbf{idempotency mechanism} that eliminated 100\% of duplicate records in \textbf{MinIO (S3-compatible)} and the database.
+          \item Built a migration module using \textbf{Merkle Trees} to upgrade data digests from \textbf{SHA-256 to SHA-512}, with safeguards against security downgrade.
+          \item Developed the \textbf{Service Subscription \& Quota Management} module: designed RESTful APIs for tenant package allocation and usage limits; optimized JPA/Hibernate queries to fix N+1 issues and reduce latency.
+          \item Worked in an \textbf{Agile/Scrum} team with Git feature-branching and code reviews; wrote tests with \textbf{JUnit 5 and Mockito} and \textbf{Postman collections} to catch regressions before release.
+        \end{itemize*}
+      \end{itemize}
+      \hrule
+      \vspace{-1em}
+      \subsection*{\Large Projects}
+      \begin{itemize}[leftmargin=1em]
+        \parskip=0.1em
+        \item
+        \headerrow
+        {\textbf{Multi-Platform English Learning System}}
+        {\href{https://github.com/vylote/anhlingo}{\textbf{github.com/vylote/anhlingo}}}
+        \headerrow
+        {}
+        {\emph{September 2026 -- October 2026}}
+        \begin{itemize*}
+          \item Built a RESTful backend with \textbf{Node.js (Express)}, \textbf{PostgreSQL} and \textbf{Redis} for an adaptive English learning platform, using a clean 3-tier Service--Repository structure.
+          \item Implemented \textbf{JWT} auth in HttpOnly cookies (XSS/CSRF mitigation) with \textbf{Redis} session management for instant session revocation, and \textbf{RBAC} with Redis-cached permissions.
+          \item Designed a timezone-aware study streak engine and an adaptive progression system that unlocks topics based on weighted vocabulary, exam and lesson results.
+          \item Built an anti-cheat exam flow with server-side timing verification and automated grading wrapped in \textbf{PostgreSQL transactions} for atomicity.
+          \item Integrated \textbf{LLM APIs (Groq/Llama)} to auto-generate multiple-choice questions, with a database fallback during rate limits or downtime.
+        \end{itemize*}
+      \end{itemize}
+      \hrule
+      \vspace{-1em}
+      \subsection*{\Large Skills}
+      \hyphenpenalty=1000
+      \begin{itemize}[leftmargin=1em,noitemsep]
+        \item \textbf{Languages \& Frameworks:}
+        Java (Spring Boot, Spring Security, Spring Data JPA), JavaScript (ES6+), TypeScript, Node.js (Express.js), basic ReactJS
+        \item \textbf{Databases \& Storage:}
+        PostgreSQL, MySQL, MongoDB, Redis, MinIO
+        \item \textbf{Architecture \& Concepts:}
+        RESTful API, RBAC, ACID Transactions, Session Management
+        \item \textbf{Security \& Testing:}
+        JWT, OAuth 2.0, Bcrypt, Postman, JUnit, Mockito
+        \item \textbf{Tools:}
+        Docker (Compose), Git, Maven
+      \end{itemize}
+      \hrule
+      \vspace{-1em}
+      \subsection*{\Large Education}
+      \begin{itemize}[leftmargin=1em]
+        \parskip=0.1em
+        \item
+        \headerrow
+        {\textbf{University of Transport and Communications}}
+        {\textbf{Hanoi, Vietnam}}
+        \headerrow
+        {\emph{B.S. Information Technology} (\textbf{GPA:} 3.16/4.00)}
+        {\emph{September 2023 -- June 2027 (Expected)}}
+      \end{itemize}
+    \end{document}
