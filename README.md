@@ -133,51 +133,217 @@ Multi-platform-English-learning-system/
 
 ---
 
-## 5. Hướng Dẫn Cài Đặt & Chạy Thử (Getting Started)
+## 5. Hướng Dẫn Cài Đặt & Khởi Chạy Dự Án (Getting Started)
 
-### 5.1. Yêu cầu môi trường
-- **Node.js**: v18.x hoặc v20.x trở lên
-- **PostgreSQL**: v14 trở lên
-- **Redis**: v6 trở lên (hoặc chạy qua Docker)
+Dành cho thành viên mới hoặc người vừa clone/pull dự án về máy. Hãy thực hiện tuần tự theo các bước chuẩn dưới đây để khởi tạo cơ sở dữ liệu, nạp dữ liệu mẫu và chạy toàn bộ hệ thống.
 
-### 5.2. Khởi động Database & Redis qua Docker
+---
+
+### 5.1. Yêu cầu môi trường (Prerequisites)
+- **Node.js**: Phiên bản `v18.x` hoặc `v20.x` trở lên (khuyến nghị Node v20 LTS).
+- **Docker & Docker Compose**: Đã cài đặt và đang chạy dịch vụ Docker daemon.
+- **Git**: Dùng để quản lý mã nguồn.
+- *(Tùy chọn)* Python 3.9+ nếu muốn chạy script phân loại từ vựng nâng cao `classify_topics.py`.
+
+---
+
+### 5.2. Khởi động Cơ sở dữ liệu & Caching bằng Docker
+
+Dự án đã định cấu hình sẵn file [`docker-compose.yml`](file:///home/vylote/Projects/Multi-platform-English-learning-system/docker-compose.yml) chứa 2 service:
+- **`my_postgres`**: PostgreSQL 15 (Port `5432`, User `postgres`, Password `3821`, Database `els_db`).
+- **`my_redis`**: Redis Alpine (Port `6379`, quản lý phiên đăng nhập và cache).
+
+Chạy lệnh sau tại **thư mục gốc dự án**:
 ```bash
-# Tại thư mục gốc dự án:
-docker-compose up -d
+# Khởi chạy ngầm PostgreSQL và Redis
+docker compose up -d
 ```
 
-### 5.3. Khởi chạy Backend
+> **Kiểm tra trạng thái:** Chạy `docker ps`, đảm bảo cả hai container `my_postgres` và `my_redis` đều ở trạng thái `Up` (hoặc `healthy`).
+
+---
+
+### 5.3. Khởi tạo Cơ sở dữ liệu qua các File SQL (Schema & RBAC)
+
+Hệ thống cung cấp sẵn các tệp SQL cốt lõi nằm trong thư mục [`backend/src/docs/`](file:///home/vylote/Projects/Multi-platform-English-learning-system/backend/src/docs/):
+1. [`schema.sql`](file:///home/vylote/Projects/Multi-platform-English-learning-system/backend/src/docs/schema.sql): Khởi tạo toàn bộ cấu trúc bảng (15 bảng: `roles`, `permissions`, `role_permissions`, `users`, `words`, `idioms`, `topics`, `flashcards`, `streak_logs`, `exams`, `questions`, `exam_results`, `exam_sessions`, `exam_answers`, `lesson_attempts`, `topic_goal_priority`, `system_settings`), ràng buộc khóa ngoại, triggers và các composite indexes tối ưu truy vấn.
+2. [`seed_permissions.sql`](file:///home/vylote/Projects/Multi-platform-English-learning-system/backend/src/docs/seed_permissions.sql): Khởi tạo 2 vai trò mặc định (`ADMIN`, `STUDENT`), danh mục quyền hạn chi tiết và tự động gán quyền truy cập cho từng vai trò trong bảng `role_permissions`.
+
+#### Cách 1: Chạy trực tiếp qua Docker CLI (Khuyên Dùng — Không Cần Cài psql)
+Từ **thư mục gốc của dự án**, chạy 2 lệnh sau:
+
+```bash
+# 1. Khởi tạo cấu trúc các bảng CSDL
+docker exec -i my_postgres psql -U postgres -d els_db < backend/src/docs/schema.sql
+
+# 2. Nạp danh mục vai trò và phân quyền (RBAC)
+docker exec -i my_postgres psql -U postgres -d els_db < backend/src/docs/seed_permissions.sql
+```
+
+#### Cách 2: Chạy qua công cụ quản trị CSDL trực quan (DBeaver, DataGrip, pgAdmin)
+- Kết nối tới PostgreSQL:
+  - **Host:** `localhost`
+  - **Port:** `5432`
+  - **Database:** `els_db`
+  - **Username:** `postgres`
+  - **Password:** `3821`
+- Mở và thực thi lần lượt file [`backend/src/docs/schema.sql`](file:///home/vylote/Projects/Multi-platform-English-learning-system/backend/src/docs/schema.sql) rồi đến [`backend/src/docs/seed_permissions.sql`](file:///home/vylote/Projects/Multi-platform-English-learning-system/backend/src/docs/seed_permissions.sql).
+
+---
+
+### 5.4. Thiết lập Biến Môi Trường (Environment Variables)
+
+#### 1. Cấu hình Backend:
 ```bash
 cd backend
-
-# 1. Cài đặt dependencies
-npm install
-
-# 2. Thiết lập biến môi trường
 cp .env.example .env
-# (Chỉnh sửa thông tin kết nối DB_HOST, DB_USER, DB_PASS, REDIS_URL, JWT_SECRET trong .env)
+```
+Nội dung file `backend/.env` mặc định tương thích hoàn toàn với cấu hình Docker:
+```env
+PORT=5000
+FRONTEND_URL=http://localhost:5173
 
-# 3. Chạy migration / seed dữ liệu (nếu cần)
-npm run migrate
+# Kết nối CSDL & Redis (Docker local)
+DATABASE_URL=postgresql://postgres:3821@localhost:5432/els_db
+REDIS_URL=redis://localhost:6379
 
-# 4. Chạy server ở chế độ dev
-npm run dev
-# Server sẽ lắng nghe tại: http://localhost:5000
+# Xác thực người dùng
+JWT_SECRET=super_secret_jwt_key_els_2026
+JWT_ACCESS_EXPIRES_IN=1d
+COOKIE_NAME=access_token
+SESSION_KEY_PREFIX=session:
+
+# Tùy chọn: API Key sinh câu hỏi thông minh bằng AI (Groq / xAI)
+# Nếu để trống, script sinh đề thi sẽ tự động dùng chế độ Offline Fallback từ CSDL
+GROQ_API_KEY=
+GROQ_MODEL=openai/gpt-oss-120b
 ```
 
-### 5.4. Khởi chạy Frontend Web
+#### 2. Cấu hình Frontend Web:
 ```bash
 cd ../frontend-web
-
-# 1. Cài đặt dependencies
-npm install
-
-# 2. Khởi chạy Vite dev server
-npm run dev
-# Ứng dụng mở tại: http://localhost:5173
+cp .env.example .env
+```
+Nội dung file `frontend-web/.env`:
+```env
+VITE_API_URL=http://localhost:5000/api/v1
 ```
 
 ---
+
+### 5.5. Cài đặt Dependencies & Kiểm tra Kết nối
+
+1. **Cài đặt thư viện Backend:**
+   ```bash
+   cd backend
+   npm install
+   ```
+
+2. **Kiểm tra kết nối tới PostgreSQL & Redis:**
+   ```bash
+   npm run test:conn
+   ```
+   *Khi thành công, màn hình sẽ thông báo xác nhận kết nối tới cả PostgreSQL và Redis đều OK.*
+
+3. **Cài đặt thư viện Frontend:**
+   ```bash
+   cd ../frontend-web
+   npm install
+   ```
+
+---
+
+### 5.6. Chạy các Script Nạp Dữ Liệu (Data Seeding)
+
+> [!IMPORTANT]
+> **Thứ tự thực thi cực kỳ quan trọng!** Các script cần chạy tuần tự từ thư mục `backend/` theo đúng các bước sau để đảm bảo tính toàn vẹn quan hệ dữ liệu:
+
+```bash
+cd backend
+```
+
+#### 🔹 Bước 1: Khởi tạo thông số cấu hình hệ thống
+```bash
+npm run init:settings
+```
+- **Tệp thực thi:** [`src/scripts/init-settings.js`](file:///home/vylote/Projects/Multi-platform-English-learning-system/backend/src/scripts/init-settings.js)
+- **Mục đích:** Nạp hơn 14 tham số nghiệp vụ vào bảng `system_settings` (ngưỡng phân loại Tier `BEGINNER`/`INTERMEDIATE`/`ADVANCED`, trọng số tính Mastery, ngưỡng mở khóa bài học `60%`, thời gian gia hạn submit thi...). **Đây là bước bắt buộc vì Backend sẽ đọc các tham số này lúc khởi động.**
+
+#### 🔹 Bước 2: Nạp danh mục 36 Chủ đề & Lộ trình học tập
+```bash
+npm run seed:topics
+```
+- **Tệp thực thi:** [`src/scripts/seed-topics.js`](file:///home/vylote/Projects/Multi-platform-English-learning-system/backend/src/scripts/seed-topics.js)
+- **Mục đích:** Đọc cấu hình chuẩn từ `topic_config.json`, tự động nạp 36 Topics vào bảng `topics`, phân bổ độ khó theo cấp độ (12 chủ đề Beginner, 12 chủ đề Intermediate, 12 chủ đề Advanced), gán thứ tự lộ trình `order_index` và lập bảng ánh xạ ưu tiên theo mục tiêu học viên (`topic_goal_priority`).
+
+#### 🔹 Bước 3: Nạp kho Từ điển Anh - Việt (8,400+ từ)
+```bash
+npm run import:dict
+```
+- **Tệp thực thi:** [`src/scripts/import-dictionary.js`](file:///home/vylote/Projects/Multi-platform-English-learning-system/backend/src/scripts/import-dictionary.js)
+- **Mục đích:** Đọc kho từ điển StarDict chuẩn từ `src/data/stardict_en_vi.txt` và nạp hơn 8,400 từ vựng đầy đủ phiên âm, từ loại và ngữ nghĩa vào bảng `words`. Đây là nguồn dữ liệu nền cho tính năng tra từ điển, học từ vựng và sinh câu hỏi thi.
+
+#### 🔹 Bước 4: Tạo đề thi đánh giá năng lực đầu vào (Placement Test)
+```bash
+npm run seed:placement
+```
+- **Tệp thực thi:** [`src/scripts/seed-placement-exam.js`](file:///home/vylote/Projects/Multi-platform-English-learning-system/backend/src/scripts/seed-placement-exam.js)
+- **Mục đích:** Nạp bộ đề thi phân loại chuẩn quốc tế gồm 30 câu hỏi trắc nghiệm chia đều theo 3 cấp độ (A1-A2, B1-B2, C1-C2) có sẵn đáp án chi tiết và giải thích ngữ pháp.
+
+#### 🔹 Bước 5: Sinh ngân hàng đề thi theo từng chủ đề
+```bash
+npm run gen:exams
+```
+- **Tệp thực thi:** [`src/scripts/gen_exam.js`](file:///home/vylote/Projects/Multi-platform-English-learning-system/backend/src/scripts/gen_exam.js) với tham số `--topics=1-36 --count=10 --duration=15`
+- **Mục đích:** Tự động tạo mỗi chủ đề 1 bộ đề thi trắc nghiệm (10 câu hỏi, thời gian 15 phút).
+- **Cơ chế linh hoạt:**
+  - Nếu có cấu hình `GROQ_API_KEY`: Tự động gọi LLM AI để tạo câu hỏi bám sát ngữ cảnh giao tiếp thực tế.
+  - Nếu không có API Key: Tự động chuyển sang chế độ **Offline Database Fallback**, lấy ngẫu nhiên từ vựng trong CSDL để tạo câu hỏi trắc nghiệm hợp lệ 100%, không bị phụ thuộc vào Internet hay quota AI.
+
+---
+
+### 5.7. Khởi Chạy Ứng Dụng (Run Dev Server)
+
+Mở 2 cửa sổ terminal riêng biệt:
+
+#### Terminal 1: Chạy Backend Server
+```bash
+cd backend
+npm run dev
+```
+👉 Server Backend sẽ khởi động tại: **`http://localhost:5000`**
+
+#### Terminal 2: Chạy Frontend Web
+```bash
+cd frontend-web
+npm run dev
+```
+👉 Mở trình duyệt truy cập: **`http://localhost:5173`**
+
+---
+
+### 5.8. Trải Nghiệm & Kiểm Thử Tính Năng
+1. Truy cập `http://localhost:5173/register` để đăng ký tài khoản học viên mới.
+2. Hoàn thành quy trình 2 bước:
+   - **Khảo sát mục tiêu:** Chọn mục tiêu học (Giao tiếp / Du lịch / Công việc / Thi cử) và thời lượng cam kết hàng ngày.
+   - **Làm bài Placement Test:** Trả lời 30 câu hỏi để hệ thống phân loại vào Tier tương ứng (`BEGINNER`, `INTERMEDIATE`, `ADVANCED`).
+3. Khám phá bản đồ học tập uốn lượn **Snake Zigzag 3 node/tầng**, học từ vựng qua Flashcard 3D, làm bài luyện tập âm vị và thi trắc nghiệm chủ đề!
+
+---
+
+### 5.9. Xử Lý Sự Cố Thường Gặp (Troubleshooting)
+
+| Hiện tượng | Nguyên nhân | Cách khắc phục |
+|---|---|---|
+| `ECONNREFUSED 127.0.0.1:5432` | Container PostgreSQL chưa chạy | Chạy `docker ps` kiểm tra. Nếu chưa có, chạy `docker compose up -d`. |
+| `password authentication failed for user "postgres"` | Sai thông tin mật khẩu kết nối CSDL | Kiểm tra biến `DATABASE_URL` trong file `.env` phải khớp với password trong `docker-compose.yml` (`3821`). |
+| `ECONNREFUSED 127.0.0.1:6379` | Container Redis chưa chạy | Chạy `docker compose restart my_redis` và thử lại với `npm run test:conn`. |
+| `relation "system_settings" does not exist` | Chưa nạp file cấu trúc SQL | Chạy lệnh `docker exec -i my_postgres psql -U postgres -d els_db < backend/src/docs/schema.sql`. |
+| Server crash khi khởi động báo thiếu setting | Chưa chạy script nạp cài đặt hệ thống | Đứng tại thư mục `backend/` và chạy `npm run init:settings`. |
+| Lỗi import từ điển bị gián đoạn | File dữ liệu từ điển chưa đúng đường dẫn | Kiểm tra tệp `backend/src/data/stardict_en_vi.txt` tồn tại và chạy lại `npm run import:dict`. |
+
+---
+
 
 ## 6. Danh Mục API Endpoints Chính
 

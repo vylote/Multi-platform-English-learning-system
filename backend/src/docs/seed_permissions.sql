@@ -28,3 +28,28 @@ INSERT INTO permissions (code, name, description) VALUES
 -- Nhóm phân quyền Hệ thống
 ('MANAGE_USERS', 'Quản trị người dùng', 'Cho phép xem thông tin tài khoản, thay đổi trạng thái hoặc phân bổ lại vai trò hệ thống')
 ON CONFLICT (code) DO NOTHING;
+
+
+-- =======================================================
+-- 3. GÁN QUYỀN CHO TỪNG ROLE (BẢNG ROLE_PERMISSIONS)
+-- =======================================================
+-- Gán toàn bộ quyền hạn cho vai trò ADMIN
+INSERT INTO role_permissions (role_id, permission_id)
+SELECT r.id, p.id
+FROM roles r
+CROSS JOIN permissions p
+WHERE r.code = 'ADMIN'
+ON CONFLICT DO NOTHING;
+
+-- Gán các quyền tương tác học tập và tra cứu cho STUDENT
+INSERT INTO role_permissions (role_id, permission_id)
+SELECT r.id, p.id
+FROM roles r
+JOIN permissions p ON p.code IN (
+    'VIEW_DICTIONARY',
+    'VIEW_IDIOMS',
+    'MANAGE_FLASHCARDS',
+    'TAKE_EXAMS'
+)
+WHERE r.code = 'STUDENT'
+ON CONFLICT DO NOTHING;
