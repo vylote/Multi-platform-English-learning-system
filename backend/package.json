@@ -6,6 +6,8 @@
   "scripts": {
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
+    "test:conn": "node test-db.js",
+    "init:settings": "node src/scripts/init-settings.js",
     "seed:topics": "node src/scripts/seed-topics.js",
     "import:dict": "node src/scripts/import-dictionary.js",
     "seed:placement": "node src/scripts/seed-placement-exam.js",
