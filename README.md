@@ -153,9 +153,15 @@ Dự án đã định cấu hình sẵn file [`docker-compose.yml`](file:///home
 - **`my_postgres`**: PostgreSQL 15 (Port `5432`, User `postgres`, Password `3821`, Database `els_db`).
 - **`my_redis`**: Redis Alpine (Port `6379`, quản lý phiên đăng nhập và cache).
 
-Chạy lệnh sau tại **thư mục gốc dự án**:
+Tại **thư mục gốc dự án**, chạy lệnh:
+
+#### 🐧 Trên Linux / macOS:
 ```bash
-# Khởi chạy ngầm PostgreSQL và Redis
+docker compose up -d
+```
+
+#### 🪟 Trên Windows (PowerShell hoặc CMD):
+```powershell
 docker compose up -d
 ```
 
@@ -163,67 +169,104 @@ docker compose up -d
 
 ---
 
-### 5.3. Khởi tạo Cơ sở dữ liệu qua các File SQL (Schema & RBAC)
+### 5.3. Khởi tạo CSDL qua các File SQL (Schema & Roles)
 
-Hệ thống cung cấp sẵn các tệp SQL cốt lõi nằm trong thư mục [`backend/src/docs/`](file:///home/vylote/Projects/Multi-platform-English-learning-system/backend/src/docs/):
-1. [`schema.sql`](file:///home/vylote/Projects/Multi-platform-English-learning-system/backend/src/docs/schema.sql): Khởi tạo toàn bộ cấu trúc bảng (15 bảng: `roles`, `permissions`, `role_permissions`, `users`, `words`, `idioms`, `topics`, `flashcards`, `streak_logs`, `exams`, `questions`, `exam_results`, `exam_sessions`, `exam_answers`, `lesson_attempts`, `topic_goal_priority`, `system_settings`), ràng buộc khóa ngoại, triggers và các composite indexes tối ưu truy vấn.
-2. [`seed_permissions.sql`](file:///home/vylote/Projects/Multi-platform-English-learning-system/backend/src/docs/seed_permissions.sql): Khởi tạo 2 vai trò mặc định (`ADMIN`, `STUDENT`), danh mục quyền hạn chi tiết và tự động gán quyền truy cập cho từng vai trò trong bảng `role_permissions`.
+Thư mục [`backend/src/docs/`](file:///home/vylote/Projects/Multi-platform-English-learning-system/backend/src/docs/) cung cấp các tệp SQL cốt lõi:
+1. [`schema.sql`](file:///home/vylote/Projects/Multi-platform-English-learning-system/backend/src/docs/schema.sql): Khởi tạo toàn bộ cấu trúc 15 bảng (`roles`, `permissions`, `role_permissions`, `users`, `words`, `idioms`, `topics`, `flashcards`, `streak_logs`, `exams`, `questions`, `exam_results`, `exam_sessions`, `exam_answers`, `lesson_attempts`, `topic_goal_priority`, `system_settings`), khóa ngoại, triggers và index tối ưu truy vấn.
+2. [`seed_permissions.sql`](file:///home/vylote/Projects/Multi-platform-English-learning-system/backend/src/docs/seed_permissions.sql): Khởi tạo 2 vai trò (`ADMIN`, `STUDENT`), danh mục quyền chi tiết và tự động map quyền vào `role_permissions`.
+3. [`seed_topics.sql`](file:///home/vylote/Projects/Multi-platform-English-learning-system/backend/src/docs/seed_topics.sql): Khởi tạo 36 chủ đề học tập chuẩn, gán độ khó (Beginner, Intermediate, Advanced), thứ tự uốn lượn và liên kết mục tiêu học tập.
+4. [`seed_admin.sql`](file:///home/vylote/Projects/Multi-platform-English-learning-system/backend/src/docs/seed_admin.sql): Khởi tạo tài khoản Quản trị viên mặc định (`admin` / `admin123`).
 
-#### Cách 1: Chạy trực tiếp qua Docker CLI (Khuyên Dùng — Không Cần Cài psql)
-Từ **thư mục gốc của dự án**, chạy 2 lệnh sau:
+Từ **thư mục gốc dự án**, thực thi các file SQL vào Docker container `my_postgres`:
 
+#### 🐧 Lệnh cho Linux / macOS (Bash):
 ```bash
-# 1. Khởi tạo cấu trúc các bảng CSDL
+# 1. Tạo bảng cơ sở dữ liệu
 docker exec -i my_postgres psql -U postgres -d els_db < backend/src/docs/schema.sql
 
-# 2. Nạp danh mục vai trò và phân quyền (RBAC)
+# 2. Nạp vai trò & phân quyền
 docker exec -i my_postgres psql -U postgres -d els_db < backend/src/docs/seed_permissions.sql
+
+# 3. Nạp 36 chủ đề học tập
+docker exec -i my_postgres psql -U postgres -d els_db < backend/src/docs/seed_topics.sql
+
+# 4. Nạp tài khoản Admin mặc định
+docker exec -i my_postgres psql -U postgres -d els_db < backend/src/docs/seed_admin.sql
 ```
 
-#### Cách 2: Chạy qua công cụ quản trị CSDL trực quan (DBeaver, DataGrip, pgAdmin)
-- Kết nối tới PostgreSQL:
-  - **Host:** `localhost`
-  - **Port:** `5432`
-  - **Database:** `els_db`
-  - **Username:** `postgres`
-  - **Password:** `3821`
-- Mở và thực thi lần lượt file [`backend/src/docs/schema.sql`](file:///home/vylote/Projects/Multi-platform-English-learning-system/backend/src/docs/schema.sql) rồi đến [`backend/src/docs/seed_permissions.sql`](file:///home/vylote/Projects/Multi-platform-English-learning-system/backend/src/docs/seed_permissions.sql).
+#### 🪟 Lệnh cho Windows PowerShell:
+```powershell
+# 1. Tạo bảng cơ sở dữ liệu
+Get-Content backend\src\docs\schema.sql | docker exec -i my_postgres psql -U postgres -d els_db
+
+# 2. Nạp vai trò & phân quyền
+Get-Content backend\src\docs\seed_permissions.sql | docker exec -i my_postgres psql -U postgres -d els_db
+
+# 3. Nạp 36 chủ đề học tập
+Get-Content backend\src\docs\seed_topics.sql | docker exec -i my_postgres psql -U postgres -d els_db
+
+# 4. Nạp tài khoản Admin mặc định
+Get-Content backend\src\docs\seed_admin.sql | docker exec -i my_postgres psql -U postgres -d els_db
+```
+
+#### 🪟 Lệnh cho Windows CMD (Command Prompt):
+```cmd
+docker exec -i my_postgres psql -U postgres -d els_db < backend\src\docs\schema.sql
+docker exec -i my_postgres psql -U postgres -d els_db < backend\src\docs\seed_permissions.sql
+docker exec -i my_postgres psql -U postgres -d els_db < backend\src\docs\seed_topics.sql
+docker exec -i my_postgres psql -U postgres -d els_db < backend\src\docs\seed_admin.sql
+```
+
+*(Hoặc dùng công cụ trực quan **DBeaver / DataGrip / pgAdmin**: Kết nối tới `localhost:5432`, user: `postgres`, password: `3821`, database: `els_db` rồi mở và execute 4 file SQL trên theo thứ tự).*
 
 ---
 
-### 5.4. Thiết lập Biến Môi Trường (Environment Variables)
+### 5.4. Thiết lập Biến Môi Trường (`.env`)
 
-#### 1. Cấu hình Backend:
-```bash
-cd backend
-cp .env.example .env
-```
-Nội dung file `backend/.env` mặc định tương thích hoàn toàn với cấu hình Docker:
-```env
-PORT=5000
-FRONTEND_URL=http://localhost:5173
+#### 1. Tạo file `.env` cho Backend:
 
-# Kết nối CSDL & Redis (Docker local)
-DATABASE_URL=postgresql://postgres:3821@localhost:5432/els_db
-REDIS_URL=redis://localhost:6379
+* **Trên Linux / macOS:**
+  ```bash
+  cd backend && cp .env.example .env
+  ```
+* **Trên Windows PowerShell:**
+  ```powershell
+  cd backend; Copy-Item .env.example .env
+  ```
+* **Trên Windows CMD:**
+  ```cmd
+  cd backend && copy .env.example .env
+  ```
 
-# Xác thực người dùng
-JWT_SECRET=super_secret_jwt_key_els_2026
-JWT_ACCESS_EXPIRES_IN=1d
-COOKIE_NAME=access_token
-SESSION_KEY_PREFIX=session:
+Nội dung chi tiết trong `backend/.env`:
+| Biến môi trường | Giá trị mặc định | Giải thích ý nghĩa |
+|---|---|---|
+| `PORT` | `5000` | Cổng HTTP Server của Backend API. |
+| `FRONTEND_URL` | `http://localhost:5173` | URL Frontend để cấu hình CORS và cookie `httpOnly`. |
+| `DATABASE_URL` | `postgresql://postgres:3821@localhost:5432/els_db` | Chuỗi kết nối PostgreSQL (khớp thông số Docker). |
+| `REDIS_URL` | `redis://localhost:6379` | Chuỗi kết nối Redis cache & quản lý phiên đăng nhập. |
+| `JWT_SECRET` | `super_secret_jwt_key_els_2026` | Khóa bí mật ký JWT Token (**bắt buộc phải có**). |
+| `JWT_ACCESS_EXPIRES_IN` | `1d` | Thời hạn sống của Access Token (1 ngày). |
+| `COOKIE_NAME` | `access_token` | Tên cookie lưu JWT bảo mật. |
+| `SESSION_KEY_PREFIX` | `session:` | Tiền tố session key lưu trên Redis. |
+| `GROQ_API_KEY` | *(Để trống nếu chạy Offline)* | Khóa API Groq Cloud sinh đề thi thông minh bằng AI. Lấy key miễn phí tại: [console.groq.com/keys](https://console.groq.com/keys). **Nếu để trống, hệ thống tự động sinh đề thi Offline từ CSDL từ điển.** |
+| `GROQ_MODEL` | `openai/gpt-oss-120b` | Model LLM sử dụng (`openai/gpt-oss-120b`, `llama-3.3-70b-versatile`). |
 
-# Tùy chọn: API Key sinh câu hỏi thông minh bằng AI (Groq / xAI)
-# Nếu để trống, script sinh đề thi sẽ tự động dùng chế độ Offline Fallback từ CSDL
-GROQ_API_KEY=
-GROQ_MODEL=openai/gpt-oss-120b
-```
+#### 2. Tạo file `.env` cho Frontend Web:
 
-#### 2. Cấu hình Frontend Web:
-```bash
-cd ../frontend-web
-cp .env.example .env
-```
+* **Trên Linux / macOS:**
+  ```bash
+  cd ../frontend-web && cp .env.example .env
+  ```
+* **Trên Windows PowerShell:**
+  ```powershell
+  cd ..\frontend-web; Copy-Item .env.example .env
+  ```
+* **Trên Windows CMD:**
+  ```cmd
+  cd ..\frontend-web && copy .env.example .env
+  ```
+
 Nội dung file `frontend-web/.env`:
 ```env
 VITE_API_URL=http://localhost:5000/api/v1
@@ -231,21 +274,17 @@ VITE_API_URL=http://localhost:5000/api/v1
 
 ---
 
-### 5.5. Cài đặt Dependencies & Kiểm tra Kết nối
+### 5.5. Cài đặt Thư viện & Kiểm tra Kết nối
 
-1. **Cài đặt thư viện Backend:**
+1. **Cài đặt thư viện Backend & Kiểm tra kết nối:**
    ```bash
    cd backend
    npm install
-   ```
-
-2. **Kiểm tra kết nối tới PostgreSQL & Redis:**
-   ```bash
    npm run test:conn
    ```
-   *Khi thành công, màn hình sẽ thông báo xác nhận kết nối tới cả PostgreSQL và Redis đều OK.*
+   *Màn hình hiển thị `[PostgreSQL] Kết nối THÀNH CÔNG!` và `[Redis] Kết nối THÀNH CÔNG!` nghĩa là hệ sinh thái Docker đã sẵn sàng.*
 
-3. **Cài đặt thư viện Frontend:**
+2. **Cài đặt thư viện Frontend:**
    ```bash
    cd ../frontend-web
    npm install
@@ -253,10 +292,21 @@ VITE_API_URL=http://localhost:5000/api/v1
 
 ---
 
-### 5.6. Chạy các Script Nạp Dữ Liệu (Data Seeding)
+### 5.6. Quy trình Nạp Dữ Liệu (Data Seeding)
 
-> [!IMPORTANT]
-> **Thứ tự thực thi cực kỳ quan trọng!** Các script cần chạy tuần tự từ thư mục `backend/` theo đúng các bước sau để đảm bảo tính toàn vẹn quan hệ dữ liệu:
+> [!TIP]
+> **Cách 1: Nạp Nhanh Toàn Bộ (Khuyên dùng)**  
+> Đứng tại thư mục `backend/` và chạy đúng 1 lệnh duy nhất:
+> ```bash
+> npm run seed:all
+> ```
+> Lệnh này sẽ tự động chạy tuần tự: Cấu hình hệ thống ➔ 36 Chủ đề ➔ Đề thi Placement Test ➔ Tài khoản Admin ➔ Ngân hàng đề thi 36 chủ đề!
+
+---
+
+#### Cách 2: Chạy Từng Script Độc Lập Theo Thứ Tự
+
+Nếu muốn chủ động kiểm soát từng bước, hãy chạy lần lượt các script sau tại thư mục `backend/`:
 
 ```bash
 cd backend
@@ -266,39 +316,51 @@ cd backend
 ```bash
 npm run init:settings
 ```
-- **Tệp thực thi:** [`src/scripts/init-settings.js`](file:///home/vylote/Projects/Multi-platform-English-learning-system/backend/src/scripts/init-settings.js)
-- **Mục đích:** Nạp hơn 14 tham số nghiệp vụ vào bảng `system_settings` (ngưỡng phân loại Tier `BEGINNER`/`INTERMEDIATE`/`ADVANCED`, trọng số tính Mastery, ngưỡng mở khóa bài học `60%`, thời gian gia hạn submit thi...). **Đây là bước bắt buộc vì Backend sẽ đọc các tham số này lúc khởi động.**
+- **Tệp:** [`src/scripts/init-settings.js`](file:///home/vylote/Projects/Multi-platform-English-learning-system/backend/src/scripts/init-settings.js)
+- **Mục đích:** Nạp hơn 14 tham số nghiệp vụ vào bảng `system_settings` (ngưỡng phân loại Tier `BEGINNER`/`INTERMEDIATE`/`ADVANCED`, trọng số tính Mastery, ngưỡng mở khóa bài học `60%`, thời gian gia hạn thi...). **Bắt buộc chạy trước khi khởi động server vì server đọc bảng này lúc khởi chạy.**
 
-#### 🔹 Bước 2: Nạp danh mục 36 Chủ đề & Lộ trình học tập
+#### 🔹 Bước 2: Nạp 36 Chủ đề & Lộ trình học tập Snake Zigzag
 ```bash
 npm run seed:topics
 ```
-- **Tệp thực thi:** [`src/scripts/seed-topics.js`](file:///home/vylote/Projects/Multi-platform-English-learning-system/backend/src/scripts/seed-topics.js)
-- **Mục đích:** Đọc cấu hình chuẩn từ `topic_config.json`, tự động nạp 36 Topics vào bảng `topics`, phân bổ độ khó theo cấp độ (12 chủ đề Beginner, 12 chủ đề Intermediate, 12 chủ đề Advanced), gán thứ tự lộ trình `order_index` và lập bảng ánh xạ ưu tiên theo mục tiêu học viên (`topic_goal_priority`).
+- **Tệp:** [`src/scripts/seed-topics.js`](file:///home/vylote/Projects/Multi-platform-English-learning-system/backend/src/scripts/seed-topics.js)
+- **Mục đích:** Đọc `topic_config.json`, tự động nạp 36 Topics vào bảng `topics`, phân bổ độ khó (12 Beginner, 12 Intermediate, 12 Advanced), gán thứ tự lộ trình `order_index` 1..36 và lập bảng ánh xạ ưu tiên theo mục tiêu học viên (`topic_goal_priority`).
 
-#### 🔹 Bước 3: Nạp kho Từ điển Anh - Việt (8,400+ từ)
-```bash
-npm run import:dict
-```
-- **Tệp thực thi:** [`src/scripts/import-dictionary.js`](file:///home/vylote/Projects/Multi-platform-English-learning-system/backend/src/scripts/import-dictionary.js)
-- **Mục đích:** Đọc kho từ điển StarDict chuẩn từ `src/data/stardict_en_vi.txt` và nạp hơn 8,400 từ vựng đầy đủ phiên âm, từ loại và ngữ nghĩa vào bảng `words`. Đây là nguồn dữ liệu nền cho tính năng tra từ điển, học từ vựng và sinh câu hỏi thi.
-
-#### 🔹 Bước 4: Tạo đề thi đánh giá năng lực đầu vào (Placement Test)
+#### 🔹 Bước 3: Tạo đề thi đánh giá năng lực đầu vào (Placement Test)
 ```bash
 npm run seed:placement
 ```
-- **Tệp thực thi:** [`src/scripts/seed-placement-exam.js`](file:///home/vylote/Projects/Multi-platform-English-learning-system/backend/src/scripts/seed-placement-exam.js)
-- **Mục đích:** Nạp bộ đề thi phân loại chuẩn quốc tế gồm 30 câu hỏi trắc nghiệm chia đều theo 3 cấp độ (A1-A2, B1-B2, C1-C2) có sẵn đáp án chi tiết và giải thích ngữ pháp.
+- **Tệp:** [`src/scripts/seed-placement-exam.js`](file:///home/vylote/Projects/Multi-platform-English-learning-system/backend/src/scripts/seed-placement-exam.js)
+- **Mục đích:** Nạp bộ đề thi phân loại chuẩn gồm 30 câu hỏi trắc nghiệm chia đều theo 3 cấp độ (A1-A2, B1-B2, C1-C2) có sẵn đáp án chi tiết và giải thích ngữ pháp.
 
-#### 🔹 Bước 5: Sinh ngân hàng đề thi theo từng chủ đề
+#### 🔹 Bước 4: Tạo tài khoản Quản trị viên (ADMIN) mặc định
+```bash
+npm run seed:admin
+```
+- **Tệp:** [`src/scripts/seed-admin.js`](file:///home/vylote/Projects/Multi-platform-English-learning-system/backend/src/scripts/seed-admin.js)
+- **Mục đích:** Tạo sẵn tài khoản Quản trị viên để đăng nhập vào Admin Portal:
+  - **Tên đăng nhập:** `admin`
+  - **Mật khẩu:** `admin123`
+  - **Email:** `admin@anhlingo.com`
+
+#### 🔹 Bước 5: Sinh ngân hàng đề thi cho toàn bộ 36 chủ đề
 ```bash
 npm run gen:exams
 ```
-- **Tệp thực thi:** [`src/scripts/gen_exam.js`](file:///home/vylote/Projects/Multi-platform-English-learning-system/backend/src/scripts/gen_exam.js) với tham số `--topics=1-36 --count=10 --duration=15`
-- **Mục đích:** Tự động tạo mỗi chủ đề 1 bộ đề thi trắc nghiệm (10 câu hỏi, thời gian 15 phút).
+- **Tệp:** [`src/scripts/gen_exam.js`](file:///home/vylote/Projects/Multi-platform-English-learning-system/backend/src/scripts/gen_exam.js)
+- **Mục đích:** Tự động tạo cho mỗi chủ đề 1 bộ đề thi trắc nghiệm (10 câu hỏi, thời lượng 15 phút).
 - **Cơ chế linh hoạt:**
   - Nếu có cấu hình `GROQ_API_KEY`: Tự động gọi LLM AI để tạo câu hỏi bám sát ngữ cảnh giao tiếp thực tế.
   - Nếu không có API Key: Tự động chuyển sang chế độ **Offline Database Fallback**, lấy ngẫu nhiên từ vựng trong CSDL để tạo câu hỏi trắc nghiệm hợp lệ 100%, không bị phụ thuộc vào Internet hay quota AI.
+
+#### 🔹 Bước 6: Nạp kho Từ điển Anh - Việt (StarDict 53 MB)
+```bash
+npm run import:dict
+```
+- **Tệp:** [`src/scripts/import-dictionary.js`](file:///home/vylote/Projects/Multi-platform-English-learning-system/backend/src/scripts/import-dictionary.js)
+- **Nguồn dữ liệu:** [`src/data/stardict_en_vi.txt`](file:///home/vylote/Projects/Multi-platform-English-learning-system/backend/src/data/stardict_en_vi.txt) (53 MB)
+- **Mục đích:** Đọc tệp từ điển StarDict và nạp từ vựng đầy đủ phiên âm, từ loại và ngữ nghĩa vào bảng `words`. Đây là nguồn dữ liệu nền cho tính năng tra từ điển, học từ vựng và sinh câu hỏi thi.
+- **Tiến trình:** Script nạp theo từng batch 500 từ và hiển thị log real-time trên màn hình (`Đã import: 500 từ...`, `Đã import: 1000 từ...`).
 
 ---
 
@@ -322,9 +384,23 @@ npm run dev
 
 ---
 
-### 5.8. Trải Nghiệm & Kiểm Thử Tính Năng
-1. Truy cập `http://localhost:5173/register` để đăng ký tài khoản học viên mới.
-2. Hoàn thành quy trình 2 bước:
+### 5.8. Kiểm Thử Hệ Thống (Admin & Học Viên)
+
+#### 🛡️ Dành cho Quản trị viên (Admin Portal):
+1. Truy cập: [`http://localhost:5173/admin/login`](http://localhost:5173/admin/login)
+2. Đăng nhập bằng tài khoản mặc định:
+   - **Tài khoản:** `admin`
+   - **Mật khẩu:** `admin123`
+3. Trải nghiệm các phân hệ quản trị:
+   - **Quản lý người dùng:** [`http://localhost:5173/admin/users`](http://localhost:5173/admin/users)
+   - **Phân quyền RBAC:** [`http://localhost:5173/admin/permissions`](http://localhost:5173/admin/permissions)
+   - **Ngân hàng đề thi:** [`http://localhost:5173/admin/exams`](http://localhost:5173/admin/exams)
+   - **Sinh đề thi AI:** [`http://localhost:5173/admin/exams/generate`](http://localhost:5173/admin/exams/generate)
+   - **Cấu hình hệ thống:** [`http://localhost:5173/admin/settings`](http://localhost:5173/admin/settings)
+
+#### 🎓 Dành cho Học viên (Student Experience):
+1. Truy cập: [`http://localhost:5173/register`](http://localhost:5173/register) để tạo tài khoản mới.
+2. Hoàn thành quy trình 2 bước Onboarding:
    - **Khảo sát mục tiêu:** Chọn mục tiêu học (Giao tiếp / Du lịch / Công việc / Thi cử) và thời lượng cam kết hàng ngày.
    - **Làm bài Placement Test:** Trả lời 30 câu hỏi để hệ thống phân loại vào Tier tương ứng (`BEGINNER`, `INTERMEDIATE`, `ADVANCED`).
 3. Khám phá bản đồ học tập uốn lượn **Snake Zigzag 3 node/tầng**, học từ vựng qua Flashcard 3D, làm bài luyện tập âm vị và thi trắc nghiệm chủ đề!
@@ -338,9 +414,10 @@ npm run dev
 | `ECONNREFUSED 127.0.0.1:5432` | Container PostgreSQL chưa chạy | Chạy `docker ps` kiểm tra. Nếu chưa có, chạy `docker compose up -d`. |
 | `password authentication failed for user "postgres"` | Sai thông tin mật khẩu kết nối CSDL | Kiểm tra biến `DATABASE_URL` trong file `.env` phải khớp với password trong `docker-compose.yml` (`3821`). |
 | `ECONNREFUSED 127.0.0.1:6379` | Container Redis chưa chạy | Chạy `docker compose restart my_redis` và thử lại với `npm run test:conn`. |
-| `relation "system_settings" does not exist` | Chưa nạp file cấu trúc SQL | Chạy lệnh `docker exec -i my_postgres psql -U postgres -d els_db < backend/src/docs/schema.sql`. |
+| `relation "words" does not exist` | Chưa nạp file cấu trúc SQL trước khi import | Chạy file `backend/src/docs/schema.sql` vào database trước. |
+| `relation "system_settings" does not exist` | Chưa nạp file cấu trúc SQL | Chạy file `backend/src/docs/schema.sql` vào database trước. |
 | Server crash khi khởi động báo thiếu setting | Chưa chạy script nạp cài đặt hệ thống | Đứng tại thư mục `backend/` và chạy `npm run init:settings`. |
-| Lỗi import từ điển bị gián đoạn | File dữ liệu từ điển chưa đúng đường dẫn | Kiểm tra tệp `backend/src/data/stardict_en_vi.txt` tồn tại và chạy lại `npm run import:dict`. |
+| Không đăng nhập được vào Admin | Chưa tạo tài khoản admin | Đứng tại thư mục `backend/` và chạy `npm run seed:admin`. |
 
 ---
 
