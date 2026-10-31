@@ -1,10 +1,15 @@
+
+
 # ==========================================
-# 1. BIẾN MÔI TRƯỜNG & BẢO MẬT (TUYỆT ĐỐI KHÔNG PUSH)
+# 1. BIẾN MÔI TRƯỜNG & BẢO MẬT (NEVER COMMIT)
 # ==========================================
 .env
-.env.local
-.env.*.local
+.env.*
 *.env
+**/.env
+**/.env.*
+!**/.env.example
+!.env.example
 
 # ==========================================
 # 2. NODE.JS & NPM (Backend Express + Frontend Web)
@@ -125,9 +130,5 @@ Thumbs.db
 pgdata/
 pgdata_new/
 *.log
-
-backend/src/data/stardict_en_vi.txt
-.venv/
-venv/
 
 backend/borderline_review.csv
