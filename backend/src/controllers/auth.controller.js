@@ -103,8 +103,24 @@ class AuthController {
 
   async logout(req, res, next) {
     try {
-      await authService.logoutUser(req.user.id, req.user.sid);
-      res.clearCookie(COOKIE_NAME);
+      const token = req.cookies?.[COOKIE_NAME] || req.cookies?.access_token;
+      if (token) {
+        try {
+          const jwt = require("jsonwebtoken");
+          const decoded = jwt.decode(token);
+          if (decoded?.id && decoded?.sid) {
+            await authService.logoutUser(decoded.id, decoded.sid);
+          }
+        } catch (e) {
+          console.warn("Lỗi thu hồi session redis khi logout:", e.message);
+        }
+      }
+
+      res.clearCookie(COOKIE_NAME || "access_token", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+      });
 
       return res
         .status(ErrorCode.SUCCESS.statusCode)
