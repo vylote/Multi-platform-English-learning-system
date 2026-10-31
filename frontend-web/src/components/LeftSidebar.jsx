@@ -18,6 +18,8 @@ import {
 } from "lucide-react";
 import { logout } from "../store/slice/authSlice";
 import { useTheme } from "../context/ThemeContext";
+import toast from "react-hot-toast";
+import api from "../api/api";
 
 export default function LeftSidebar() {
   const location = useLocation();
@@ -40,9 +42,17 @@ export default function LeftSidebar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleLogout = () => {
-    dispatch(logout());
-    navigate("/auth");
+  const handleLogout = async () => {
+    setShowMoreMenu(false);
+    try {
+      await api.post("/auth/logout");
+    } catch (error) {
+      console.log("Lỗi đăng xuất: ", error);
+    } finally {
+      dispatch(logout());
+      toast.success("Đã đăng xuất thành công");
+      navigate("/login");
+    }
   };
 
   const navItems = [
