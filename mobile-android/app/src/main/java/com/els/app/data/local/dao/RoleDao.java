@@ -4,17 +4,21 @@ import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
+
 import com.els.app.data.local.entity.RoleEntity;
-import java.util.List;
 
 @Dao
 public interface RoleDao {
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    long insertRole(RoleEntity role);
+
     @Query("SELECT * FROM roles WHERE code = :code LIMIT 1")
     RoleEntity findByCode(String code);
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void insertAll(List<RoleEntity> roles);
+    @Query("SELECT * FROM roles WHERE id = :id LIMIT 1")
+    RoleEntity findById(long id);
 
-    @Query("SELECT COUNT(*) FROM roles")
-    int count();
+    @Query("DELETE FROM roles")
+    void deleteAll();
 }

@@ -3,83 +3,62 @@ package com.els.app.ui;
 import android.content.Intent;
 import android.os.Bundle;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import com.els.app.R;
-import com.els.app.data.local.database.AppDatabase;
-import com.els.app.data.local.entity.RoleEntity;
+
+import com.els.app.data.remote.api.AuthApiService;
+import com.els.app.data.remote.dto.response.UserResponse;
+import com.els.app.network.ApiCallback;
 import com.els.app.network.RetrofitClient;
-import com.els.app.data.remote.api.RoleApiService;
-import com.els.app.data.remote.dto.response.ApiResponse;
-import com.els.app.data.remote.dto.response.RoleResponse;
+import com.els.app.ui.NavHelper;
 import com.els.app.ui.auth.LoginActivity;
-import java.util.ArrayList;
-import java.util.List;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import com.els.app.util.SessionManager;
 
 public class SplashActivity extends AppCompatActivity {
-
-    private AppDatabase database;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_splash);
 
-        database = AppDatabase.getDatabase(this);
-        syncRolesThenProceed();
+        goToLogin();
     }
 
-    private void syncRolesThenProceed() {
-        // Nếu local đã có roles rồi thì không cần gọi lại API mỗi lần mở app
-        new Thread(() -> {
-            int localCount = database.roleDao().count();
-            if (localCount > 0) {
-                goToLogin();
+    // Giữ nguyên tên hàm goToLogin() để các chỗ gọi cũ không phải sửa.
+    // Có phiên hợp lệ thì vào app, không có phiên hoặc cookie hết hạn thì về Login.
+    private void goToLogin() {
+        runOnUiThread(() -> {
+            SessionManager session = new SessionManager(this);
+
+            if (!session.isLoggedIn()) {
+                openLogin();
                 return;
             }
 
-            RoleApiService roleApi = RetrofitClient.getClient(this).create(RoleApiService.class);
-            roleApi.getAllRoles().enqueue(new Callback<>() {
-                @Override
-                public void onResponse(@NonNull Call<ApiResponse<List<RoleResponse>>> call,
-                                       @NonNull Response<ApiResponse<List<RoleResponse>>> response) {
-                    if (response.isSuccessful() && response.body() != null
-                            && "1000".equals(response.body().getCode())) {
-                        List<RoleResponse> dtos = response.body().getResult();
+            // Kiểm tra cookie đăng nhập bằng GET /auth/me.
+            RetrofitClient.create(this, AuthApiService.class)
+                    .me()
+                    .enqueue(new ApiCallback<UserResponse>() {
 
-                        new Thread(() -> {
-                            List<RoleEntity> entities = new ArrayList<>();
-                            for (RoleResponse dto : dtos) {
-                                entities.add(RoleEntity.builder()
-                                        .id(dto.getId())
-                                        .code(dto.getCode())
-                                        .name(dto.getName())
-                                        .build());
-                            }
-                            database.roleDao().insertAll(entities);
-                            goToLogin();
-                        }).start();
-                    } else {
-                        // Sync thất bại - vẫn cho vào Login, mapper sẽ fallback roleId = 0
-                        goToLogin();
-                    }
-                }
+                        @Override
+                        public void onSuccess(UserResponse user) {
+                            session.saveUser(user);
+                            NavHelper.routeAfterAuth(SplashActivity.this);
+                        }
 
-                @Override
-                public void onFailure(@NonNull Call<ApiResponse<List<RoleResponse>>> call, @NonNull Throwable t) {
-                    goToLogin();
-                }
-            });
-        }).start();
+                        @Override
+                        public void onError(String message) {
+                            session.clear();
+                            RetrofitClient.clearSession();
+                            openLogin();
+                        }
+                    });
+        });
     }
 
-    private void goToLogin() {
-        runOnUiThread(() -> {
-            startActivity(new Intent(SplashActivity.this, LoginActivity.class));
-            finish();
-        });
+    private void openLogin() {
+        startActivity(new Intent(
+                SplashActivity.this,
+                LoginActivity.class
+        ));
+        finish();
     }
 }

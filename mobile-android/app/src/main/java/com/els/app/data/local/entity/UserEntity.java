@@ -4,7 +4,6 @@ import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
-import androidx.room.Ignore;
 import androidx.room.Index;
 import androidx.room.PrimaryKey;
 
@@ -20,19 +19,21 @@ import lombok.experimental.FieldDefaults;
         indices = {
                 @Index(value = "username", unique = true),
                 @Index(value = "email", unique = true),
-                @Index("roleId")
+                @Index(value = "roleId")
         },
-        foreignKeys = @ForeignKey(
-                entity = RoleEntity.class,
-                parentColumns = "id",
-                childColumns = "roleId",
-                onDelete = ForeignKey.CASCADE
-        )
+        foreignKeys = {
+                @ForeignKey(
+                        entity = RoleEntity.class,
+                        parentColumns = "id",
+                        childColumns = "roleId",
+                        onDelete = ForeignKey.CASCADE
+                )
+        }
 )
 @Data
 @Builder
 @AllArgsConstructor
-@NoArgsConstructor(onConstructor_ = @Ignore)
+@NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UserEntity {
 

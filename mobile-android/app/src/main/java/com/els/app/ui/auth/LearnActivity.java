@@ -2,50 +2,52 @@ package com.els.app.ui.auth;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.widget.EditText;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.cardview.widget.CardView;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.els.app.R;
+import com.els.app.data.remote.api.LearningApiService;
+import com.els.app.data.remote.dto.ApiModels;
+import com.els.app.network.ApiCallback;
+import com.els.app.network.RetrofitClient;
+import com.els.app.util.Labels;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.button.MaterialButton;
 
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Tương đương frontend-web/src/pages/LearningPathPage.jsx
+ * Dữ liệu: GET /learning-path (mở khóa theo Mastery >= 60%).
+ * File này THAY THẾ hoàn toàn LearnActivity cũ (dữ liệu giả 3 bài).
+ */
 public class LearnActivity extends AppCompatActivity {
 
-    private EditText etSearch;
+    private RecyclerView rvPath;
+    private ProgressBar progressLoading;
+    private TextView tvTier;
+    private TextView tvEmpty;
+    private MaterialButton btnPlacement;
     private BottomNavigationView bottomNav;
 
-    private TextView chipAll;
-    private TextView chipVocab;
-    private TextView chipGrammar;
-    private TextView chipQuiz;
-
-    private TextView tvContinueLabel;
-    private TextView tvContinueSub;
-    private ProgressBar progressContinue;
-    private MaterialButton btnContinue;
-
-    private CardView cardLesson1;
-    private TextView tvLesson1Title;
-    private TextView tvLesson1Sub;
-    private ProgressBar progressLesson1;
-
-    private CardView cardLesson2;
-    private TextView tvLesson2Title;
-    private TextView tvLesson2Sub;
-    private ProgressBar progressLesson2;
-
-    private CardView cardLesson3;
-    private TextView tvLesson3Title;
-    private TextView tvLesson3Sub;
-    private ProgressBar progressLesson3;
+    private final List<ApiModels.PathTopic> topics = new ArrayList<>();
+    private PathAdapter adapter;
+    private LearningApiService api;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,124 +55,101 @@ public class LearnActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_learn);
 
-        // Chỉ áp padding top/left/right cho root — KHÔNG áp bottom,
-        // vì BottomNavigationView tự xử lý inset đáy của riêng nó (tránh cộng dồn 2 lần).
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, 0);
+            Insets bars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(bars.left, bars.top, bars.right, 0);
             return insets;
         });
 
-        initViews();
-        bindData();
-        setupClickListeners();
-        setupFilterChips();
+        api = RetrofitClient.create(this, LearningApiService.class);
+
+        rvPath = findViewById(R.id.rvPath);
+        progressLoading = findViewById(R.id.progressLoading);
+        tvTier = findViewById(R.id.tvTier);
+        tvEmpty = findViewById(R.id.tvEmpty);
+        btnPlacement = findViewById(R.id.btnPlacement);
+        bottomNav = findViewById(R.id.bottomNav);
+
+        ViewCompat.setOnApplyWindowInsetsListener(bottomNav, (v, insets) -> {
+            Insets bars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(v.getPaddingLeft(), v.getPaddingTop(), v.getPaddingRight(), bars.bottom);
+            return insets;
+        });
+
+        adapter = new PathAdapter(topics, this::onTopicClick);
+        rvPath.setLayoutManager(new LinearLayoutManager(this));
+        rvPath.setAdapter(adapter);
+
+        btnPlacement.setOnClickListener(v -> {
+            Intent i = new Intent(this, QuizActivity.class);
+            i.putExtra(QuizActivity.EXTRA_PLACEMENT, true);
+            startActivity(i);
+        });
+
         setupBottomNav();
     }
 
-    private void initViews() {
-        etSearch = findViewById(R.id.etSearch);
-        bottomNav = findViewById(R.id.bottomNav);
-
-        // Đảm bảo bottomNav luôn padding đúng bằng vùng gesture bar/nav bar hệ thống
-        ViewCompat.setOnApplyWindowInsetsListener(bottomNav, (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(v.getPaddingLeft(), v.getPaddingTop(), v.getPaddingRight(), systemBars.bottom);
-            return insets;
-        });
-
-        chipAll = findViewById(R.id.chipAll);
-        chipVocab = findViewById(R.id.chipVocab);
-        chipGrammar = findViewById(R.id.chipGrammar);
-        chipQuiz = findViewById(R.id.chipQuiz);
-
-        tvContinueLabel = findViewById(R.id.tvContinueLabel);
-        tvContinueSub = findViewById(R.id.tvContinueSub);
-        progressContinue = findViewById(R.id.progressContinue);
-        btnContinue = findViewById(R.id.btnContinue);
-
-        cardLesson1 = findViewById(R.id.cardLesson1);
-        tvLesson1Title = findViewById(R.id.tvLesson1Title);
-        tvLesson1Sub = findViewById(R.id.tvLesson1Sub);
-        progressLesson1 = findViewById(R.id.progressLesson1);
-
-        cardLesson2 = findViewById(R.id.cardLesson2);
-        tvLesson2Title = findViewById(R.id.tvLesson2Title);
-        tvLesson2Sub = findViewById(R.id.tvLesson2Sub);
-        progressLesson2 = findViewById(R.id.progressLesson2);
-
-        cardLesson3 = findViewById(R.id.cardLesson3);
-        tvLesson3Title = findViewById(R.id.tvLesson3Title);
-        tvLesson3Sub = findViewById(R.id.tvLesson3Sub);
-        progressLesson3 = findViewById(R.id.progressLesson3);
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadPath(); // tải lại mỗi lần quay về để cập nhật Mastery sau khi học xong
     }
 
-    private void bindData() {
-        // TODO: Thay bằng dữ liệu thật từ ViewModel / Repository
+    private void loadPath() {
+        progressLoading.setVisibility(View.VISIBLE);
+        tvEmpty.setVisibility(View.GONE);
 
-        String continueTitle = "Bài 12: Thì hiện tại hoàn thành";
-        String continueCategory = "Ngữ pháp";
-        int continueRemaining = 6;
-        int continuePercent = 60;
+        api.getLearningPath().enqueue(new ApiCallback<ApiModels.LearningPath>() {
+            @Override
+            public void onSuccess(ApiModels.LearningPath result) {
+                progressLoading.setVisibility(View.GONE);
+                tvTier.setText("Trình độ: " + Labels.tier(result.getTier()));
+                btnPlacement.setVisibility(result.isNeedsPlacement() ? View.VISIBLE : View.GONE);
 
-        tvContinueLabel.setText(continueTitle);
-        tvContinueSub.setText(continueCategory + " · Còn " + continueRemaining + " câu");
-        progressContinue.setProgress(continuePercent);
+                topics.clear();
+                if (result.getPath() != null) topics.addAll(result.getPath());
+                adapter.notifyDataSetChanged();
+                tvEmpty.setVisibility(topics.isEmpty() ? View.VISIBLE : View.GONE);
+            }
 
-        int vocabDone = 14, vocabTotal = 20;
-        tvLesson1Title.setText("Từ vựng chủ đề Du lịch");
-        tvLesson1Sub.setText(vocabTotal + " từ · Đã học " + vocabDone + "/" + vocabTotal);
-        progressLesson1.setProgress((vocabDone * 100) / vocabTotal);
-
-        int grammarDone = 5, grammarTotal = 12;
-        tvLesson2Title.setText("Ngữ pháp: Câu điều kiện");
-        tvLesson2Sub.setText(grammarTotal + " bài tập · Đã học " + grammarDone + "/" + grammarTotal);
-        progressLesson2.setProgress((grammarDone * 100) / grammarTotal);
-
-        int quizDone = 0, quizTotal = 30;
-        tvLesson3Title.setText("Kiểm tra giữa khóa");
-        tvLesson3Sub.setText(quizTotal + " câu hỏi · " + (quizDone == 0 ? "Chưa làm" : "Đã làm " + quizDone + "/" + quizTotal));
-        progressLesson3.setProgress((quizDone * 100) / quizTotal);
-    }
-
-    private void setupClickListeners() {
-        btnContinue.setOnClickListener(v -> {
-            // TODO: mở tiếp bài học đang dở
-        });
-
-        cardLesson1.setOnClickListener(v -> {
-            // TODO: mở chi tiết bài học Từ vựng
-        });
-
-        cardLesson2.setOnClickListener(v -> {
-            // TODO: mở chi tiết bài học Ngữ pháp
-        });
-
-        cardLesson3.setOnClickListener(v -> {
-            // TODO: mở màn Kiểm tra
+            @Override
+            public void onError(String message) {
+                progressLoading.setVisibility(View.GONE);
+                Toast.makeText(LearnActivity.this, message, Toast.LENGTH_LONG).show();
+            }
         });
     }
 
-    private void setupFilterChips() {
-        chipAll.setOnClickListener(v -> selectChip(chipAll));
-        chipVocab.setOnClickListener(v -> selectChip(chipVocab));
-        chipGrammar.setOnClickListener(v -> selectChip(chipGrammar));
-        chipQuiz.setOnClickListener(v -> selectChip(chipQuiz));
-    }
-
-    private void selectChip(TextView selected) {
-        TextView[] chips = { chipAll, chipVocab, chipGrammar, chipQuiz };
-        for (TextView chip : chips) {
-            boolean isSelected = chip == selected;
-            chip.setBackgroundResource(isSelected ? R.drawable.bg_chip_selected : R.drawable.bg_chip_unselected);
-            chip.setTextColor(isSelected ? 0xFFFFFFFF : 0xFF4F46E5);
+    private void onTopicClick(ApiModels.PathTopic topic) {
+        if (!topic.isUnlocked()) {
+            Toast.makeText(this,
+                    "Đạt tối thiểu 60% Mastery ở chủ đề trước để mở khóa", Toast.LENGTH_LONG).show();
+            return;
         }
-        // TODO: lọc danh sách bài học theo danh mục được chọn
+
+        String[] options = {"Học bài (Quiz + Phát âm)", "Ôn flashcard", "Làm đề thi chủ đề"};
+        new AlertDialog.Builder(this)
+                .setTitle(topic.getTitle())
+                .setItems(options, (dialog, which) -> {
+                    Intent intent;
+                    if (which == 0) {
+                        intent = new Intent(this, TopicLessonActivity.class);
+                        intent.putExtra(TopicLessonActivity.EXTRA_TOPIC_ID, topic.getId());
+                        intent.putExtra(TopicLessonActivity.EXTRA_TOPIC_TITLE, topic.getTitle());
+                    } else if (which == 1) {
+                        intent = new Intent(this, VocabularyActivity.class);
+                        intent.putExtra(VocabularyActivity.EXTRA_TOPIC_ID, topic.getId());
+                    } else {
+                        intent = new Intent(this, ExamListActivity.class);
+                        intent.putExtra(ExamListActivity.EXTRA_TOPIC_ID, topic.getId());
+                    }
+                    startActivity(intent);
+                })
+                .show();
     }
 
     private void setupBottomNav() {
         bottomNav.setSelectedItemId(R.id.nav_learn);
-
         bottomNav.setOnItemSelectedListener(item -> {
             int id = item.getItemId();
             if (id == R.id.nav_home) {
@@ -189,10 +168,74 @@ public class LearnActivity extends AppCompatActivity {
         });
     }
 
-    private void navigateTo(Class<?> targetActivity) {
-        Intent intent = new Intent(this, targetActivity);
-        startActivity(intent);
+    private void navigateTo(Class<?> target) {
+        startActivity(new Intent(this, target));
         overridePendingTransition(0, 0);
-        // Không finish() để bấm back quay lại đúng màn trước đó
+    }
+
+    // =====================================================================
+    // Adapter
+    // =====================================================================
+    private static class PathAdapter extends RecyclerView.Adapter<PathAdapter.VH> {
+
+        interface Listener {
+            void onClick(ApiModels.PathTopic topic);
+        }
+
+        private final List<ApiModels.PathTopic> data;
+        private final Listener listener;
+
+        PathAdapter(List<ApiModels.PathTopic> data, Listener listener) {
+            this.data = data;
+            this.listener = listener;
+        }
+
+        @NonNull
+        @Override
+        public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            View v = LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.item_topic_path, parent, false);
+            return new VH(v);
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull VH h, int position) {
+            ApiModels.PathTopic t = data.get(position);
+            h.tvTitle.setText((position + 1) + ". " + t.getTitle());
+            h.tvMeta.setText(Labels.difficulty(t.getDifficulty())
+                    + " · Thành thạo " + t.getMasteryPercent() + "%"
+                    + " · " + t.getMasteredWords() + "/" + t.getTotalWords() + " từ");
+            h.progress.setProgress(t.getMasteryPercent());
+
+            String status;
+            if (!t.isUnlocked()) status = "🔒";
+            else if (t.getMasteryPercent() >= 100) status = "✅";
+            else if (t.isCurrent()) status = "▶";
+            else status = "›";
+            h.tvStatus.setText(status);
+
+            h.itemView.setAlpha(t.isUnlocked() ? 1f : 0.5f);
+            h.itemView.setOnClickListener(v -> listener.onClick(t));
+        }
+
+        @Override
+        public int getItemCount() {
+            return data.size();
+        }
+
+        static class VH extends RecyclerView.ViewHolder {
+            final TextView tvTitle;
+            final TextView tvMeta;
+            final TextView tvStatus;
+            final ProgressBar progress;
+
+            VH(@NonNull View itemView) {
+                super(itemView);
+                tvTitle = itemView.findViewById(R.id.tvTopicTitle);
+                tvMeta = itemView.findViewById(R.id.tvTopicMeta);
+                tvStatus = itemView.findViewById(R.id.tvTopicStatus);
+                progress = itemView.findViewById(R.id.progressTopic);
+            }
+        }
     }
 }
