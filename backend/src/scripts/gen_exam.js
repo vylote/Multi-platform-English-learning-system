@@ -31,10 +31,10 @@ const ACTIVE_MODEL = isXai ? process.env.GROQ_MODEL || "grok-4-fast" : GROQ_MODE
 
 if (GROQ_API_KEY) {
   if (isXai) {
-    console.log("⚠️  Phát hiện key xAI (xai-...) — script sẽ gọi api.x.ai thay vì api.groq.com.");
+    console.log("Phát hiện key xAI (xai-...) — script sẽ gọi api.x.ai thay vì api.groq.com.");
   }
 } else {
-  console.log("ℹ️  Không phát hiện GROQ_API_KEY. Tự động chuyển sang chế độ sinh đề thi trắc nghiệm từ kho từ vựng chuẩn (8,403 từ) trong Database.");
+  console.log("Không phát hiện GROQ_API_KEY. Tự động chuyển sang chế độ sinh đề thi trắc nghiệm từ kho từ vựng chuẩn (8,403 từ) trong Database.");
 }
 
 // ---------------------------------------------------------------------------
@@ -150,7 +150,7 @@ async function callGroq(prompt, { retries = 3 } = {}) {
 
     if (res.status === 429) {
       const wait = 3000 * attempt;
-      console.warn(`   ⏳ Bị rate limit, chờ ${wait}ms rồi thử lại (${attempt}/${retries})...`);
+      console.warn(`   Bị rate limit, chờ ${wait}ms rồi thử lại (${attempt}/${retries})...`);
       await sleep(wait);
       continue;
     }
@@ -278,9 +278,9 @@ async function runPlacementGeneration({ count, duration, force }) {
       questions,
     });
 
-    console.log(`✅ Tạo bài Placement id=${examId} với ${questions.length} câu hỏi.`);
+    console.log(`Tạo bài Placement id=${examId} với ${questions.length} câu hỏi.`);
   } catch (err) {
-    console.error(`❌ Lỗi sinh bài Placement: ${err.message}`);
+    console.error(`Lỗi sinh bài Placement: ${err.message}`);
   }
 }
 
@@ -422,10 +422,10 @@ async function runTopicGeneration({ topicIds, count, duration, force, sets = 1 }
           questions,
         });
 
-        console.log(`   ✅ Tạo đề id=${examId} "${title}" với ${questions.length} câu hỏi tiếng Anh chuẩn.`);
+        console.log(`Tạo đề id=${examId}"${title}"với ${questions.length} câu hỏi tiếng Anh chuẩn.`);
         okCount++;
       } catch (err) {
-        console.error(`   ❌ Lỗi tạo bộ đề ${setIdx}: ${err.message}`);
+        console.error(`Lỗi tạo bộ đề ${setIdx}: ${err.message}`);
         failCount++;
       }
 

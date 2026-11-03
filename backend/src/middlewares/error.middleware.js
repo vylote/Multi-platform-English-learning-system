@@ -29,7 +29,7 @@ const globalExceptionHandler = (err, req, res, next) => {
   }
 
   // 3. Bắt lỗi ngoại lệ không xác định (Tương đương @ExceptionHandler(Exception.class))
-  console.error('🔥 BẮT ĐƯỢC THỦ PHẠM GÂY LỖI 9999: ', err);
+  console.error('BẮT ĐƯỢC THỦ PHẠM GÂY LỖI 9999:', err);
   const errorCode = ErrorCode.UNCATEGORIZED_EXCEPTION;
 
   return res.status(errorCode.statusCode).json(

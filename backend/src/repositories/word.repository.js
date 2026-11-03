@@ -62,6 +62,17 @@ class WordRepository {
     const { rows } = await db.query(sql, [topicId, limit]);
     return rows.map((row) => new Word({ ...row, isExternal: false }));
   }
+
+  async findByExactWord(word) {
+    const { rows } = await db.query(
+      `SELECT id, word, topic_id, pronunciation, part_of_speech, meaning_vi 
+       FROM words 
+       WHERE LOWER(word) = LOWER($1) 
+       LIMIT 1;`,
+      [word.trim()]
+    );
+    return rows[0] ? new Word({ ...rows[0], isExternal: false }) : null;
+  }
 }
 
 module.exports = new WordRepository();

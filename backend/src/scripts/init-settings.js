@@ -133,7 +133,7 @@ async function initSettingsTable() {
     );
   `);
 
-  console.log("✓ Bảng system_settings đã sẵn sàng.");
+  console.log("Bảng system_settings đã sẵn sàng.");
 
   // 2. Chèn cấu hình mặc định nếu chưa tồn tại
   for (const item of DEFAULT_SETTINGS) {
@@ -158,7 +158,7 @@ async function initSettingsTable() {
     );
   }
 
-  console.log(`✓ Đã nạp thành công ${DEFAULT_SETTINGS.length} cấu hình hệ thống ban đầu.`);
+  console.log(`Đã nạp thành công ${DEFAULT_SETTINGS.length} cấu hình hệ thống ban đầu.`);
 }
 
 if (require.main === module) {

@@ -7,6 +7,8 @@ const { ErrorCode } = require("../common/error-code");
 const AppException = require("../exceptions/app.exception");
 const PageResponse = require("../models/page-response.model");
 const { classifyTier } = require("../utils/tier-classifier");
+const examProducer = require("../kafka/producers/exam.producer");
+const activityProducer = require("../kafka/producers/activity.producer");
 
 //TODO: Khoảng đệm bù độ trễ mạng khi nộp bài
 const DEFAULT_NETWORK_BUFFER_SECONDS = 15;
@@ -292,7 +294,47 @@ class ExamService {
     }
     // -------------------------------------------------------------
 
+    // Bắn event nộp bài vào Kafka Topic (chạy nền, không block HTTP response)
+    const wrongQuestions = review
+      .filter((r) => !r.is_correct)
+      .map((r) => ({
+        question_id: r.question_id,
+        question_text: r.question_text,
+        selected_option: r.selected_option,
+        correct_option: r.correct_option,
+      }));
+
+    examProducer
+      .publishExamSubmitted({
+        userId,
+        examId: Number(examId),
+        sessionId: Number(sessionId),
+        score,
+        correctCount,
+        totalQuestions,
+        timeSpentSeconds,
+        wrongQuestions,
+        submittedAt: new Date().toISOString(),
+      })
+      .catch((err) => {
+        console.warn("[Kafka Publish Error]", err.message);
+      });
+
+    // Bắn event Gamification & Streak vào Topic: learning.activity.completed
+    activityProducer
+      .publishActivityCompleted({
+        userId,
+        activityType: "EXAM_SUBMITTED",
+        referenceId: Number(examId),
+        score,
+        timezoneOffsetMinutes,
+      })
+      .catch((err) => {
+        console.warn("[Kafka Activity Publish Error]", err.message);
+      });
+
     const result = new ExamResultDetail({
+      session_id: Number(sessionId),
       score,
       correct_count: correctCount,
       total_questions: totalQuestions,
@@ -302,6 +344,25 @@ class ExamService {
     });
 
     return result;
+  }
+
+  async getAiFeedback(userId, sessionId) {
+    const session = await examRepository.findSessionById(sessionId, userId);
+    if (!session) {
+      throw new AppException(
+        ErrorCode.RESOURCE_NOT_FOUND,
+        "Không tìm thấy phiên làm bài.",
+      );
+    }
+    const redisClient = require("../config/redis");
+    const raw = await redisClient.get(`exam:ai_feedback:${sessionId}`);
+    if (!raw) {
+      return {
+        status: "PROCESSING",
+        message: "Hệ thống AI đang phân tích bài thi qua hàng đợi Kafka...",
+      };
+    }
+    return JSON.parse(raw);
   }
 
   async getPlacementExam() {

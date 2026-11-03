@@ -24,6 +24,24 @@ class WordController {
       next(error);
     }
   }
+
+  async getWeakWordsAnalytics(req, res, next) {
+    try {
+      const userId = req.user?.id || null;
+      const limit = parseInt(req.query.limit, 10) || 5;
+      const data = await wordService.getWeakWordsAnalytics(userId, limit);
+
+      return res.status(ErrorCode.SUCCESS.statusCode).json(
+        ApiResponse.builder()
+          .code(ErrorCode.SUCCESS.code)
+          .message("Lấy thống kê từ vựng yếu thành công")
+          .result(data)
+          .build()
+      );
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 module.exports = new WordController();

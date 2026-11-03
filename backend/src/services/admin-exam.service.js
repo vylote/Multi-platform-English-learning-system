@@ -252,7 +252,7 @@ class AdminExamService {
         questions = this._validateQuestions(parsed);
         generationSource = "AI (Groq/LLM)";
       } catch (aiError) {
-        console.warn("⚠️ AI generation thất bại:", aiError.message);
+        console.warn("AI generation thất bại:", aiError.message);
         if (method === "AI") {
           throw new AppException(
             ErrorCode.SYSTEM_ERROR,

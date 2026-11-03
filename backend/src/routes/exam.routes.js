@@ -19,4 +19,6 @@ router.post("/:id/submit", verifyToken, examController.submit);
 
 router.post("/:id/cancel", verifyToken, examController.cancel);
 
+router.get("/sessions/:sessionId/ai-feedback", verifyToken, examController.getAiFeedback);
+
 module.exports = router;

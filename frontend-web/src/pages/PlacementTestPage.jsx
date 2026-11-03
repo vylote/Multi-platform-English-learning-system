@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../api/api";
 import ExamLayout from "../layouts/ExamLayout";
+import ExamAiFeedback from "../components/ExamAiFeedback";
 import { getBackendTimezoneOffset } from "../utils/timezone";
 import { useDispatch } from "react-redux";
 import { updateUser } from "../store/slice/authSlice";
@@ -339,6 +340,8 @@ export default function PlacementTestPage() {
           <div className={`p-4 rounded-2xl border mb-8 max-w-md mx-auto text-sm font-semibold ${tierInfo.color}`}>
             🎯 Trình độ đề xuất: {tierInfo.label}
           </div>
+
+          <ExamAiFeedback sessionId={result.session_id || sessionInfo?.session_id} className="max-w-md mx-auto mb-8" />
 
           <button
             onClick={() => {

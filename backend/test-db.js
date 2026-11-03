@@ -4,7 +4,7 @@ const { createClient } = require('redis');
 
 async function testConnections() {
   console.log('==============================================');
-  console.log('🔍 ĐANG KIỂM TRA KẾT NỐI TỚI CÁC DỊCH VỤ DOCKER...');
+  console.log('ĐANG KIỂM TRA KẾT NỐI TỚI CÁC DỊCH VỤ DOCKER...');
   console.log('==============================================\n');
 
   let pgSuccess = false;
@@ -19,7 +19,7 @@ async function testConnections() {
   try {
     const client = await pool.connect();
     const resTime = await client.query('SELECT NOW() as current_time, current_database() as db_name');
-    console.log('✅ [PostgreSQL] Kết nối THÀNH CÔNG!');
+    console.log('[PostgreSQL] Kết nối THÀNH CÔNG!');
     console.log(`   - Database: ${resTime.rows[0].db_name}`);
     console.log(`   - Server Time: ${resTime.rows[0].current_time}`);
 
@@ -36,13 +36,13 @@ async function testConnections() {
     if (tables.length > 0) {
       console.log(`   - Danh sách bảng: [ ${tables.join(', ')} ]`);
     } else {
-      console.log('   ⚠️ Chưa có bảng nào. Hãy nạp file schema.sql vào database!');
+      console.log('Chưa có bảng nào. Hãy nạp file schema.sql vào database!');
     }
 
     client.release();
     pgSuccess = true;
   } catch (err) {
-    console.error('❌ [PostgreSQL] Kết nối THẤT BẠI!');
+    console.error('[PostgreSQL] Kết nối THẤT BẠI!');
     console.error(`   Lỗi: ${err.message}`);
   } finally {
     await pool.end();
@@ -65,12 +65,12 @@ async function testConnections() {
     await redisClient.set('test_key', 'Docker Redis Running OK!', { EX: 10 });
     const val = await redisClient.get('test_key');
 
-    console.log('✅ [Redis] Kết nối THÀNH CÔNG!');
+    console.log('[Redis] Kết nối THÀNH CÔNG!');
     console.log(`   - Ping/Pong test: PONG`);
     console.log(`   - Thử nghiệm Write/Read: "${val}"`);
     redisSuccess = true;
   } catch (err) {
-    console.error('❌ [Redis] Kết nối THẤT BẠI!');
+    console.error('[Redis] Kết nối THẤT BẠI!');
     console.error(`   Lỗi: ${err.message}`);
   } finally {
     if (redisClient.isOpen) {
@@ -80,9 +80,9 @@ async function testConnections() {
 
   console.log('\n==============================================');
   if (pgSuccess && redisSuccess) {
-    console.log('🎉 TẤT CẢ DỊCH VỤ SẴN SÀNG ĐỂ PHÁT TRIỂN TIẾP!');
+    console.log('TẤT CẢ DỊCH VỤ SẴN SÀNG ĐỂ PHÁT TRIỂN TIẾP!');
   } else {
-    console.log('⚠️ CẦN KIỂM TRA LẠI DOCKER HOẶC FILE .ENV!');
+    console.log('CẦN KIỂM TRA LẠI DOCKER HOẶC FILE .ENV!');
   }
   console.log('==============================================');
 }

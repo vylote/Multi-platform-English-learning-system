@@ -75,6 +75,18 @@ class FlashcardRepository {
     return rows[0] ? new Flashcard(rows[0]) : null;
   }
 
+  async upsertFailedWordFlashcard(userId, wordId, topicId) {
+    const sql = `
+      INSERT INTO flashcards (user_id, word_id, topic_id, status, last_reviewed)
+      VALUES ($1, $2, $3, 'LEARNING', CURRENT_TIMESTAMP)
+      ON CONFLICT (user_id, word_id)
+      DO UPDATE SET status = 'LEARNING', last_reviewed = CURRENT_TIMESTAMP
+      RETURNING id, user_id, word_id, topic_id, status, last_reviewed;
+    `;
+    const { rows } = await db.query(sql, [userId, wordId, topicId]);
+    return rows[0] ? new Flashcard(rows[0]) : null;
+  }
+
   async deleteById(id, userId) {
     const sql = `DELETE FROM flashcards WHERE id = $1 AND user_id = $2 RETURNING id;`;
     const { rows } = await db.query(sql, [id, userId]);

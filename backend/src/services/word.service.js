@@ -225,6 +225,45 @@ class WordService {
   async upsertWord(wordData, client) {
     return wordRepository.upsert(wordData, client);
   }
+
+  async getWeakWordsAnalytics(userId, limit = 5) {
+    const parseWeakEntries = async (key) => {
+      let raw = [];
+      try {
+        raw = await redisClient.zRangeWithScores(key, 0, limit - 1, { REV: true });
+      } catch (_) {}
+      if (!raw || raw.length === 0) return [];
+
+      const list = [];
+      for (const item of raw) {
+        const wordId = parseInt(item.value, 10);
+        const failCount = Math.round(item.score);
+
+        let wordText = `Từ #${wordId}`;
+        const cachedMeta = await redisClient.hGetAll(`word:meta:${wordId}`).catch(() => ({}));
+        if (cachedMeta && cachedMeta.word) {
+          wordText = cachedMeta.word;
+        }
+
+        list.push({
+          wordId,
+          word: wordText,
+          failCount,
+        });
+      }
+      return list;
+    };
+
+    const userWeakWords = userId
+      ? await parseWeakEntries(`analytics:weak_words:user:${userId}`)
+      : [];
+    const globalWeakWords = await parseWeakEntries("analytics:weak_words:global");
+
+    return {
+      userWeakWords,
+      globalWeakWords,
+    };
+  }
 }
 
 module.exports = new WordService();
