@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!-- CHỈ dùng cho bản debug: cho phép gọi http:// tới backend local -->
+    <base-config cleartextTrafficPermitted="true" />
+</network-security-config>

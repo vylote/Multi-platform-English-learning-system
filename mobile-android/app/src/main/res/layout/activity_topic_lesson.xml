@@ -1,0 +1,289 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F1F5F9"
+    tools:context=".ui.auth.TopicLessonActivity">
+
+    <ImageButton
+        android:id="@+id/btnClose"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="20dp"
+        android:background="@android:color/transparent"
+        android:src="@android:drawable/ic_menu_close_clear_cancel"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="#0F172A" />
+
+    <TextView
+        android:id="@+id/tvStage"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="Từ vựng"
+        android:textColor="#0F172A"
+        android:textSize="16sp"
+        android:fontFamily="sans-serif-medium"
+        app:layout_constraintBottom_toBottomOf="@id/btnClose"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/btnClose"
+        app:layout_constraintTop_toTopOf="@id/btnClose"
+        android:layout_marginEnd="56dp" />
+
+    <ProgressBar
+        android:id="@+id/progressLesson"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="0dp"
+        android:layout_height="6dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="24dp"
+        android:max="100"
+        android:progressTint="#4F46E5"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/btnClose" />
+
+    <ProgressBar
+        android:id="@+id/progressLoading"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- ===== Giai đoạn 1: danh sách từ vựng ===== -->
+    <LinearLayout
+        android:id="@+id/layoutVocab"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        android:visibility="gone"
+        android:padding="24dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/progressLesson">
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+            <TextView
+                android:id="@+id/tvVocabList"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:lineSpacingExtra="6dp"
+                android:textColor="#0F172A"
+                android:textSize="16sp" />
+        </ScrollView>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnStartQuiz"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:text="Bắt đầu làm Quiz"
+            android:textAllCaps="false"
+            app:backgroundTint="#4F46E5"
+            app:cornerRadius="14dp" />
+    </LinearLayout>
+
+    <!-- ===== Giai đoạn 2: Quiz trắc nghiệm ===== -->
+    <LinearLayout
+        android:id="@+id/layoutQuiz"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        android:visibility="gone"
+        android:padding="24dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/progressLesson">
+
+        <TextView
+            android:id="@+id/tvQuizCounter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Câu 1/5"
+            android:textColor="#4F46E5"
+            android:textSize="13sp" />
+
+        <TextView
+            android:id="@+id/tvQuizQuestion"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="20dp"
+            android:textColor="#0F172A"
+            android:textSize="20sp"
+            android:fontFamily="sans-serif-medium" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnOpt0"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="start|center_vertical"
+            android:minHeight="56dp"
+            android:textAllCaps="false"
+            android:textColor="#0F172A" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnOpt1"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:gravity="start|center_vertical"
+            android:minHeight="56dp"
+            android:textAllCaps="false"
+            android:textColor="#0F172A" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnOpt2"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:gravity="start|center_vertical"
+            android:minHeight="56dp"
+            android:textAllCaps="false"
+            android:textColor="#0F172A" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnOpt3"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:gravity="start|center_vertical"
+            android:minHeight="56dp"
+            android:textAllCaps="false"
+            android:textColor="#0F172A" />
+    </LinearLayout>
+
+    <!-- ===== Giai đoạn 3: Luyện phát âm ===== -->
+    <LinearLayout
+        android:id="@+id/layoutPron"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        android:gravity="center_horizontal"
+        android:visibility="gone"
+        android:padding="24dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/progressLesson">
+
+        <TextView
+            android:id="@+id/tvPronCounter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Từ 1/5"
+            android:textColor="#4F46E5"
+            android:textSize="13sp" />
+
+        <TextView
+            android:id="@+id/tvPronWord"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:textColor="#0F172A"
+            android:textSize="36sp"
+            android:fontFamily="sans-serif-medium" />
+
+        <TextView
+            android:id="@+id/tvPronPhonetic"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:textColor="#64748B"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/tvPronStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:minHeight="24dp"
+            android:textSize="15sp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnListen"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:layout_marginTop="24dp"
+            android:text="🔊 Nghe mẫu"
+            android:textAllCaps="false" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSpeakNow"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:layout_marginTop="10dp"
+            android:text="🎤 Bấm để đọc"
+            android:textAllCaps="false"
+            app:backgroundTint="#4F46E5"
+            app:cornerRadius="14dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnPronNext"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="Từ tiếp theo →"
+            android:textAllCaps="false" />
+    </LinearLayout>
+
+    <!-- ===== Kết quả ===== -->
+    <LinearLayout
+        android:id="@+id/layoutResult"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:visibility="gone"
+        android:padding="24dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/progressLesson">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="🎉"
+            android:textSize="56sp" />
+
+        <TextView
+            android:id="@+id/tvLessonResult"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:gravity="center"
+            android:lineSpacingExtra="6dp"
+            android:textColor="#0F172A"
+            android:textSize="18sp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnLessonDone"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:layout_marginTop="28dp"
+            android:text="Hoàn tất"
+            android:textAllCaps="false"
+            app:backgroundTint="#4F46E5"
+            app:cornerRadius="14dp" />
+    </LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,3 +1,4 @@
+
 package com.els.app.ui.auth;
 
 import android.content.Intent;
@@ -18,6 +19,8 @@ import com.els.app.data.remote.dto.response.ApiResponse;
 import com.els.app.data.remote.dto.response.LoginResponse;
 import com.els.app.data.remote.dto.response.UserResponse;
 import com.els.app.network.RetrofitClient;
+import com.els.app.ui.NavHelper;
+import com.els.app.util.SessionManager;
 import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.Objects;
@@ -28,13 +31,11 @@ import retrofit2.Response;
 
 public class LoginActivity extends AppCompatActivity {
 
-    private static final String TEST_USERNAME = "test";
-    private static final String TEST_PASSWORD = "test";
-
     private TextInputEditText edtUsername;
     private TextInputEditText edtPassword;
-    private View progressOverlay; // ProgressBar/overlay trong layout, thay cho ProgressDialog
+    private View progressOverlay;
 
+    private SessionManager sessionManager;
     private AuthApiService apiService;
     private AppDatabase database;
 
@@ -43,90 +44,162 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
+        // Khởi tạo
         database = AppDatabase.getDatabase(this);
-        apiService = RetrofitClient.getClient(this).create(AuthApiService.class);
+        apiService = RetrofitClient.getClient(this)
+                .create(AuthApiService.class);
+        sessionManager = new SessionManager(this);
 
+        // Ánh xạ giao diện
         edtUsername = findViewById(R.id.edtUsername);
         edtPassword = findViewById(R.id.edtPassword);
         progressOverlay = findViewById(R.id.progressOverlay);
 
+        // Sự kiện
         findViewById(R.id.btnLogin).setOnClickListener(v -> performLogin());
+
         findViewById(R.id.tvToRegister).setOnClickListener(v ->
-                startActivity(new Intent(LoginActivity.this, RegisterActivity.class)));
+                startActivity(new Intent(
+                        LoginActivity.this,
+                        RegisterActivity.class
+                )));
     }
 
     private void performLogin() {
-        String username = Objects.requireNonNull(edtUsername.getText()).toString().trim();
-        String password = Objects.requireNonNull(edtPassword.getText()).toString().trim();
+
+        String username = Objects.requireNonNull(
+                edtUsername.getText()
+        ).toString().trim();
+
+        String password = Objects.requireNonNull(
+                edtPassword.getText()
+        ).toString().trim();
 
         if (username.isEmpty() || password.isEmpty()) {
-            Toast.makeText(this, "Vui lòng nhập đầy đủ tài khoản và mật khẩu", Toast.LENGTH_SHORT).show();
+            Toast.makeText(
+                    this,
+                    "Vui lòng nhập đầy đủ tài khoản và mật khẩu",
+                    Toast.LENGTH_SHORT
+            ).show();
             return;
         }
 
-        // Tài khoản test: bỏ qua gọi API, vào thẳng Home để tiện test UI
-        if (TEST_USERNAME.equals(username) && TEST_PASSWORD.equals(password)) {
-            Toast.makeText(this, "Đăng nhập tài khoản test thành công!", Toast.LENGTH_SHORT).show();
-            navigateToHome();
-            return;
-        }
-
+        // Gọi API đăng nhập
         showLoading(true);
-        apiService.login(new LoginRequest(username, password)).enqueue(new Callback<>() {
-            @Override
-            public void onResponse(@NonNull Call<ApiResponse<LoginResponse>> call,
-                                   @NonNull Response<ApiResponse<LoginResponse>> response) {
-                showLoading(false);
-                handleLoginResponse(response);
-            }
 
-            @Override
-            public void onFailure(@NonNull Call<ApiResponse<LoginResponse>> call, @NonNull Throwable t) {
-                showLoading(false);
-                Toast.makeText(LoginActivity.this, "Kết nối Server thất bại: " + t.getMessage(), Toast.LENGTH_LONG).show();
-            }
-        });
+        apiService.login(new LoginRequest(username, password))
+                .enqueue(new Callback<ApiResponse<LoginResponse>>() {
+
+                    @Override
+                    public void onResponse(
+                            @NonNull Call<ApiResponse<LoginResponse>> call,
+                            @NonNull Response<ApiResponse<LoginResponse>> response
+                    ) {
+                        showLoading(false);
+                        handleLoginResponse(response);
+                    }
+
+                    @Override
+                    public void onFailure(
+                            @NonNull Call<ApiResponse<LoginResponse>> call,
+                            @NonNull Throwable t
+                    ) {
+                        showLoading(false);
+
+                        Toast.makeText(
+                                LoginActivity.this,
+                                "Kết nối Server thất bại: " + t.getMessage(),
+                                Toast.LENGTH_LONG
+                        ).show();
+                    }
+                });
     }
 
-    private void handleLoginResponse(@NonNull Response<ApiResponse<LoginResponse>> response) {
+    private void handleLoginResponse(
+            @NonNull Response<ApiResponse<LoginResponse>> response
+    ) {
+
         if (!response.isSuccessful() || response.body() == null) {
-            Toast.makeText(this, "Mật khẩu hoặc tên đăng nhập chưa chính xác.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(
+                    this,
+                    "Mật khẩu hoặc tên đăng nhập chưa chính xác.",
+                    Toast.LENGTH_SHORT
+            ).show();
             return;
         }
 
         ApiResponse<LoginResponse> apiResponse = response.body();
+
         if (!"1000".equals(apiResponse.getCode())) {
-            Toast.makeText(this, apiResponse.getMessage(), Toast.LENGTH_LONG).show();
+            Toast.makeText(
+                    this,
+                    apiResponse.getMessage(),
+                    Toast.LENGTH_LONG
+            ).show();
+            return;
+        }
+
+        if (apiResponse.getResult() == null
+                || apiResponse.getResult().getUser() == null) {
+            Toast.makeText(
+                    this,
+                    "Dữ liệu người dùng không hợp lệ.",
+                    Toast.LENGTH_SHORT
+            ).show();
             return;
         }
 
         UserResponse dto = apiResponse.getResult().getUser();
+
+        // Lưu thông tin phiên đăng nhập
+        sessionManager.saveUser(dto);
+
+        // Lưu người dùng vào Room Database
         persistUserLocally(dto);
     }
 
     private void persistUserLocally(UserResponse dto) {
+
         new Thread(() -> {
             try {
-                UserEntity user = UserMapper.toEntity(dto, database.roleDao());
+
+                UserEntity user = UserMapper.toEntity(
+                        dto,
+                        database.roleDao()
+                );
+
                 database.userDao().insertUser(user);
+
                 runOnUiThread(() -> {
-                    Toast.makeText(this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
+
+                    Toast.makeText(
+                            this,
+                            "Đăng nhập thành công!",
+                            Toast.LENGTH_SHORT
+                    ).show();
+
+                    // Điều hướng theo trạng thái tài khoản
                     navigateToHome();
                 });
+
             } catch (Exception e) {
-                runOnUiThread(() -> Toast.makeText(this, "Lỗi lưu dữ liệu local: " + e.getMessage(), Toast.LENGTH_LONG).show());
+
+                runOnUiThread(() -> Toast.makeText(
+                        this,
+                        "Lỗi lưu dữ liệu local: " + e.getMessage(),
+                        Toast.LENGTH_LONG
+                ).show());
             }
         }).start();
     }
 
     private void navigateToHome() {
-        Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(intent);
-        finish();
+        NavHelper.routeAfterAuth(this);
     }
 
     private void showLoading(boolean show) {
-        progressOverlay.setVisibility(show ? View.VISIBLE : View.GONE);
+        progressOverlay.setVisibility(
+                show ? View.VISIBLE : View.GONE
+        );
     }
 }

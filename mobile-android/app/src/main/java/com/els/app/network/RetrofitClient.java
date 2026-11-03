@@ -1,78 +1,102 @@
 package com.els.app.network;
 
 import android.content.Context;
-import android.content.SharedPreferences;
+import android.content.Intent;
 
 import androidx.annotation.NonNull;
 
 import com.els.app.BuildConfig;
+import com.els.app.ui.auth.LoginActivity;
+import com.els.app.util.SessionManager;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import okhttp3.Cookie;
-import okhttp3.CookieJar;
-import okhttp3.HttpUrl;
+import java.io.IOException;
+import java.util.concurrent.TimeUnit;
+
+import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
+import okhttp3.Response;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class RetrofitClient {
+
     private RetrofitClient() {
-        /* This utility class should not be instantiated */
+        /* utility class */
     }
 
-    // IP đặc biệt kết nối từ máy ảo Android về máy tính cài Server Node.js
-    private static final String BASE_URL = BuildConfig.BASE_URL;
-
     private static Retrofit retrofit = null;
+    private static PersistentCookieJar cookieJar = null;
 
-    public static Retrofit getClient(Context context) {
+    public static synchronized Retrofit getClient(Context context) {
         if (retrofit == null) {
+            Context app = context.getApplicationContext();
+            cookieJar = new PersistentCookieJar(app);
+
             HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
-            //TODO: debug on dev mode
-            logging.setLevel(HttpLoggingInterceptor.Level.BODY);
+            logging.setLevel(BuildConfig.DEBUG
+                    ? HttpLoggingInterceptor.Level.BODY
+                    : HttpLoggingInterceptor.Level.NONE);
 
-            // Xử lý tự động duy trì Cookie an toàn
             OkHttpClient okHttpClient = new OkHttpClient.Builder()
+                    .connectTimeout(15, TimeUnit.SECONDS)
+                    .readTimeout(30, TimeUnit.SECONDS)
+                    .cookieJar(cookieJar)
+                    .addInterceptor(new UnauthorizedInterceptor(app))
                     .addInterceptor(logging)
-                    .cookieJar(new CookieJar() {
-                        private final SharedPreferences sharedPreferences =
-                                context.getSharedPreferences("CookiePrefs", Context.MODE_PRIVATE);
-
-                        @Override
-                        public void saveFromResponse(@NonNull HttpUrl url, @NonNull List<Cookie> cookies) {
-                            Set<String> cookieStrings = new HashSet<>();
-                            for (Cookie cookie : cookies) {
-                                cookieStrings.add(cookie.toString());
-                            }
-                            sharedPreferences.edit().putStringSet("session_cookies", cookieStrings).apply();
-                        }
-
-                        @NonNull
-                        @Override
-                        public List<Cookie> loadForRequest(@NonNull HttpUrl url) {
-                            List<Cookie> cookies = new ArrayList<>();
-                            Set<String> cookieStrings = sharedPreferences.getStringSet("session_cookies", new HashSet<>());
-                            for (String cookieString : cookieStrings) {
-                                Cookie cookie = Cookie.parse(url, cookieString);
-                                if (cookie != null) {
-                                    cookies.add(cookie);
-                                }
-                            }
-                            return cookies;
-                        }
-                    })
                     .build();
 
             retrofit = new Retrofit.Builder()
-                    .baseUrl(BASE_URL)
+                    .baseUrl(BuildConfig.BASE_URL)
                     .client(okHttpClient)
                     .addConverterFactory(GsonConverterFactory.create())
                     .build();
         }
         return retrofit;
+    }
+
+    /** Tiện: RetrofitClient.create(this, LearningApiService.class) */
+    public static <T> T create(Context context, Class<T> service) {
+        return getClient(context).create(service);
+    }
+
+    /** Xóa cookie phiên (gọi khi đăng xuất / bị 401) */
+    public static synchronized void clearSession() {
+        if (cookieJar != null) cookieJar.clear();
+    }
+
+    /**
+     * Giống axios interceptor trong frontend-web/src/api/api.js:
+     * 401 (token hết hạn / bị revoke trong Redis) -> xóa phiên và quay về Login.
+     * Bỏ qua các endpoint /auth/* (401 ở login nghĩa là sai mật khẩu).
+     */
+    private static class UnauthorizedInterceptor implements Interceptor {
+        private final Context appContext;
+        private long lastRedirectAt = 0;
+
+        UnauthorizedInterceptor(Context appContext) {
+            this.appContext = appContext;
+        }
+
+        @NonNull
+        @Override
+        public Response intercept(@NonNull Chain chain) throws IOException {
+            Response response = chain.proceed(chain.request());
+            String path = chain.request().url().encodedPath();
+
+            if (response.code() == 401 && !path.contains("/auth/")) {
+                long now = System.currentTimeMillis();
+                if (now - lastRedirectAt > 3000) {
+                    lastRedirectAt = now;
+                    clearSession();
+                    new SessionManager(appContext).clear();
+
+                    Intent intent = new Intent(appContext, LoginActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    appContext.startActivity(intent);
+                }
+            }
+            return response;
+        }
     }
 }
