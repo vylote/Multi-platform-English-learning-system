@@ -2,18 +2,20 @@ package com.els.app.ui.auth;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.widget.LinearLayout;
+import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.els.app.R;
+import com.els.app.util.Labels;
+import com.els.app.util.LogoutHelper;
+import com.els.app.util.SessionManager;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.switchmaterial.SwitchMaterial;
 
@@ -27,35 +29,32 @@ public class ProfileActivity extends AppCompatActivity {
     private SwitchMaterial switchDarkMode;
     private SwitchMaterial switchSound;
 
-    private LinearLayout itemChangePassword;
-    private LinearLayout itemSecurity;
-    private LinearLayout itemLanguage;
-    private LinearLayout itemHelp;
-    private LinearLayout itemAbout;
+    private View btnEditProfile;
+    private View itemChangePassword;
+    private View itemSecurity;
+    private View itemLanguage;
+    private View itemHelp;
+    private View itemAbout;
 
-    private MaterialButton btnEditProfile;
     private MaterialButton btnLogout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_profile);
 
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
-
-        // Không có bottomNav ở màn này — nút back hệ thống sẽ tự quay lại
-        // đúng màn trước đó (Home/Learn/Progress) vì các màn đó không finish()
-        // khi mở ProfileActivity.
-
         initViews();
+        setupWindowInsets();
+
         bindData();
         setupListeners();
     }
+
+    // ------------------------------------------------
+    // ÁNH XẠ VIEW
+    // ------------------------------------------------
 
     private void initViews() {
         tvUserName = findViewById(R.id.tvUserName);
@@ -66,79 +65,166 @@ public class ProfileActivity extends AppCompatActivity {
         switchDarkMode = findViewById(R.id.switchDarkMode);
         switchSound = findViewById(R.id.switchSound);
 
+        btnEditProfile = findViewById(R.id.btnEditProfile);
+
         itemChangePassword = findViewById(R.id.itemChangePassword);
         itemSecurity = findViewById(R.id.itemSecurity);
         itemLanguage = findViewById(R.id.itemLanguage);
         itemHelp = findViewById(R.id.itemHelp);
         itemAbout = findViewById(R.id.itemAbout);
 
-        btnEditProfile = findViewById(R.id.btnEditProfile);
         btnLogout = findViewById(R.id.btnLogout);
     }
 
+    // ------------------------------------------------
+    // WINDOW INSETS
+    // ------------------------------------------------
+
+    private void setupWindowInsets() {
+        View main = findViewById(R.id.main);
+
+        if (main != null) {
+            ViewCompat.setOnApplyWindowInsetsListener(main, (v, insets) -> {
+                Insets systemBars = insets.getInsets(
+                        WindowInsetsCompat.Type.systemBars()
+                );
+
+                v.setPadding(
+                        systemBars.left,
+                        systemBars.top,
+                        systemBars.right,
+                        systemBars.bottom
+                );
+
+                return insets;
+            });
+        }
+    }
+
+    // ------------------------------------------------
+    // HIỂN THỊ THÔNG TIN HỒ SƠ
+    // ------------------------------------------------
+
     private void bindData() {
-        // TODO: Lấy dữ liệu thật từ SharedPreferences / ViewModel
-        tvUserName.setText("Nguyễn Văn A");
-        tvUserEmail.setText("nguyenvana@gmail.com");
+        SessionManager session = new SessionManager(this);
+
+        String username = session.getUsername();
+        String email = session.getEmail();
+        String tier = session.getTier();
+
+        tvUserName.setText(
+                username != null ? username : "Học viên"
+        );
+
+        tvUserEmail.setText(
+                (email != null ? email : "")
+                        + "\nTrình độ: "
+                        + Labels.tier(tier)
+        );
+
         tvLanguageValue.setText("Tiếng Việt");
 
-        // TODO: đọc trạng thái đã lưu (SharedPreferences) để set switch đúng
         switchNotification.setChecked(true);
         switchDarkMode.setChecked(false);
         switchSound.setChecked(true);
     }
 
+    // ------------------------------------------------
+    // CÀI ĐẶT VÀ SỰ KIỆN
+    // ------------------------------------------------
+
     private void setupListeners() {
-        btnEditProfile.setOnClickListener(v -> {
-            // TODO: mở màn Chỉnh sửa hồ sơ
-        });
 
-        itemChangePassword.setOnClickListener(v -> {
-            // TODO: mở màn Đổi mật khẩu
-        });
+        // Chỉnh sửa hồ sơ: backend chưa có API.
+        btnEditProfile.setOnClickListener(v ->
+                showComingSoon("Chức năng chỉnh sửa hồ sơ")
+        );
 
-        itemSecurity.setOnClickListener(v -> {
-            // TODO: mở màn Bảo mật tài khoản
-        });
+        // Thông báo.
+        switchNotification.setOnCheckedChangeListener(
+                (buttonView, isChecked) ->
+                        Toast.makeText(
+                                this,
+                                isChecked
+                                        ? "Đã bật thông báo"
+                                        : "Đã tắt thông báo",
+                                Toast.LENGTH_SHORT
+                        ).show()
+        );
 
-        switchNotification.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            // TODO: lưu trạng thái + bật/tắt thông báo
-        });
+        // Giao diện tối.
+        switchDarkMode.setOnCheckedChangeListener(
+                (buttonView, isChecked) -> {
+                    androidx.appcompat.app.AppCompatDelegate.setDefaultNightMode(
+                            isChecked
+                                    ? androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES
+                                    : androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO
+                    );
+                }
+        );
 
-        switchDarkMode.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            int mode = isChecked
-                    ? AppCompatDelegate.MODE_NIGHT_YES
-                    : AppCompatDelegate.MODE_NIGHT_NO;
-            AppCompatDelegate.setDefaultNightMode(mode);
-            // TODO: lưu trạng thái vào SharedPreferences
-        });
+        // Âm thanh.
+        switchSound.setOnCheckedChangeListener(
+                (buttonView, isChecked) ->
+                        Toast.makeText(
+                                this,
+                                isChecked
+                                        ? "Đã bật âm thanh"
+                                        : "Đã tắt âm thanh",
+                                Toast.LENGTH_SHORT
+                        ).show()
+        );
 
-        switchSound.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            // TODO: lưu trạng thái bật/tắt âm thanh
-        });
+        // Đổi mật khẩu: backend chưa có API.
+        itemChangePassword.setOnClickListener(v ->
+                showComingSoon("Chức năng đổi mật khẩu")
+        );
 
-        itemLanguage.setOnClickListener(v -> {
-            // TODO: mở dialog / màn chọn ngôn ngữ
-        });
+        // Bảo mật.
+        itemSecurity.setOnClickListener(v ->
+                showComingSoon("Chức năng bảo mật")
+        );
 
-        itemHelp.setOnClickListener(v -> {
-            // TODO: mở màn Trợ giúp & hỗ trợ
-        });
+        // Ngôn ngữ.
+        itemLanguage.setOnClickListener(v ->
+                showComingSoon("Chức năng thay đổi ngôn ngữ")
+        );
 
-        itemAbout.setOnClickListener(v -> {
-            // TODO: mở màn Về chúng tôi
-        });
+        // Lịch sử làm bài thi.
+        itemHelp.setOnClickListener(v ->
+                startActivity(new Intent(
+                        this,
+                        ExamHistoryActivity.class
+                ))
+        );
 
+        // Giới thiệu.
+        itemAbout.setOnClickListener(v ->
+                showComingSoon("Thông tin ứng dụng")
+        );
+
+        // Đăng xuất.
         btnLogout.setOnClickListener(v -> doLogout());
     }
 
-    private void doLogout() {
-        // TODO: xóa session/token đã lưu (SharedPreferences, DataStore...)
-        Toast.makeText(this, "Đã đăng xuất", Toast.LENGTH_SHORT).show();
+    // ------------------------------------------------
+    // ĐĂNG XUẤT
+    // ------------------------------------------------
 
-        Intent intent = new Intent(this, LoginActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(intent);
-        finish();
+    private void doLogout() {
+        btnLogout.setEnabled(false);
+        LogoutHelper.logout(this);
+    }
+
+    // ------------------------------------------------
+    // THÔNG BÁO CHỨC NĂNG CHƯA TRIỂN KHAI
+    // ------------------------------------------------
+
+    private void showComingSoon(String feature) {
+        Toast.makeText(
+                this,
+                feature + " chưa được triển khai",
+                Toast.LENGTH_SHORT
+        ).show();
     }
 }

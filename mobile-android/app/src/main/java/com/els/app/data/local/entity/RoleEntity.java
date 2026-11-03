@@ -3,7 +3,6 @@ package com.els.app.data.local.entity;
 import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
-import androidx.room.Ignore;
 import androidx.room.Index;
 import androidx.room.PrimaryKey;
 
@@ -14,11 +13,16 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
-@Entity(tableName = "roles", indices = {@Index(value = "code", unique = true)})
+@Entity(
+        tableName = "roles",
+        indices = {
+                @Index(value = "code", unique = true)
+        }
+)
 @Data
 @Builder
 @AllArgsConstructor
-@NoArgsConstructor(onConstructor_ = @Ignore) // buộc Room dùng constructor đầy đủ (All-Args)
+@NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class RoleEntity {
 
