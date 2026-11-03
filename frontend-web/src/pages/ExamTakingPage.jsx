@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import api from "../api/api";
 import ExamLayout from "../layouts/ExamLayout";
+import ExamAiFeedback from "../components/ExamAiFeedback";
 import { getBackendTimezoneOffset } from "../utils/timezone";
 import { getReturnTo } from "../utils/navigation";
 
@@ -462,6 +463,11 @@ export default function ExamTakingPage() {
                 {accuracy}%
               </div>
             </div>
+          </div>
+
+          {/* AI FEEDBACK SECTION (ASYNCHRONOUS KAFKA EVALUATION) */}
+          <div className="mb-8">
+            <ExamAiFeedback sessionId={result.session_id || sessionInfo?.session_id} />
           </div>
 
           {/* ACTION BUTTONS */}

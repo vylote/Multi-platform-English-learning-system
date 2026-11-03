@@ -230,6 +230,24 @@ class ExamController {
       next(error);
     }
   }
+
+  async getAiFeedback(req, res, next) {
+    try {
+      const userId = req.user.id;
+      const { sessionId } = req.params;
+      const feedback = await examService.getAiFeedback(userId, sessionId);
+
+      return res.status(ErrorCode.SUCCESS.statusCode).json(
+        ApiResponse.builder()
+          .code(ErrorCode.SUCCESS.code)
+          .message("Lấy kết quả phân tích AI thành công")
+          .result(feedback)
+          .build(),
+      );
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 module.exports = new ExamController();

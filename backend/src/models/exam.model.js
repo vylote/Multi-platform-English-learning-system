@@ -73,7 +73,8 @@ class ExamReviewItem {
 }
 
 class ExamResultDetail {
-  constructor({ score, correct_count, total_questions, time_spent, review, tier_assigned }) {
+  constructor({ session_id, score, correct_count, total_questions, time_spent, review, tier_assigned }) {
+    this.session_id = session_id;
     this.score = score;
     this.correct_count = correct_count;
     this.total_questions = total_questions;
@@ -84,6 +85,7 @@ class ExamResultDetail {
 
   toJSON() {
     return {
+      session_id: this.session_id,
       score: this.score,
       correct_count: this.correct_count,
       total_questions: this.total_questions,

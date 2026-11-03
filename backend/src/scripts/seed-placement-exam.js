@@ -258,7 +258,7 @@ const PLACEMENT_QUESTIONS = [
 async function seedPlacementExam() {
   const client = await db.pool.connect();
   try {
-    console.log("🚀 Bắt đầu quá trình seed bài kiểm tra đầu vào (Placement Test)...");
+    console.log("Bắt đầu quá trình seed bài kiểm tra đầu vào (Placement Test)...");
 
     await client.query("BEGIN");
 
@@ -266,7 +266,7 @@ async function seedPlacementExam() {
     const existing = await client.query("SELECT id FROM exams WHERE exam_type = 'PLACEMENT'");
     if (existing.rows.length > 0) {
       const oldId = existing.rows[0].id;
-      console.log(`⚠️  Phát hiện bài Placement cũ (ID: ${oldId}). Đang làm mới...`);
+      console.log(`Phát hiện bài Placement cũ (ID: ${oldId}). Đang làm mới...`);
       await client.query("DELETE FROM exams WHERE id = $1", [oldId]);
     }
 
@@ -277,7 +277,7 @@ async function seedPlacementExam() {
        RETURNING id, title, duration, exam_type`,
     );
     const exam = examRes.rows[0];
-    console.log(`✅ Đã tạo đề thi: [ID: ${exam.id}] "${exam.title}" (${exam.duration} phút)`);
+    console.log(`Đã tạo đề thi: [ID: ${exam.id}]"${exam.title}"(${exam.duration} phút)`);
 
     // Chèn 30 câu hỏi
     for (let i = 0; i < PLACEMENT_QUESTIONS.length; i++) {
@@ -290,14 +290,14 @@ async function seedPlacementExam() {
     }
 
     await client.query("COMMIT");
-    console.log(`✅ Đã nạp thành công ${PLACEMENT_QUESTIONS.length} câu hỏi trắc nghiệm chuẩn hóa.`);
+    console.log(`Đã nạp thành công ${PLACEMENT_QUESTIONS.length} câu hỏi trắc nghiệm chuẩn hóa.`);
     console.log("   - 10 câu DỄ (Beginner)");
     console.log("   - 10 câu TRUNG BÌNH (Intermediate)");
     console.log("   - 10 câu KHÓ (Advanced)");
-    console.log("\n🎉 SEED PLACEMENT EXAM THÀNH CÔNG VÀ SẴN SÀNG SỬ DỤNG!");
+    console.log("\n SEED PLACEMENT EXAM THÀNH CÔNG VÀ SẴN SÀNG SỬ DỤNG!");
   } catch (err) {
     await client.query("ROLLBACK");
-    console.error("❌ Lỗi khi seed bài Placement Test:", err);
+    console.error("Lỗi khi seed bài Placement Test:", err);
     process.exit(1);
   } finally {
     client.release();

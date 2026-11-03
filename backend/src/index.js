@@ -14,6 +14,7 @@ const learningPathRoutes = require('./routes/learning-path.routes');
 const onBoardingRoutes = require('./routes/onboarding.route');
 const lessonRoutes = require('./routes/lesson.routes');
 const adminRoutes = require('./routes/admin.routes');
+const gamificationRoutes = require('./routes/gamification.routes');
 
 const { noResourceFoundHandler, globalExceptionHandler } = require('./middlewares/error.middleware');
 
@@ -46,6 +47,7 @@ app.use('/api/v1/learning-path', learningPathRoutes);
 app.use('/api/v1/onboarding', onBoardingRoutes);
 app.use('/api/v1/lessons', lessonRoutes);
 app.use('/api/v1/admin', adminRoutes);
+app.use('/api/v1/gamification', gamificationRoutes);
 
 app.use(noResourceFoundHandler);
 app.use(globalExceptionHandler);

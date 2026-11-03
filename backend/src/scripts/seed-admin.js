@@ -5,7 +5,7 @@ const db = require("../config/db");
 async function seedAdmin() {
   const client = await db.pool.connect();
   try {
-    console.log("🚀 Đang khởi tạo tài khoản Quản trị viên (ADMIN)...");
+    console.log("Đang khởi tạo tài khoản Quản trị viên (ADMIN)...");
 
     // 1. Tìm vai trò ADMIN
     const roleRes = await client.query("SELECT id FROM roles WHERE code = 'ADMIN'");
@@ -28,13 +28,13 @@ async function seedAdmin() {
       ["admin", "admin@anhlingo.com", passwordHash, adminRoleId]
     );
 
-    console.log("✅ Khởi tạo tài khoản ADMIN thành công!");
+    console.log("Khởi tạo tài khoản ADMIN thành công!");
     console.log(`   - Username: ${userRes.rows[0].username}`);
     console.log(`   - Email: ${userRes.rows[0].email}`);
     console.log("   - Password: admin123");
-    console.log("👉 Đăng nhập tại: http://localhost:5173/admin/login");
+    console.log("Đăng nhập tại: http://localhost:5173/admin/login");
   } catch (err) {
-    console.error("❌ Lỗi khi khởi tạo tài khoản ADMIN:", err.message);
+    console.error("Lỗi khi khởi tạo tài khoản ADMIN:", err.message);
     process.exit(1);
   } finally {
     client.release();

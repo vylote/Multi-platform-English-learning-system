@@ -51,4 +51,4 @@ for (const [name, svgContent] of Object.entries(TOPICS)) {
   fs.writeFileSync(filePath, svgContent.trim(), 'utf8');
 }
 
-console.log(`✅ Đã tạo thành công ${Object.keys(TOPICS).length} icon chủ đề SVG tĩnh tại: ${targetDir}`);
+console.log(`Đã tạo thành công ${Object.keys(TOPICS).length} icon chủ đề SVG tĩnh tại: ${targetDir}`);

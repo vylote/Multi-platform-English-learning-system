@@ -14,7 +14,7 @@ const scripts = [
 ];
 
 console.log("=======================================================");
-console.log("🌟 BẮT ĐẦU CHẠY TOÀN BỘ QUY TRÌNH NẠP DỮ LIỆU (SEED ALL)");
+console.log("BẮT ĐẦU CHẠY TOÀN BỘ QUY TRÌNH NẠP DỮ LIỆU (SEED ALL)");
 console.log("=======================================================\n");
 
 for (let i = 0; i < scripts.length; i++) {
@@ -29,15 +29,15 @@ for (let i = 0; i < scripts.length; i++) {
   });
 
   if (result.status !== 0) {
-    console.error(`\n❌ Script ${item.file} thất bại (Exit code: ${result.status})`);
+    console.error(`\n Script ${item.file} thất bại (Exit code: ${result.status})`);
     process.exit(result.status || 1);
   }
-  console.log(`✅ Hoàn thành: ${item.name}\n`);
+  console.log(`Hoàn thành: ${item.name}\n`);
 }
 
 console.log("=======================================================");
-console.log("🎉 TẤT CẢ DỮ LIỆU ĐÃ ĐƯỢC SEED THÀNH CÔNG VÀO DATABASE!");
-console.log("👉 Đăng nhập Admin: http://localhost:5173/admin/login");
+console.log("TẤT CẢ DỮ LIỆU ĐÃ ĐƯỢC SEED THÀNH CÔNG VÀO DATABASE!");
+console.log("Đăng nhập Admin: http://localhost:5173/admin/login");
 console.log("   - Username: admin");
 console.log("   - Password: admin123");
 console.log("=======================================================");

@@ -3,6 +3,8 @@ const examRepository = require("../repositories/exam.repository");
 const lessonRepository = require("../repositories/lesson.repository");
 const streakService = require("./streak.service");
 const systemSettingService = require("./system-setting.service");
+const activityProducer = require("../kafka/producers/activity.producer");
+const vocabProducer = require("../kafka/producers/vocab.producer");
 const AppException = require("../exceptions/app.exception");
 const { ErrorCode } = require("../common/error-code");
 
@@ -118,10 +120,55 @@ class TopicLessonService {
     // Tự động ghi nhận chuỗi ngày học streak khi hoàn thành bài học
     await this._recordStreakSafely(userId, timezoneOffsetMinutes);
 
+    // Bắn event hoạt động học tập hoàn thành vào Kafka Topic (async, non-blocking)
+    const combinedScore = (quizScore + pronunciationScore) / 2;
+    activityProducer
+      .publishActivityCompleted({
+        userId,
+        activityType: "LESSON_COMPLETED",
+        referenceId: Number(topicId),
+        score: Math.round(combinedScore),
+        timezoneOffsetMinutes: Number.isInteger(timezoneOffsetMinutes)
+          ? timezoneOffsetMinutes
+          : 0,
+      })
+      .catch((err) => {
+        console.warn("[Kafka Activity Publish Error]", err.message);
+      });
+
+    // Bắn event từ vựng phát âm yếu vào Kafka Topic: vocab.learning.events (chạy nền, không block)
+    const weakPronunciations = pronunciationResults.filter((r) => !r.isCorrect);
+    if (weakPronunciations.length > 0) {
+      (async () => {
+        try {
+          const events = [];
+          for (const item of weakPronunciations) {
+            const wordObj = await wordRepository.findByExactWord(item.word);
+            if (wordObj) {
+              events.push({
+                userId,
+                wordId: wordObj.id,
+                word: wordObj.word,
+                topicId: Number(topicId),
+                eventType: "PRONUNCIATION_WEAK",
+                mistakeDetail: "Phát âm chưa chuẩn trong bài học chủ đề",
+                timestamp: Date.now(),
+              });
+            }
+          }
+          if (events.length > 0) {
+            await vocabProducer.publishBatchVocabEvents(events);
+          }
+        } catch (vocabErr) {
+          console.warn("[Kafka Vocab Publish Error]", vocabErr.message);
+        }
+      })();
+    }
+
     return {
       quizScore,
       pronunciationScore,
-      combinedScore: (quizScore + pronunciationScore) / 2,
+      combinedScore,
       completedAt: attempt.completed_at,
     };
   }

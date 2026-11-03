@@ -169,6 +169,24 @@ docker compose up -d
 
 ---
 
+### 5.2.1. (Tùy chọn) Khởi động Cụm Kafka Cluster Phân Tán (3 Brokers + Kafka UI)
+
+Cụm Kafka được **tách riêng biệt** trong tệp [`docker-compose.kafka.yml`](file:///home/vylote/Projects/Multi-platform-English-learning-system/docker-compose.kafka.yml) theo chuẩn hiện đại **KRaft Mode** (không cần ZooKeeper), gồm:
+- **3 Kafka Brokers:** `kafka-1` (port 9092), `kafka-2` (port 9093), `kafka-3` (port 9094) đảm bảo độ sẵn sàng cao (High Availability, Replication Factor = 3).
+- **Kafka UI Dashboard:** Trực quan hóa toàn bộ cụm, theo dõi Topics, Partitions, Consumer Groups và thông điệp thời gian thực tại: **`http://localhost:8085`**.
+
+Khi cần sử dụng Event Streaming cho hệ thống, chạy lệnh:
+```bash
+# Khởi chạy riêng cụm Kafka Cluster
+docker compose -f docker-compose.kafka.yml up -d
+
+# Khi muốn dừng cụm Kafka:
+docker compose -f docker-compose.kafka.yml down
+```
+*(Cụm Kafka và cơ sở dữ liệu chính tự động kết nối chung mạng Docker `els_network`).*
+
+---
+
 ### 5.3. Khởi tạo CSDL qua các File SQL (Schema & Roles)
 
 Thư mục [`backend/src/docs/`](file:///home/vylote/Projects/Multi-platform-English-learning-system/backend/src/docs/) cung cấp các tệp SQL cốt lõi:

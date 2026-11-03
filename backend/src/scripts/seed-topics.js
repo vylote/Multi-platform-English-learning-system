@@ -90,7 +90,7 @@ const GOAL_PRIORITY_MAP = {
 async function seedTopics() {
   const client = await pool.connect();
   try {
-    console.log('🚀 Bắt đầu quá trình seed topics vào cơ sở dữ liệu...');
+    console.log('Bắt đầu quá trình seed topics vào cơ sở dữ liệu...');
 
     // 1. Đọc file config
     const configPath = path.join(__dirname, 'topic_config.json');
@@ -99,7 +99,7 @@ async function seedTopics() {
     }
     const topicSeeds = JSON.parse(fs.readFileSync(configPath, 'utf8'));
     const topicTitles = Object.keys(topicSeeds);
-    console.log(`📄 Tìm thấy ${topicTitles.length} topics trong topic_config.json`);
+    console.log(`Tìm thấy ${topicTitles.length} topics trong topic_config.json`);
 
     await client.query('BEGIN');
 
@@ -127,7 +127,7 @@ async function seedTopics() {
         insertedCount++;
       }
     }
-    console.log(`✅ Hoàn thành chèn mới: ${insertedCount}, cập nhật mô tả: ${updatedCount} topics.`);
+    console.log(`Hoàn thành chèn mới: ${insertedCount}, cập nhật mô tả: ${updatedCount} topics.`);
 
     // 3. Cập nhật difficulty cho từng nhóm
     for (const [diff, titles] of Object.entries(DIFFICULTY_MAP)) {
@@ -160,7 +160,7 @@ async function seedTopics() {
       FROM ranked r
       WHERE t.id = r.id;
     `);
-    console.log('✅ Đã cập nhật xong order_index (1 -> 36) theo lộ trình chuẩn.');
+    console.log('Đã cập nhật xong order_index (1 -> 36) theo lộ trình chuẩn.');
 
     // 5. Seed bảng topic_goal_priority
     let totalGoalLinks = 0;
@@ -181,7 +181,7 @@ async function seedTopics() {
         totalGoalLinks++;
       }
     }
-    console.log(`✅ Đã thiết lập ${totalGoalLinks} liên kết mục tiêu học tập (topic_goal_priority).`);
+    console.log(`Đã thiết lập ${totalGoalLinks} liên kết mục tiêu học tập (topic_goal_priority).`);
 
     await client.query('COMMIT');
 
@@ -198,7 +198,7 @@ async function seedTopics() {
         END;
     `);
 
-    console.log('\n📊 TỔNG KẾT DỮ LIỆU TOPICS TRONG DATABASE:');
+    console.log('\n TỔNG KẾT DỮ LIỆU TOPICS TRONG DATABASE:');
     summary.rows.forEach((r) => {
       console.log(`   - Trình độ ${r.difficulty}: ${r.count} chủ đề`);
     });
@@ -209,15 +209,15 @@ async function seedTopics() {
       ORDER BY order_index ASC 
       LIMIT 5;
     `);
-    console.log('\n🌟 5 chủ đề đầu tiên trong Lộ trình:');
+    console.log('\n 5 chủ đề đầu tiên trong Lộ trình:');
     sample.rows.forEach((r) => {
       console.log(`   [#${r.order_index}] ID: ${r.id} | ${r.title} (${r.difficulty})`);
     });
 
-    console.log('\n🎉 SEED TOPICS THÀNH CÔNG VÀ SẴN SÀNG SỬ DỤNG!');
+    console.log('\n SEED TOPICS THÀNH CÔNG VÀ SẴN SÀNG SỬ DỤNG!');
   } catch (err) {
     await client.query('ROLLBACK');
-    console.error('❌ Lỗi khi seed topics:', err);
+    console.error('Lỗi khi seed topics:', err);
     process.exit(1);
   } finally {
     client.release();
