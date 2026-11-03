@@ -38,6 +38,7 @@ CREATE TABLE IF NOT EXISTS users (
     tier VARCHAR(50),
     experience_level VARCHAR(50),
     learning_purpose VARCHAR(150),
+    learning_goal VARCHAR(30) CHECK (learning_goal IN ('DAILY_COMMUNICATION', 'CAREER', 'TRAVEL', 'HOBBY')),
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -60,12 +61,15 @@ CREATE TABLE IF NOT EXISTS idioms (
     example TEXT
 );
 
--- 7. BẢNG TOPICS: Phân nhóm chủ đề học tập và lộ trình
+-- 7. BẢNG TOPICS: Phân nhóm chủ đề học tập và lộ trình 36 bài uốn lượn
 CREATE TABLE IF NOT EXISTS topics (
     id SERIAL PRIMARY KEY,                  -- Tự sinh index: topics_pkey
-    title VARCHAR(100) NOT NULL,
-    description TEXT
+    title VARCHAR(100) UNIQUE NOT NULL,     -- Tự sinh index: topics_title_key
+    description TEXT,
+    difficulty VARCHAR(20) NOT NULL DEFAULT 'BEGINNER' CHECK (difficulty IN ('BEGINNER', 'INTERMEDIATE', 'ADVANCED')),
+    order_index INTEGER NOT NULL DEFAULT 0
 );
+CREATE INDEX IF NOT EXISTS idx_topics_order ON topics (order_index);
 
 -- Khóa ngoại từ words -> topics
 ALTER TABLE words ADD COLUMN IF NOT EXISTS topic_id INTEGER REFERENCES topics(id) ON DELETE SET NULL;
@@ -81,9 +85,6 @@ CREATE TABLE IF NOT EXISTS flashcards (
     status VARCHAR(20) DEFAULT 'NEW' CHECK (status IN ('NEW', 'LEARNING', 'MASTERED')),
     last_reviewed TIMESTAMPTZ,
     CONSTRAINT uq_user_word UNIQUE(user_id, word_id)  -- Tự sinh index: uq_user_word (user_id, word_id)
-    -- CHƯA CẦN: index riêng cho topic_id hoặc word_id một mình - chưa có
-    -- repository nào query theo 2 cột này độc lập. Khi có tính năng
-    -- "lọc flashcard theo chủ đề" hoặc "thống kê độ phổ biến từ vựng",
 );
 
 CREATE INDEX IF NOT EXISTS uq_flashcards_user_topic ON flashcards (user_id, topic_id);
@@ -97,16 +98,17 @@ CREATE TABLE IF NOT EXISTS streak_logs (
     CONSTRAINT uq_user_activity UNIQUE(user_id, activity_date)  -- Tự sinh index: uq_user_activity (user_id, activity_date)
 );
 
--- 10. BẢNG EXAMS: Danh sách đề thi trắc nghiệm có tính giờ
+-- 10. BẢNG EXAMS: Danh sách đề thi trắc nghiệm có tính giờ (Topic Exam & Placement Test)
 CREATE TABLE IF NOT EXISTS exams (
     id SERIAL PRIMARY KEY,                  -- Tự sinh index: exams_pkey
-    topic_id INTEGER NOT NULL REFERENCES topics(id) ON DELETE CASCADE,
+    topic_id INTEGER REFERENCES topics(id) ON DELETE CASCADE,
     title VARCHAR(150) NOT NULL,
     duration INTEGER NOT NULL,
+    exam_type VARCHAR(20) NOT NULL DEFAULT 'TOPIC' CHECK (exam_type IN ('TOPIC', 'PLACEMENT')),
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
-    -- CHƯA CẦN: index cho topic_id - chưa có tính năng "danh sách đề thi
-    -- theo chủ đề" được triển khai trong repository hiện tại
 );
+CREATE UNIQUE INDEX IF NOT EXISTS uq_single_placement_exam
+  ON exams ((exam_type)) WHERE exam_type = 'PLACEMENT';
 
 -- 11. BẢNG QUESTIONS: Danh sách câu hỏi trắc nghiệm chi tiết
 CREATE TABLE IF NOT EXISTS questions (

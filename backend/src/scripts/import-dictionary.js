@@ -121,10 +121,29 @@ function truncate(str, maxLen) {
 
 async function importDictionary() {
   console.log(`Bắt đầu import từ: ${FILE_PATH}`);
-  const fileStream = fs.createReadStream(FILE_PATH); //TODO: tạo stream đọc từng block data
+
+  // Kiểm tra bảng words đã được tạo trong CSDL chưa
+  try {
+    const tableCheck = await db.pool.query(
+      "SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'words')"
+    );
+    if (!tableCheck.rows[0].exists) {
+      console.error("\n❌ LỖI: Bảng 'words' chưa được tạo trong CSDL!");
+      console.error("👉 Vui lòng chạy file 'schema.sql' trước:");
+      console.error("   Linux:   docker exec -i my_postgres psql -U postgres -d els_db < src/docs/schema.sql");
+      console.error("   Windows: Get-Content src\\docs\\schema.sql | docker exec -i my_postgres psql -U postgres -d els_db\n");
+      process.exit(1);
+    }
+  } catch (dbErr) {
+    console.error("\n❌ Không thể kết nối tới PostgreSQL! Hãy đảm bảo Docker my_postgres đang chạy.");
+    console.error("   Lỗi:", dbErr.message);
+    process.exit(1);
+  }
+
+  const fileStream = fs.createReadStream(FILE_PATH);
   const rl = readline.createInterface({
     input: fileStream,
-    crlfDelay: Infinity, //TODO: Chuẩn hóa kí tự xuống dòng WIN(\r\n), Linux, MacOS(\n)
+    crlfDelay: Infinity,
   });
 
   let batch = [];
