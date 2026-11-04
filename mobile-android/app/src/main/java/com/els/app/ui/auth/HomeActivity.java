@@ -195,16 +195,18 @@ public class HomeActivity extends AppCompatActivity {
         );
 
         cardGrammar.setOnClickListener(v ->
-                navigateTo(GrammarActivity.class)
+                navigateTo(AchievementsActivity.class)
         );
 
         cardDictionary.setOnClickListener(v ->
                 navigateTo(DictionaryActivity.class)
         );
 
-        cardQuiz.setOnClickListener(v ->
-                navigateTo(QuizActivity.class)
-        );
+        cardQuiz.setOnClickListener(v -> {
+            Intent i = new Intent(this, TopicPickerActivity.class);
+            i.putExtra(TopicPickerActivity.EXTRA_MODE, TopicPickerActivity.MODE_EXAM);
+            startActivity(i);
+        });
     }
 
     private void setupBottomNav() {

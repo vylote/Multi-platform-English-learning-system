@@ -5,16 +5,20 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.cardview.widget.CardView;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -33,8 +37,8 @@ import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
-import java.util.Locale;
 
 import retrofit2.Call;
 
@@ -42,13 +46,28 @@ public class DictionaryActivity extends AppCompatActivity {
 
     private static final int MAX_RECENT_WORDS = 3;
     private static final long SEARCH_DELAY = 400L;
+    private static final int DAILY_WORD_COUNT = 4;
 
     private static final String PREF_NAME = "dictionary_preferences";
     private static final String KEY_RECENT_WORDS = "recent_words";
 
+    // Cùng danh sách SUGGESTED_WORDS của DictionaryPage.jsx (web)
+    private static final String[][] SUGGESTED_WORDS = {
+            {"opportunity", "Cơ hội"},
+            {"resilience", "Kiên cường"},
+            {"delicious", "Ngon miệng"},
+            {"knowledge", "Tri thức"},
+            {"journey", "Hành trình"},
+            {"challenge", "Thử thách"},
+            {"efficient", "Hiệu quả"},
+            {"curious", "Tò mò"}
+    };
+
     // Views
     private TextInputEditText edtSearch;
 
+    private View layoutDailyWords;
+    private LinearLayout layoutDailyWordItems;
     private View layoutRecent;
     private View cardResult;
     private View layoutNotFound;
@@ -119,6 +138,7 @@ public class DictionaryActivity extends AppCompatActivity {
 
         loadRecentSearches();
         setupRecentSearchList();
+        setupDailyWords();
         setupListeners();
         setupBottomNav();
 
@@ -157,6 +177,8 @@ public class DictionaryActivity extends AppCompatActivity {
 
         edtSearch = findViewById(R.id.edtSearch);
 
+        layoutDailyWords = findViewById(R.id.layoutDailyWords);
+        layoutDailyWordItems = findViewById(R.id.layoutDailyWordItems);
         layoutRecent = findViewById(R.id.layoutRecent);
         cardResult = findViewById(R.id.cardResult);
         layoutNotFound = findViewById(R.id.layoutNotFound);
@@ -173,6 +195,77 @@ public class DictionaryActivity extends AppCompatActivity {
 
         rvRecentSearches = findViewById(R.id.rvRecentSearches);
         bottomNav = findViewById(R.id.bottomNav);
+    }
+
+    // ---------------------------------------------------------
+    // DAILY SUGGESTED WORDS (Từ vựng gợi ý hôm nay)
+    // ---------------------------------------------------------
+
+    /**
+     * Đổ 4 từ gợi ý của hôm nay vào layoutDailyWordItems.
+     * Bộ từ xoay vòng theo ngày trong năm nên mỗi ngày một bộ khác.
+     */
+    private void setupDailyWords() {
+        float density = getResources().getDisplayMetrics().density;
+        layoutDailyWordItems.removeAllViews();
+
+        int dayOfYear = Calendar.getInstance().get(Calendar.DAY_OF_YEAR);
+        int start = (dayOfYear * DAILY_WORD_COUNT) % SUGGESTED_WORDS.length;
+
+        for (int k = 0; k < DAILY_WORD_COUNT; k++) {
+            String[] item = SUGGESTED_WORDS[(start + k) % SUGGESTED_WORDS.length];
+            final String word = item[0];
+
+            CardView card = new CardView(this);
+            LinearLayout.LayoutParams cardParams = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+            );
+            cardParams.topMargin = (int) (8 * density);
+            card.setLayoutParams(cardParams);
+            card.setRadius(14 * density);
+            card.setCardElevation(2 * density);
+            card.setCardBackgroundColor(0xFFFFFFFF);
+
+            LinearLayout row = new LinearLayout(this);
+            row.setOrientation(LinearLayout.HORIZONTAL);
+            row.setGravity(Gravity.CENTER_VERTICAL);
+            row.setPadding(
+                    (int) (16 * density),
+                    (int) (12 * density),
+                    (int) (16 * density),
+                    (int) (12 * density)
+            );
+
+            TextView tvWord = new TextView(this);
+            tvWord.setText(word);
+            tvWord.setTextColor(0xFF0F172A);
+            tvWord.setTextSize(15);
+            tvWord.setLayoutParams(new LinearLayout.LayoutParams(
+                    0,
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    1f
+            ));
+
+            TextView tvLabel = new TextView(this);
+            tvLabel.setText(item[1]);
+            tvLabel.setTextColor(0xFF94A3B8);
+            tvLabel.setTextSize(13);
+
+            row.addView(tvWord);
+            row.addView(tvLabel);
+            card.addView(row);
+
+            card.setOnClickListener(v -> {
+                edtSearch.setText(word);
+                edtSearch.setSelection(word.length());
+
+                searchHandler.removeCallbacks(searchRunnable);
+                performSearch(word);
+            });
+
+            layoutDailyWordItems.addView(card);
+        }
     }
 
     // ---------------------------------------------------------
@@ -283,7 +376,7 @@ public class DictionaryActivity extends AppCompatActivity {
         btnBack.setOnClickListener(v -> finish());
 
         // Realtime search with debounce
-        edtSearch.addTextChangedListener(new android.text.TextWatcher() {
+        edtSearch.addTextChangedListener(new TextWatcher() {
 
             @Override
             public void beforeTextChanged(
@@ -319,7 +412,7 @@ public class DictionaryActivity extends AppCompatActivity {
             }
 
             @Override
-            public void afterTextChanged(android.text.Editable s) {
+            public void afterTextChanged(Editable s) {
             }
         });
 
@@ -362,7 +455,7 @@ public class DictionaryActivity extends AppCompatActivity {
                 ).show()
         );
 
-        // This feature has not been implemented yet
+        // Backend chưa có endpoint thêm từ vào flashcard -> ẩn nút
         if (btnAddToVocab != null) {
             btnAddToVocab.setVisibility(View.GONE);
         }
@@ -448,8 +541,7 @@ public class DictionaryActivity extends AppCompatActivity {
 
                         currentWord = firstWord;
 
-                        // Combine meanings if the API returns
-                        // multiple rows for the same word
+                        // Gộp các nghĩa nếu API trả nhiều dòng cho cùng một từ
                         StringBuilder meanings = new StringBuilder();
 
                         for (ApiModels.WordDto item : results) {
@@ -543,8 +635,7 @@ public class DictionaryActivity extends AppCompatActivity {
             tvResultMeaning.setText(meanings);
         }
 
-        // The current WordDto does not provide example
-        // or synonym fields in the code shared so far.
+        // Backend chưa có câu ví dụ / từ đồng nghĩa
         tvResultExample.setText("");
         tvResultSynonyms.setText("");
 
@@ -553,19 +644,23 @@ public class DictionaryActivity extends AppCompatActivity {
         showResultState();
     }
 
+    // Chưa tìm gì: hiện "Từ vựng gợi ý hôm nay" + "Tra cứu gần đây" (nếu có)
     private void showRecentState() {
-        layoutRecent.setVisibility(View.VISIBLE);
+        layoutDailyWords.setVisibility(View.VISIBLE);
+        layoutRecent.setVisibility(recentWords.isEmpty() ? View.GONE : View.VISIBLE);
         cardResult.setVisibility(View.GONE);
         layoutNotFound.setVisibility(View.GONE);
     }
 
     private void showResultState() {
+        layoutDailyWords.setVisibility(View.GONE);
         layoutRecent.setVisibility(View.GONE);
         cardResult.setVisibility(View.VISIBLE);
         layoutNotFound.setVisibility(View.GONE);
     }
 
     private void showNotFoundState() {
+        layoutDailyWords.setVisibility(View.GONE);
         layoutRecent.setVisibility(View.GONE);
         cardResult.setVisibility(View.GONE);
         layoutNotFound.setVisibility(View.VISIBLE);
@@ -582,13 +677,13 @@ public class DictionaryActivity extends AppCompatActivity {
             int itemId = item.getItemId();
 
             if (itemId == R.id.nav_home) {
-                // Replace this class with your existing HomeActivity import
                 startActivity(new Intent(this, HomeActivity.class));
                 finish();
                 return true;
 
             } else if (itemId == R.id.nav_learn) {
-                // Already on the learning section
+                startActivity(new Intent(this, LearnActivity.class));
+                finish();
                 return true;
 
             } else if (itemId == R.id.nav_progress) {

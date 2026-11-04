@@ -61,6 +61,8 @@
             android:windowSoftInputMode="adjustResize" />
         <activity android:name=".ui.auth.QuizActivity" android:exported="false"
             android:windowSoftInputMode="adjustResize" />
+        <activity android:name=".ui.auth.AchievementsActivity" android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
     </application>
 
 </manifest>

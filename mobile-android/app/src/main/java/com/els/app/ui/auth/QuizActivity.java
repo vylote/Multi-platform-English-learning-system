@@ -1,5 +1,6 @@
 package com.els.app.ui.auth;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.view.View;
@@ -87,6 +88,12 @@ public class QuizActivity extends AppCompatActivity {
         api = RetrofitClient.create(this, LearningApiService.class);
         placement = getIntent().getBooleanExtra(EXTRA_PLACEMENT, false);
         examId = getIntent().getLongExtra(EXTRA_EXAM_ID, 0);
+        if (!placement && examId <= 0) {
+            // Chưa chọn đề -> chuyển sang màn chọn đề thay vì báo lỗi
+            startActivity(new Intent(this, ExamListActivity.class));
+            finish();
+            return;
+        }
 
         initViews();
 
