@@ -7,7 +7,8 @@ class LessonController {
   async getTopicLesson(req, res, next) {
     try {
       const { topicId } = req.params;
-      const lesson = await topicLessonService.getLesson(topicId);
+      const userId = req.user?.id;
+      const lesson = await topicLessonService.getLesson(topicId, userId);
       return res.status(ErrorCode.SUCCESS.statusCode).json(
         ApiResponse.builder()
           .code(ErrorCode.SUCCESS.code)

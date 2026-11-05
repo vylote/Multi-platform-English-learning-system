@@ -5,9 +5,10 @@ const { startStreakTrackerConsumer } = require("./consumers/streak-tracker.consu
 const { startGamificationExpConsumer } = require("./consumers/gamification-exp.consumer");
 const { startSmartFlashcardConsumer } = require("./consumers/smart-flashcard.consumer");
 const { startVocabAnalyticsConsumer } = require("./consumers/vocab-analytics.consumer");
+const { runLessonAiPregenConsumer } = require("./consumers/lesson-pregen.consumer");
 
 console.log("=======================================================");
-console.log("KHỞI ĐỘNG KAFKA BACKGROUND WORKER (ANHLINGO EVENT RUNNER)");
+console.log("KHOI DONG KAFKA BACKGROUND WORKER (ANHLINGO EVENT RUNNER)");
 console.log("=======================================================\n");
 
 async function runWorker() {
@@ -23,10 +24,11 @@ async function runWorker() {
       startGamificationExpConsumer(),
       startSmartFlashcardConsumer(),
       startVocabAnalyticsConsumer(),
+      runLessonAiPregenConsumer(),
     ]);
-    console.log("\n Tất cả Kafka Consumers đã sẵn sàng tiếp nhận sự kiện!\n");
+    console.log("\nTat ca Kafka Consumers da san sang tiep nhan su kien!\n");
   } catch (err) {
-    console.error("Không thể khởi động Kafka Worker:", err.message);
+    console.error("Khong the khoi dong Kafka Worker:", err.message);
     process.exit(1);
   }
 }
@@ -35,11 +37,11 @@ runWorker();
 
 // Graceful shutdown
 process.on("SIGINT", () => {
-  console.log("\n Đang dừng Kafka Worker an toàn...");
+  console.log("\nDang dung Kafka Worker an toan...");
   process.exit(0);
 });
 
 process.on("SIGTERM", () => {
-  console.log("\n Đang dừng Kafka Worker an toàn...");
+  console.log("\nDang dung Kafka Worker an toan...");
   process.exit(0);
 });

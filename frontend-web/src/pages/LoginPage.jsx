@@ -5,7 +5,6 @@ import toast from "react-hot-toast";
 import { Eye, EyeOff, AlertCircle } from "lucide-react";
 
 import AuthLayout from "../layouts/AuthLayout";
-import SocialButtons from "../components/SocialButtons";
 import PolicyFooter from "../components/PolicyFooter";
 import api from "../api/api";
 import { loginSuccess } from "../store/slice/authSlice";
@@ -119,7 +118,6 @@ export default function LoginPage() {
           {submitting ? "Đang đăng nhập..." : "Đăng nhập"}
         </button>
 
-        <SocialButtons />
         <PolicyFooter mode="login" />
       </form>
 

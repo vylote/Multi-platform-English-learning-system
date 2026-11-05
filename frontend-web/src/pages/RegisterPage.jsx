@@ -4,17 +4,22 @@ import toast from "react-hot-toast";
 import { Eye, EyeOff, AlertCircle } from "lucide-react";
 
 import AuthLayout from "../layouts/AuthLayout";
-import SocialButtons from "../components/SocialButtons";
 import PolicyFooter from "../components/PolicyFooter";
 import api from "../api/api";
 
 export default function RegisterPage() {
   const navigate = useNavigate();
 
-  const [form, setForm] = useState({ username: "", email: "", password: "", age: "" });
+  const [form, setForm] = useState({
+    username: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
   const [errorMsg, setErrorMsg] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleChange = (e) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -22,11 +27,16 @@ export default function RegisterPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const { username, email, password } = form;
-    if (!username || !email || !password) return;
+    const { username, email, password, confirmPassword } = form;
+    if (!username || !email || !password || !confirmPassword) return;
 
     if (password.length < 6) {
       setErrorMsg("Mật khẩu phải có tối thiểu 6 ký tự.");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setErrorMsg("Mật khẩu xác nhận không khớp.");
       return;
     }
 
@@ -57,7 +67,7 @@ export default function RegisterPage() {
           <input
             type="text"
             name="username"
-            placeholder="Tên đăng nhập (viết liền, không dấu)"
+            placeholder="Tên đăng nhập"
             value={form.username}
             onChange={handleChange}
             autoComplete="username"
@@ -85,7 +95,7 @@ export default function RegisterPage() {
           <input
             type={showPassword ? "text" : "password"}
             name="password"
-            placeholder="Mật khẩu (tối thiểu 6 ký tự)"
+            placeholder="Mật khẩu"
             value={form.password}
             onChange={handleChange}
             autoComplete="new-password"
@@ -109,18 +119,33 @@ export default function RegisterPage() {
           </button>
         </div>
 
-        {/* Optional Age Input */}
-        <div>
+        {/* Confirm Password Input */}
+        <div className="relative">
           <input
-            type="number"
-            name="age"
-            placeholder="Tuổi (tùy chọn)"
-            value={form.age}
+            type={showConfirmPassword ? "text" : "password"}
+            name="confirmPassword"
+            placeholder="Xác nhận mật khẩu"
+            value={form.confirmPassword}
             onChange={handleChange}
-            min={1}
-            max={120}
-            className="w-full px-4 py-3 rounded-2xl border-2 border-[#d5cdbd] dark:border-gray-700 bg-[#ede8dc]/30 dark:bg-gray-800/80 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 font-bold text-sm sm:text-base outline-none focus:border-[#58cc02] dark:focus:border-[#58cc02] focus:bg-white dark:focus:bg-gray-800 transition-all shadow-2xs"
+            autoComplete="new-password"
+            required
+            minLength={6}
+            className="w-full px-4 py-3 pr-12 rounded-2xl border-2 border-[#d5cdbd] dark:border-gray-700 bg-[#ede8dc]/30 dark:bg-gray-800/80 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 font-bold text-sm sm:text-base outline-none focus:border-[#58cc02] dark:focus:border-[#58cc02] focus:bg-white dark:focus:bg-gray-800 transition-all shadow-2xs"
           />
+
+          <button
+            type="button"
+            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+            tabIndex={-1}
+            aria-label={showConfirmPassword ? "Ẩn xác nhận mật khẩu" : "Hiện xác nhận mật khẩu"}
+            className="absolute inset-y-0 right-0 flex items-center pr-3.5 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors cursor-pointer"
+          >
+            {showConfirmPassword ? (
+              <EyeOff className="w-5 h-5 stroke-[2]" />
+            ) : (
+              <Eye className="w-5 h-5 stroke-[2]" />
+            )}
+          </button>
         </div>
 
         {/* Error Alert */}
@@ -134,13 +159,18 @@ export default function RegisterPage() {
         {/* 3D Submit Button */}
         <button
           type="submit"
-          disabled={submitting || !form.username || !form.email || !form.password}
+          disabled={
+            submitting ||
+            !form.username ||
+            !form.email ||
+            !form.password ||
+            !form.confirmPassword
+          }
           className="w-full py-3.5 mt-2 rounded-2xl text-white font-black text-[15px] uppercase tracking-wider bg-[#58cc02] hover:bg-[#4fb802] border-b-4 border-[#3b8702] active:translate-y-1 active:border-b-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:translate-y-0 disabled:border-b-4 transition-all shadow-sm cursor-pointer"
         >
           {submitting ? "Đang tạo tài khoản..." : "Tạo tài khoản"}
         </button>
 
-        <SocialButtons />
         <PolicyFooter mode="register" />
       </form>
 

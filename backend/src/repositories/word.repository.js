@@ -73,6 +73,34 @@ class WordRepository {
     );
     return rows[0] ? new Word({ ...rows[0], isExternal: false }) : null;
   }
+
+  // Lấy các từ tiếng Anh ngẫu nhiên để làm đáp án gây nhiễu cho câu hỏi trắc nghiệm
+  async findDistractorWords(excludeWordIds = [], limit = 15) {
+    let sql = `SELECT id, word FROM words`;
+    const params = [];
+    if (excludeWordIds.length > 0) {
+      sql += ` WHERE id != ALL($1::int[])`;
+      params.push(excludeWordIds);
+    }
+    sql += ` ORDER BY RANDOM() LIMIT $${params.length + 1};`;
+    params.push(limit);
+    const { rows } = await db.query(sql, params);
+    return rows.map((r) => r.word).filter(Boolean);
+  }
+
+  // Lấy các nghĩa tiếng Việt ngẫu nhiên để làm đáp án gây nhiễu cho câu hỏi trắc nghiệm
+  async findDistractorMeanings(excludeWordIds = [], limit = 15) {
+    let sql = `SELECT id, meaning_vi FROM words`;
+    const params = [];
+    if (excludeWordIds.length > 0) {
+      sql += ` WHERE id != ALL($1::int[])`;
+      params.push(excludeWordIds);
+    }
+    sql += ` ORDER BY RANDOM() LIMIT $${params.length + 1};`;
+    params.push(limit);
+    const { rows } = await db.query(sql, params);
+    return rows.map((r) => r.meaning_vi).filter(Boolean);
+  }
 }
 
 module.exports = new WordRepository();

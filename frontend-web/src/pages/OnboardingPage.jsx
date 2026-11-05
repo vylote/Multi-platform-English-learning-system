@@ -54,7 +54,7 @@ export default function OnboardingPage() {
 
   if (step === 1) {
     return (
-      <AuthLayout>
+      <AuthLayout mode="onboarding">
         <h1 className="text-2xl font-bold text-center mb-6 text-gray-900 dark:text-white">
           Bạn đã biết tiếng Anh chưa?
         </h1>
@@ -77,7 +77,7 @@ export default function OnboardingPage() {
   }
 
   return (
-    <AuthLayout onBack={() => setStep(1)}>
+    <AuthLayout mode="onboarding" onBack={() => setStep(1)}>
       <h1 className="text-2xl font-bold text-center mb-6 text-gray-900 dark:text-white">
         Bạn học tiếng Anh để làm gì?
       </h1>

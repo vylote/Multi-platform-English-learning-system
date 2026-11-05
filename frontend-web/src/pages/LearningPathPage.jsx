@@ -5,7 +5,7 @@ import MainLayout from "../layouts/MainLayout";
 import { withReturnTo } from "../utils/navigation";
 import { TopicIcon } from "../utils/topicIcons";
 
-const UNLOCK_THRESHOLD = 60; // phải khớp UNLOCK_THRESHOLD ở learning-path.service.js
+const UNLOCK_THRESHOLD = 70; // phải khớp UNLOCK_THRESHOLD ở learning-path.service.js
 const RING_R = 34;
 const RING_C = 2 * Math.PI * RING_R;
 const GOLD = "#ffc800";
@@ -122,10 +122,30 @@ function TopicModal({ topic, prevTopic, tierColor, onClose }) {
             <h4 className="font-extrabold text-lg text-gray-900 dark:text-white mb-2">
               Chủ đề đang khóa
             </h4>
-            <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed max-w-xs mx-auto">
-              Đạt ít nhất <strong className="text-[#58cc02] font-black">{UNLOCK_THRESHOLD}%</strong> ở chủ đề{" "}
-              <span className="font-bold text-gray-800 dark:text-gray-200">{prevTopic?.title}</span> để mở khóa chủ đề này.
+            <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed mb-4 max-w-xs mx-auto">
+              Để mở khóa, bạn cần hoàn thành <strong className="text-gray-800 dark:text-gray-200 font-bold">tất cả</strong> các yêu cầu sau ở chủ đề{" "}
+              <span className="font-bold text-[#58cc02]">{prevTopic?.title}</span>:
             </p>
+            <div className="space-y-2 text-left text-xs bg-gray-50 dark:bg-gray-900/50 p-3.5 rounded-2xl border border-gray-200 dark:border-gray-700 mb-2">
+              <div className="flex items-center justify-between">
+                <span className="text-gray-600 dark:text-gray-300">1. Bài học tương tác (tối thiểu 80%):</span>
+                <span className={`font-bold ${prevTopic?.bestLessonScore >= 80 ? "text-[#58cc02]" : "text-amber-500"}`}>
+                  {prevTopic?.bestLessonScore != null ? `${Math.round(prevTopic.bestLessonScore)}%` : "Chưa học"}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-gray-600 dark:text-gray-300">2. Bài thi chủ đề (tối thiểu 8.0/10):</span>
+                <span className={`font-bold ${prevTopic?.bestExamScore >= 8.0 ? "text-[#58cc02]" : "text-amber-500"}`}>
+                  {prevTopic?.bestExamScore != null ? `${prevTopic.bestExamScore}/10` : "Chưa thi"}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-gray-600 dark:text-gray-300">3. Độ thành thạo (tối thiểu 70%):</span>
+                <span className={`font-bold ${prevTopic?.masteryPercent >= UNLOCK_THRESHOLD ? "text-[#58cc02]" : "text-amber-500"}`}>
+                  {prevTopic?.masteryPercent || 0}%
+                </span>
+              </div>
+            </div>
           </div>
         ) : (
           <div className="relative w-full rounded-3xl border-2 border-[#d5cdbd] dark:border-gray-700 bg-white dark:bg-gray-800 p-6 shadow-2xl text-left animate-fadeIn">
@@ -214,13 +234,13 @@ function TopicModal({ topic, prevTopic, tierColor, onClose }) {
                   to={withReturnTo(`/review?topicId=${topic.id}&topicTitle=${encodeURIComponent(topic.title)}`, "/learn")}
                   className="flex-1 text-center py-2.5 rounded-2xl border-2 border-[#d5cdbd] dark:border-gray-700 bg-gray-50 dark:bg-gray-900/60 hover:border-[#58cc02] dark:hover:border-[#58cc02] text-gray-700 dark:text-gray-200 hover:text-[#58cc02] dark:hover:text-[#58cc02] text-xs font-extrabold uppercase transition-all shadow-2xs active:scale-[0.98]"
                 >
-                  🎴 Ôn từ vựng
+                  Ôn từ vựng
                 </Link>
                 <Link
                   to={withReturnTo(`/exams/topics/${topic.id}`, "/learn")}
                   className="flex-1 text-center py-2.5 rounded-2xl border-2 border-[#d5cdbd] dark:border-gray-700 bg-gray-50 dark:bg-gray-900/60 hover:border-[#58cc02] dark:hover:border-[#58cc02] text-gray-700 dark:text-gray-200 hover:text-[#58cc02] dark:hover:text-[#58cc02] text-xs font-extrabold uppercase transition-all shadow-2xs active:scale-[0.98]"
                 >
-                  📝 Làm bài thi
+                  Làm bài thi
                 </Link>
               </div>
             </div>

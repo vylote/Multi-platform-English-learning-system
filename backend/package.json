@@ -14,10 +14,8 @@
     "import:dict": "node src/scripts/import-dictionary.js",
     "gen:exams": "node src/scripts/gen_exam.js --topics=1-36 --count=10 --duration=15",
     "seed:all": "node src/scripts/seed-all.js",
-    "kafka:worker": "node src/kafka/worker.js",
-    "kafka:test": "node src/kafka/test-produce.js",
-    "kafka:test:activity": "node src/kafka/test-produce-activity.js",
-    "kafka:test:vocab": "node src/kafka/test-produce-vocab.js"
+    "seed:policy": "node src/scripts/run-sql-seed.js src/scripts/seed_learning_path_policy.sql",
+    "kafka:worker": "node src/kafka/worker.js"
   },
   "keywords": [],
   "author": "",

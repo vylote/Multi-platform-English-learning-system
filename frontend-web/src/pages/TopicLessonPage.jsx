@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
+import { Volume2, CheckCircle2, AlertCircle, RotateCcw, ArrowRight } from "lucide-react";
 import api from "../api/api";
 import MainLayout from "../layouts/MainLayout";
 import PronunciationPractice from "../components/PronunciationPractice";
@@ -219,22 +220,35 @@ export default function TopicLessonPage() {
   }
 
   if (result) {
+    const isPassed = Math.round(result.combinedScore) >= 80;
     const scoreCards = [
-      { label: "Trắc nghiệm", value: result.quizScore, icon: "✏️" },
-      { label: "Phát âm", value: result.pronunciationScore, icon: "🎙️" },
-      { label: "Tổng kết quả", value: result.combinedScore, icon: "🏆", highlight: true },
+      { label: "Trắc nghiệm", value: result.quizScore },
+      { label: "Phát âm", value: result.pronunciationScore },
+      { label: "Tổng kết quả", value: result.combinedScore, highlight: true },
     ];
     return (
       <MainLayout>
         <div className="max-w-[500px] mx-auto text-center py-10 px-4">
-          <div className="w-16 h-16 rounded-3xl bg-[#58cc02]/10 border-2 border-[#58cc02]/30 text-3xl flex items-center justify-center mx-auto mb-4">
-            🎉
+          <div
+            className={`w-16 h-16 rounded-3xl border-2 flex items-center justify-center mx-auto mb-4 ${
+              isPassed
+                ? "bg-[#58cc02]/10 border-[#58cc02]/30 text-[#58cc02]"
+                : "bg-amber-500/10 border-amber-500/30 text-amber-500"
+            }`}
+          >
+            {isPassed ? (
+              <CheckCircle2 className="w-8 h-8" />
+            ) : (
+              <AlertCircle className="w-8 h-8" />
+            )}
           </div>
           <h1 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white mb-2">
-            Hoàn thành bài học!
+            {isPassed ? "Chúc mừng! Bạn đã đạt điểm giỏi bài học" : "Hoàn thành bài học"}
           </h1>
           <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-8">
-            Kết quả của bạn đã được cập nhật trực tiếp vào lộ trình học tập.
+            {isPassed
+              ? "Bạn đã đạt chuẩn bài học (từ 80% trở lên). Hãy tiếp tục làm bài thi chủ đề để hoàn thành toàn bộ điều kiện mở khóa chủ đề tiếp theo."
+              : "Bạn cần đạt tối thiểu 80% tổng điểm bài học (đúng từ 8/10 câu trắc nghiệm và phát âm) để đủ điều kiện xét mở khóa."}
           </p>
 
           <div className="grid grid-cols-3 gap-3 mb-8">
@@ -243,14 +257,19 @@ export default function TopicLessonPage() {
                 key={c.label}
                 className={`rounded-3xl p-4 sm:p-5 border-2 ${
                   c.highlight
-                    ? "border-[#58cc02] bg-[#58cc02]/10 dark:bg-[#58cc02]/15 shadow-sm"
+                    ? isPassed
+                      ? "border-[#58cc02] bg-[#58cc02]/10 dark:bg-[#58cc02]/15 shadow-sm"
+                      : "border-amber-500 bg-amber-500/10 dark:bg-amber-500/15 shadow-sm"
                     : "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"
                 }`}
               >
-                <span className="text-lg block mb-1">{c.icon}</span>
                 <p
                   className={`text-2xl sm:text-3xl font-black ${
-                    c.highlight ? "text-[#58cc02]" : "text-gray-900 dark:text-white"
+                    c.highlight
+                      ? isPassed
+                        ? "text-[#58cc02]"
+                        : "text-amber-500"
+                      : "text-gray-900 dark:text-white"
                   }`}
                 >
                   {Math.round(c.value)}%
@@ -265,15 +284,21 @@ export default function TopicLessonPage() {
           <div className="flex gap-3">
             <button
               onClick={handleRetry}
-              className="flex-1 py-3.5 rounded-2xl font-bold text-sm border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:border-[#58cc02] hover:text-[#58cc02] transition-all cursor-pointer shadow-2xs"
+              className="flex-1 py-3.5 rounded-2xl font-bold text-sm border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:border-[#58cc02] hover:text-[#58cc02] transition-all cursor-pointer shadow-2xs inline-flex items-center justify-center gap-2"
             >
-              🔄 Học lại
+              <RotateCcw className="w-4 h-4" />
+              <span>Học lại</span>
             </button>
             <button
               onClick={() => navigate("/learn")}
-              className="flex-1 py-3.5 rounded-2xl font-black text-sm uppercase text-white bg-[#58cc02] hover:bg-[#4cb001] transition-all shadow-md shadow-[#58cc02]/25 cursor-pointer"
+              className={`flex-1 py-3.5 rounded-2xl font-black text-sm uppercase text-white transition-all shadow-md cursor-pointer inline-flex items-center justify-center gap-2 ${
+                isPassed
+                  ? "bg-[#58cc02] hover:bg-[#4cb001] shadow-[#58cc02]/25"
+                  : "bg-gray-700 hover:bg-gray-800 shadow-gray-700/25"
+              }`}
             >
-              Về lộ trình →
+              <span>Về lộ trình</span>
+              <ArrowRight className="w-4 h-4" />
             </button>
           </div>
         </div>
@@ -331,7 +356,7 @@ export default function TopicLessonPage() {
                     title="Nghe phát âm"
                     className="w-12 h-12 rounded-2xl bg-gray-100 dark:bg-gray-700/80 hover:bg-[#58cc02] text-gray-600 dark:text-gray-300 hover:text-white flex items-center justify-center text-xl shrink-0 transition-all active:scale-90 shadow-2xs cursor-pointer group-hover:bg-[#58cc02]/10 group-hover:text-[#58cc02]"
                   >
-                    🔊
+                    <Volume2 className="w-5 h-5" />
                   </button>
                 </div>
               ))}

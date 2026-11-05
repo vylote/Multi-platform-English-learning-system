@@ -41,6 +41,7 @@ Dich vu Bai thi ---------> |                                                    
                            | Partition 0 (Broker 1) : [Msg 0] [Msg 1] [Msg 2]... (Offset: 0, 1, 2...)    |
 Dich vu Bai hoc ---------> | Partition 1 (Broker 2) : [Msg 0] [Msg 1] [Msg 2]... (Offset: 0, 1, 2...)    | ---> Nhom 3: Cong EXP & BXH
                            | Partition 2 (Broker 3) : [Msg 0] [Msg 1] [Msg 2]... (Offset: 0, 1, 2...)    |
+                           |                                                                            | ---> Nhom 6: Sinh ngam cau hoi AI
                            +============================================================================+
 
                            +====================== TOPIC: vocab.learning.events ========================+
@@ -61,6 +62,7 @@ Dich vu Bai hoc ---------> | Partition 0 (Broker 1) : [Msg 0] [Msg 1] [Msg 2]...
 | Dịch vụ bài thi | `exam.submissions` | `exam-ai-evaluation-group` | Chấm điểm bài thi và gọi AI (Groq) phân tích kết quả học tập. |
 | Dịch vụ bài thi & bài học | `learning.activity.completed` | `streak-tracker-group` | Cập nhật số ngày học liên tiếp của người dùng. |
 | Dịch vụ bài thi & bài học | `learning.activity.completed` | `gamification-exp-group` | Cộng điểm kinh nghiệm (EXP) và xếp hạng học viên theo tuần. |
+| Dịch vụ bài thi & bài học | `learning.activity.completed` | `lesson-ai-pregen-group` | Tự động sinh ngầm câu hỏi AI cho chủ đề tiếp theo vào Database. |
 | Dịch vụ bài học & phát âm | `vocab.learning.events` | `smart-flashcard-enqueue-group` | Tự động đưa các từ phát âm yếu vào danh mục thẻ nhớ ôn tập ngắt quãng. |
 | Dịch vụ bài học & phát âm | `vocab.learning.events` | `vocab-analytics-group` | Thống kê danh sách từ vựng người dùng thường xuyên mắc lỗi. |
 

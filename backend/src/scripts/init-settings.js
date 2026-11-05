@@ -4,7 +4,7 @@ const DEFAULT_SETTINGS = [
   // --- NHÓM 1: HỌC TẬP & LỘ TRÌNH (LEARNING) ---
   {
     key: "learning.unlock_threshold",
-    value: "60",
+    value: "70",
     data_type: "number",
     group_name: "LEARNING",
     label: "Ngưỡng mở khóa chủ đề (%)",
@@ -12,7 +12,7 @@ const DEFAULT_SETTINGS = [
   },
   {
     key: "learning.words_per_lesson",
-    value: "5",
+    value: "10",
     data_type: "number",
     group_name: "LEARNING",
     label: "Số từ vựng mỗi bài học",
@@ -20,7 +20,7 @@ const DEFAULT_SETTINGS = [
   },
   {
     key: "learning.questions_per_lesson",
-    value: "5",
+    value: "10",
     data_type: "number",
     group_name: "LEARNING",
     label: "Số câu hỏi trắc nghiệm / bài học",

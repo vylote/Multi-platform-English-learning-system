@@ -1,10 +1,15 @@
 import { Link, useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 import { X, ArrowLeft, Sun, Moon } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
 
 export default function AuthLayout({ onClose, onBack, mode = "login", children }) {
   const navigate = useNavigate();
   const { isDark, toggleTheme } = useTheme();
+  const { user } = useSelector((state) => state.auth || {});
+
+  // Ẩn nút Chuyển đổi Đăng nhập / Đăng ký nếu đang ở Onboarding hoặc đã có tài khoản đăng nhập
+  const showAuthAction = mode !== "onboarding" && !user;
 
   return (
     <div className="min-h-screen w-full bg-[#ede8dc] dark:bg-[#16171d] text-gray-900 dark:text-gray-100 flex flex-col justify-between transition-colors duration-200 select-none">
@@ -35,21 +40,23 @@ export default function AuthLayout({ onClose, onBack, mode = "login", children }
 
           {/* Right Controls: Switch Mode + Theme + Close */}
           <div className="flex items-center gap-2 sm:gap-3">
-            {/* Quick Switch Mode Button (Duolingo Header Style) */}
-            {mode === "login" ? (
-              <Link
-                to="/register"
-                className="px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl border-2 border-[#d5cdbd] dark:border-gray-700 border-b-4 bg-[#f4efe4] dark:bg-gray-800 text-[#1cb0f6] dark:text-[#38bdf8] font-black text-xs sm:text-sm uppercase tracking-wider hover:bg-[#e4ded0] dark:hover:bg-gray-700 active:translate-y-0.5 active:border-b-2 transition-all cursor-pointer shadow-xs"
-              >
-                Đăng ký
-              </Link>
-            ) : (
-              <Link
-                to="/login"
-                className="px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl border-2 border-[#d5cdbd] dark:border-gray-700 border-b-4 bg-[#f4efe4] dark:bg-gray-800 text-[#1cb0f6] dark:text-[#38bdf8] font-black text-xs sm:text-sm uppercase tracking-wider hover:bg-[#e4ded0] dark:hover:bg-gray-700 active:translate-y-0.5 active:border-b-2 transition-all cursor-pointer shadow-xs"
-              >
-                Đăng nhập
-              </Link>
+            {/* Quick Switch Mode Button (Chỉ hiển thị khi chưa đăng nhập và không phải màn Onboarding) */}
+            {showAuthAction && (
+              mode === "login" ? (
+                <Link
+                  to="/register"
+                  className="px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl border-2 border-[#d5cdbd] dark:border-gray-700 border-b-4 bg-[#f4efe4] dark:bg-gray-800 text-[#1cb0f6] dark:text-[#38bdf8] font-black text-xs sm:text-sm uppercase tracking-wider hover:bg-[#e4ded0] dark:hover:bg-gray-700 active:translate-y-0.5 active:border-b-2 transition-all cursor-pointer shadow-xs"
+                >
+                  Đăng ký
+                </Link>
+              ) : (
+                <Link
+                  to="/login"
+                  className="px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl border-2 border-[#d5cdbd] dark:border-gray-700 border-b-4 bg-[#f4efe4] dark:bg-gray-800 text-[#1cb0f6] dark:text-[#38bdf8] font-black text-xs sm:text-sm uppercase tracking-wider hover:bg-[#e4ded0] dark:hover:bg-gray-700 active:translate-y-0.5 active:border-b-2 transition-all cursor-pointer shadow-xs"
+                >
+                  Đăng nhập
+                </Link>
+              )
             )}
 
             {/* Theme Toggle Button */}
