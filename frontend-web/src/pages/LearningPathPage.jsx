@@ -96,6 +96,7 @@ function TopicNode({ topic, tierColor, isCurrent, isSelected, onClick }) {
 
 function TopicModal({ topic, prevTopic, tierColor, onClose }) {
   const locked = !topic.isUnlocked;
+  const threshold = topic.unlockThreshold || UNLOCK_THRESHOLD;
 
   return (
     <div
@@ -123,26 +124,26 @@ function TopicModal({ topic, prevTopic, tierColor, onClose }) {
               Chủ đề đang khóa
             </h4>
             <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed mb-4 max-w-xs mx-auto">
-              Để mở khóa, bạn cần hoàn thành <strong className="text-gray-800 dark:text-gray-200 font-bold">tất cả</strong> các yêu cầu sau ở chủ đề{" "}
-              <span className="font-bold text-[#58cc02]">{prevTopic?.title}</span>:
+              Đạt ít nhất <strong className="text-[#58cc02] font-black">{threshold}%</strong> độ thành thạo ở chủ đề{" "}
+              <span className="font-bold text-gray-800 dark:text-gray-200">{prevTopic?.title}</span> để mở khóa chủ đề này.
             </p>
             <div className="space-y-2 text-left text-xs bg-gray-50 dark:bg-gray-900/50 p-3.5 rounded-2xl border border-gray-200 dark:border-gray-700 mb-2">
               <div className="flex items-center justify-between">
-                <span className="text-gray-600 dark:text-gray-300">1. Bài học tương tác (tối thiểu 80%):</span>
-                <span className={`font-bold ${prevTopic?.bestLessonScore >= 80 ? "text-[#58cc02]" : "text-amber-500"}`}>
-                  {prevTopic?.bestLessonScore != null ? `${Math.round(prevTopic.bestLessonScore)}%` : "Chưa học"}
+                <span className="text-gray-600 dark:text-gray-300">Tiến độ chủ đề trước:</span>
+                <span className={`font-bold ${prevTopic?.masteryPercent >= threshold ? "text-[#58cc02]" : "text-amber-500"}`}>
+                  {prevTopic?.masteryPercent || 0}% / {threshold}%
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-gray-600 dark:text-gray-300">2. Bài thi chủ đề (tối thiểu 8.0/10):</span>
-                <span className={`font-bold ${prevTopic?.bestExamScore >= 8.0 ? "text-[#58cc02]" : "text-amber-500"}`}>
+                <span className="text-gray-600 dark:text-gray-300">Bài học tương tác:</span>
+                <span className="font-bold text-gray-800 dark:text-gray-200">
+                  {prevTopic?.bestLessonScore != null ? `${Math.round((prevTopic.bestLessonScore + Number.EPSILON) * 100) / 100}%` : "Chưa học"}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-gray-600 dark:text-gray-300">Điểm bài thi:</span>
+                <span className="font-bold text-gray-800 dark:text-gray-200">
                   {prevTopic?.bestExamScore != null ? `${prevTopic.bestExamScore}/10` : "Chưa thi"}
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-gray-600 dark:text-gray-300">3. Độ thành thạo (tối thiểu 70%):</span>
-                <span className={`font-bold ${prevTopic?.masteryPercent >= UNLOCK_THRESHOLD ? "text-[#58cc02]" : "text-amber-500"}`}>
-                  {prevTopic?.masteryPercent || 0}%
                 </span>
               </div>
             </div>
@@ -213,7 +214,7 @@ function TopicModal({ topic, prevTopic, tierColor, onClose }) {
                   Điểm bài học
                 </div>
                 <div className="text-xs sm:text-sm font-extrabold text-gray-900 dark:text-gray-100 mt-0.5">
-                  {topic.bestLessonScore != null ? `${Math.round(topic.bestLessonScore)}%` : "chưa học"}
+                  {topic.bestLessonScore != null ? `${Math.round((topic.bestLessonScore + Number.EPSILON) * 100) / 100}%` : "chưa học"}
                 </div>
               </div>
             </div>
@@ -406,7 +407,9 @@ export default function LearningPathPage() {
         {needsPlacement && (
           <div className="mb-8 p-4 sm:p-5 rounded-3xl border-2 border-[#ff9600]/40 bg-[#ff9600]/10 text-sm text-gray-700 dark:text-gray-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xs">
             <div className="flex items-center gap-3">
-              <span className="text-2xl shrink-0">🎯</span>
+              <span className="w-8 h-8 rounded-xl bg-[#ff9600]/20 text-[#ff9600] flex items-center justify-center font-black text-sm shrink-0">
+                !
+              </span>
               <span>
                 Bạn chưa làm bài kiểm tra đầu vào nên hệ thống đang gợi ý từ các chủ đề cơ bản.
               </span>

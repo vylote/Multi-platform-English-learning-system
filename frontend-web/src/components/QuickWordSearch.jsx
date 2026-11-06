@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from "react";
+import { Volume2 } from "lucide-react";
 import api from "../api/api";
+import { playAudio } from "../utils/audio";
 
 function useDebouncedValue(value, delayMs) {
   const [debounced, setDebounced] = useState(value);
@@ -171,18 +173,12 @@ export default function QuickWordSearch() {
                   type="button"
                   onClick={(e) => {
                     e.stopPropagation();
-                    if (typeof window !== "undefined" && "speechSynthesis" in window) {
-                      window.speechSynthesis.cancel();
-                      const utterance = new SpeechSynthesisUtterance(item.word);
-                      utterance.lang = "en-US";
-                      utterance.rate = 0.85;
-                      window.speechSynthesis.speak(utterance);
-                    }
+                    playAudio(item.word);
                   }}
                   className="w-8 h-8 rounded-xl bg-gray-100 dark:bg-gray-700 hover:bg-[#58cc02] text-gray-500 dark:text-gray-400 hover:text-white flex items-center justify-center text-sm shrink-0 transition-colors cursor-pointer"
                   title="Nghe phát âm"
                 >
-                  🔊
+                  <Volume2 className="w-4 h-4" />
                 </button>
               </div>
             ))}

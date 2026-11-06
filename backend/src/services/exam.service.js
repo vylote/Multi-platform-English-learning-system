@@ -296,13 +296,26 @@ class ExamService {
 
     // Bắn event nộp bài vào Kafka Topic (chạy nền, không block HTTP response)
     const wrongQuestions = review
-      .filter((r) => !r.is_correct)
-      .map((r) => ({
-        question_id: r.question_id,
-        question_text: r.question_text,
-        selected_option: r.selected_option,
-        correct_option: r.correct_option,
-      }));
+      .map((r, index) => {
+        const selectedKey = r.selected_option
+          ? `option_${r.selected_option.toLowerCase()}`
+          : null;
+        const correctKey = r.correct_option
+          ? `option_${r.correct_option.toLowerCase()}`
+          : null;
+
+        return {
+          question_number: index + 1,
+          question_id: r.question_id,
+          question_text: r.question_text,
+          selected_option: r.selected_option,
+          selected_text: selectedKey ? r[selectedKey] : "Không trả lời",
+          correct_option: r.correct_option,
+          correct_text: correctKey ? r[correctKey] : "",
+          is_correct: r.is_correct,
+        };
+      })
+      .filter((r) => !r.is_correct);
 
     examProducer
       .publishExamSubmitted({
@@ -362,7 +375,15 @@ class ExamService {
         message: "Hệ thống AI đang phân tích bài thi qua hàng đợi Kafka...",
       };
     }
-    return JSON.parse(raw);
+    const feedback = JSON.parse(raw);
+    if (typeof feedback.commonMistakes === "string") {
+      const cleaned = feedback.commonMistakes.replace(/\bQ(\d+):/gi, "Câu $1:");
+      feedback.commonMistakes = cleaned
+        .split(/(?:^|\s+)(?:\d+[\.\)]\s+)/)
+        .map((s) => s.trim())
+        .filter(Boolean);
+    }
+    return feedback;
   }
 
   async getPlacementExam() {

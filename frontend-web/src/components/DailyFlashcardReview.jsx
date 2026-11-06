@@ -4,6 +4,7 @@ import { setStreak, fetchStreakWeek } from "../store/slice/streakSlice";
 import { getBackendTimezoneOffset } from "../utils/timezone";
 import api from "../api/api";
 import { TopicIcon } from "../utils/topicIcons";
+import { playAudio as playAudioHelper } from "../utils/audio";
 
 export default function DailyFlashcardReview({
   endpoint = "/flashcards/daily",
@@ -43,16 +44,7 @@ export default function DailyFlashcardReview({
   const isSessionDone = cards !== null && currentIndex >= cards.length;
 
   const playAudio = useCallback((text) => {
-    if (!text || typeof window === "undefined" || !("speechSynthesis" in window)) return;
-    try {
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = "en-US";
-      utterance.rate = 0.85;
-      window.speechSynthesis.speak(utterance);
-    } catch {
-      // SpeechSynthesis có thể không khả dụng
-    }
+    playAudioHelper(text);
   }, []);
 
   const handleFlip = useCallback(() => {

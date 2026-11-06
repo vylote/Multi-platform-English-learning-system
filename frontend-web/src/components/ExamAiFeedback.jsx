@@ -11,6 +11,26 @@ import {
 } from "lucide-react";
 import api from "../api/api";
 
+function normalizeMistakes(commonMistakes) {
+  if (!commonMistakes) return [];
+  if (Array.isArray(commonMistakes)) {
+    return commonMistakes
+      .map((m) => (typeof m === "string" ? m.trim() : JSON.stringify(m)))
+      .filter(Boolean);
+  }
+  if (typeof commonMistakes === "string") {
+    // Tách theo các số thứ tự "1. ... 2. ..." hoặc dòng mới
+    const cleaned = commonMistakes.replace(/\bQ(\d+):/gi, "Câu $1:");
+    const parts = cleaned
+      .split(/(?:^|\s+)(?:\d+[\.\)]\s+)/)
+      .map((s) => s.trim())
+      .filter(Boolean);
+    if (parts.length > 0) return parts;
+    return [cleaned.trim()];
+  }
+  return [];
+}
+
 export default function ExamAiFeedback({ sessionId, className = "" }) {
   const [feedback, setFeedback] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -159,6 +179,7 @@ export default function ExamAiFeedback({ sessionId, className = "" }) {
 
   const isPerfect = feedback.status === "PERFECT";
   const recommendations = feedback.recommendations || [];
+  const mistakesList = normalizeMistakes(feedback.commonMistakes);
 
   return (
     <div
@@ -201,20 +222,31 @@ export default function ExamAiFeedback({ sessionId, className = "" }) {
       </div>
 
       {/* Common Mistakes & Traps (if present) */}
-      {feedback.commonMistakes && (
+      {mistakesList.length > 0 && (
         <div className="relative z-10 mb-4 p-4 rounded-2xl bg-amber-50/50 dark:bg-amber-950/20 border border-amber-200/70 dark:border-amber-800/50">
-          <div className="flex items-start gap-2.5">
-            <div className="w-6 h-6 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 mt-0.5">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="w-6 h-6 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
               <Lightbulb className="w-4 h-4" />
             </div>
-            <div>
-              <span className="text-xs font-extrabold uppercase tracking-wider text-amber-800 dark:text-amber-300 block mb-1">
-                Lỗi sai thường gặp & Bẫy ngữ pháp
-              </span>
-              <p className="text-xs sm:text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
-                {feedback.commonMistakes}
-              </p>
-            </div>
+            <h4 className="text-xs font-extrabold uppercase tracking-wider text-amber-800 dark:text-amber-300">
+              Lỗi sai thường gặp & Bẫy ngữ pháp
+            </h4>
+          </div>
+
+          <div className="space-y-2.5">
+            {mistakesList.map((mistake, idx) => (
+              <div
+                key={idx}
+                className="flex items-start gap-3 p-3 rounded-xl bg-white/80 dark:bg-gray-800/80 border border-amber-200/60 dark:border-amber-900/40 text-xs sm:text-sm text-gray-700 dark:text-gray-300 shadow-2xs"
+              >
+                <span className="w-5 h-5 rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-400 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">
+                  {idx + 1}
+                </span>
+                <p className="flex-1 font-medium leading-relaxed">
+                  {mistake}
+                </p>
+              </div>
+            ))}
           </div>
         </div>
       )}

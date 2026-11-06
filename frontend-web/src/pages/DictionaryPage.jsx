@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { Link } from "react-router-dom";
 import MainLayout from "../layouts/MainLayout";
 import api from "../api/api";
+import { playAudio } from "../utils/audio";
 
 const RECENT_KEY = "els_dict_recent_searches";
 const MAX_RECENT = 8;
@@ -18,12 +19,7 @@ const SUGGESTED_WORDS = [
 ];
 
 function speak(text) {
-  if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
-  window.speechSynthesis.cancel();
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = "en-US";
-  utterance.rate = 0.85;
-  window.speechSynthesis.speak(utterance);
+  playAudio(text);
 }
 
 export default function DictionaryPage() {

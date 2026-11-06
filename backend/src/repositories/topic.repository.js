@@ -79,9 +79,13 @@ class TopicRepository {
       totalWords: Number(r.total_words),
       masteredWords: Number(r.mastered_words),
       bestExamScore:
-        r.best_exam_score !== null ? Number(r.best_exam_score) : null,
+        r.best_exam_score !== null
+          ? Math.round((Number(r.best_exam_score) + Number.EPSILON) * 100) / 100
+          : null,
       bestLessonScore:
-        r.best_lesson_score !== null ? Number(r.best_lesson_score) : null,
+        r.best_lesson_score !== null
+          ? Math.round((Number(r.best_lesson_score) + Number.EPSILON) * 100) / 100
+          : null,
     }));
   }
 

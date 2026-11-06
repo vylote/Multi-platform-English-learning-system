@@ -335,7 +335,7 @@ STRICT REQUIREMENTS:
         userId,
         activityType: "LESSON_COMPLETED",
         referenceId: Number(topicId),
-        score: Math.round(combinedScore),
+        score: Math.round((combinedScore + Number.EPSILON) * 100) / 100,
         timezoneOffsetMinutes: Number.isInteger(timezoneOffsetMinutes)
           ? timezoneOffsetMinutes
           : 0,
@@ -400,9 +400,9 @@ STRICT REQUIREMENTS:
     }
 
     return {
-      quizScore,
-      pronunciationScore,
-      combinedScore,
+      quizScore: Math.round((quizScore + Number.EPSILON) * 100) / 100,
+      pronunciationScore: Math.round((pronunciationScore + Number.EPSILON) * 100) / 100,
+      combinedScore: Math.round((combinedScore + Number.EPSILON) * 100) / 100,
       completedAt: attempt.completed_at,
     };
   }

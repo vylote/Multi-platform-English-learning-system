@@ -5,12 +5,10 @@ const AppException = require("../exceptions/app.exception");
 const { ErrorCode } = require("../common/error-code");
 const { DIFFICULTY_ORDER } = require("../utils/tier-classifier");
 
-const DEFAULT_VOCAB_WEIGHT = 0.10;
+const DEFAULT_VOCAB_WEIGHT = 0.3;
 const DEFAULT_EXAM_WEIGHT = 0.45;
-const DEFAULT_LESSON_WEIGHT = 0.45;
-const DEFAULT_UNLOCK_THRESHOLD = 70;
-const DEFAULT_LESSON_PASS_THRESHOLD = 80;
-const DEFAULT_EXAM_PASS_THRESHOLD = 8.0;
+const DEFAULT_LESSON_WEIGHT = 0.25;
+const DEFAULT_UNLOCK_THRESHOLD = 60;
 
 class LearningPathService {
   calculateMastery(
@@ -26,15 +24,16 @@ class LearningPathService {
     const vocabPercent =
       totalWords > 0 ? (masteredWords / totalWords) * 100 : 0;
 
-    // Tiến độ phản ánh đầy đủ cả bài học tương tác, bài thi và thẻ từ vựng:
-    // Lesson (45%) + Exam (45%) + Vocab SRS (10%)
+    // Tiến độ phản ánh đầy đủ cả bài học tương tác, bài thi và thẻ từ vựng theo trọng số cấu hình
+    const rawMastery =
+      lessonPercent * lessonWeight +
+      examPercent * examWeight +
+      vocabPercent * vocabWeight;
+
+    // Làm tròn tối đa 2 chữ số thập phân (ví dụ: 50.3, 56.75)
     return Math.min(
       100,
-      Math.round(
-        lessonPercent * lessonWeight +
-        examPercent * examWeight +
-        vocabPercent * vocabWeight
-      )
+      Math.round((rawMastery + Number.EPSILON) * 100) / 100,
     );
   }
 
@@ -75,8 +74,6 @@ class LearningPathService {
       examWeight,
       lessonWeight,
       unlockThreshold,
-      lessonPassThreshold,
-      examPassThreshold,
     ] = await Promise.all([
       systemSettingService.get("learning.vocab_weight", DEFAULT_VOCAB_WEIGHT),
       systemSettingService.get("learning.exam_weight", DEFAULT_EXAM_WEIGHT),
@@ -84,14 +81,6 @@ class LearningPathService {
       systemSettingService.get(
         "learning.unlock_threshold",
         DEFAULT_UNLOCK_THRESHOLD,
-      ),
-      systemSettingService.get(
-        "learning.lesson_pass_threshold",
-        DEFAULT_LESSON_PASS_THRESHOLD,
-      ),
-      systemSettingService.get(
-        "learning.exam_pass_threshold",
-        DEFAULT_EXAM_PASS_THRESHOLD,
       ),
     ]);
 
@@ -105,47 +94,26 @@ class LearningPathService {
     const path = topicsWithMastery.map((topic, index) => {
       const prevTopic = topicsWithMastery[index - 1];
 
-      // ĐIỀU KIỆN QUA MÀN NGHIÊM TÚC: BẮT BUỘC ĐÁP ỨNG TẤT CẢ (AND), KHÔNG CHO PHÉP NỚI LỎNG:
-      // 1. Phải hoàn thành Bài học tương tác đạt điểm giỏi (>= 80%)
-      // 2. Phải hoàn thành Bài thi trắc nghiệm chủ đề đạt điểm giỏi (>= 8.0/10)
-      // 3. Độ thành thạo tổng hợp của chủ đề đạt chuẩn (>= 70%)
-      const hasPassedLesson =
-        prevTopic &&
-        prevTopic.bestLessonScore !== null &&
-        prevTopic.bestLessonScore >= lessonPassThreshold;
-
-      const hasPassedExam =
-        prevTopic &&
-        prevTopic.bestExamScore !== null &&
-        prevTopic.bestExamScore >= examPassThreshold;
-
-      const hasPassedMastery =
-        prevTopic && prevTopic.masteryPercent >= unlockThreshold;
-
+      // Điều kiện mở khóa theo đúng cấu hình Admin:
+      // Chủ đề kế tiếp được mở khóa khi độ thành thạo của chủ đề trước đạt ngưỡng mở khóa do Admin thiết lập
       const isPrevPassed =
-        prevTopic && hasPassedLesson && hasPassedExam && hasPassedMastery;
+        prevTopic && prevTopic.masteryPercent >= unlockThreshold;
 
       const isUnlocked = isAdmin || index === 0 || Boolean(isPrevPassed);
       return {
         ...topic,
+        unlockThreshold,
         isUnlocked,
         isCurrent: isUnlocked && topic.masteryPercent < 100,
-        requirements: {
-          hasPassedLesson:
-            topic.bestLessonScore !== null &&
-            topic.bestLessonScore >= lessonPassThreshold,
-          hasPassedExam:
-            topic.bestExamScore !== null &&
-            topic.bestExamScore >= examPassThreshold,
-          hasPassedMastery: topic.masteryPercent >= unlockThreshold,
-          lessonPassThreshold,
-          examPassThreshold,
-          unlockThreshold,
-        },
       };
     });
 
-    return { tier, needsPlacement: !isAdmin && tier === null, path };
+    return {
+      tier,
+      needsPlacement: !isAdmin && tier === null,
+      unlockThreshold,
+      path,
+    };
   }
 }
 

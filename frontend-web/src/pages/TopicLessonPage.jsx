@@ -7,6 +7,7 @@ import MainLayout from "../layouts/MainLayout";
 import PronunciationPractice from "../components/PronunciationPractice";
 import { getBackendTimezoneOffset } from "../utils/timezone";
 import { fetchStreakStatus } from "../store/slice/streakSlice";
+import { playAudio } from "../utils/audio";
 
 const PHASES = [
   { key: "learn", label: "Học từ vựng" },
@@ -16,11 +17,7 @@ const PHASES = [
 const OPTION_KEYS = ["A", "B", "C", "D"];
 
 function speak(text) {
-  if (!("speechSynthesis" in window)) return;
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = "en-US";
-  utterance.rate = 0.85;
-  window.speechSynthesis.speak(utterance);
+  playAudio(text);
 }
 
 function BackButton({ onClick }) {

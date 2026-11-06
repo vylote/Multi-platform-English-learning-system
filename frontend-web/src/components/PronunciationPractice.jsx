@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { playAudio } from "../utils/audio";
 
 // So khớp linh hoạt: bỏ dấu câu, viết hoa/thường không tính là sai
 function normalizeText(text) {
@@ -16,12 +17,7 @@ export default function PronunciationPractice({ targetWord, pronunciation, onRes
     ("webkitSpeechRecognition" in window || "SpeechRecognition" in window);
 
   const playTargetAudio = useCallback(() => {
-    if (!("speechSynthesis" in window)) return;
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(targetWord);
-    utterance.lang = "en-US";
-    utterance.rate = 0.85;
-    window.speechSynthesis.speak(utterance);
+    playAudio(targetWord);
   }, [targetWord]);
 
   const handleSelfPassed = useCallback(() => {
